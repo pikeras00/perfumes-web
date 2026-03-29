@@ -1,0 +1,12 @@
+# Archivos de Office
+*.xlsx
+*.xls
+*.docx
+
+# Sistema operativo
+Thumbs.db
+.DS_Store
+
+# Editores
+.vscode/
+*.swp

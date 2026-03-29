@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Celebrity Perfumes &mdash; Test</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Raleway:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <nav>
+    <a href="index.html" class="logo">&#9670; Celebrity <em>Perfumes</em></a>
+    <div class="nav-links">
+      <a href="index.html" class="nbtn">Biblioteca</a>
+      <a href="test.html" class="nbtn active">Test</a>
+      <a href="sostenible.html" class="nbtn">Sostenible</a>
+    </div>
+  </nav>
+
+  <section id="test">
+    <div class="shdr">
+      <div class="stag">Descubre</div>
+      <h2 class="stitle">Tu Perfume Ideal</h2>
+      <p class="sdesc">Responde 11 preguntas y te diremos qu&eacute; celebrity comparte tu gusto olfativo.</p>
+      <div class="sline"></div>
+    </div>
+
+    <div class="twrap">
+      <div class="plbl" id="pl">Pregunta 1 de 11</div>
+      <div class="pbar"><div class="pfill" id="pf" style="width:9%"></div></div>
+
+      <div class="qcard" id="qc"></div>
+
+      <div class="rcard" id="rc">
+        <span class="rstar">&#9670; &#9670; &#9670;</span>
+        <div class="rintro">Tu celebrity olfativa es</div>
+        <div class="rname" id="rn"></div>
+        <div class="rprof" id="rpr"></div>
+        <div class="rpbox">
+          <span class="rplbl">Fragancia recomendada</span>
+          <span class="rpname" id="rpn"></span>
+          <span class="rpbrand" id="rpb"></span>
+        </div>
+        <div class="rothers" id="ro"></div>
+        <button class="btnRetry" onclick="restartTest()">Repetir test &nbsp; &#9670;</button>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>&#9670; &nbsp;<strong>Celebrity Perfumes</strong>&nbsp; &#9670; &nbsp; Datos extra&iacute;dos de fuentes p&uacute;blicas &nbsp;&middot;&nbsp; Todos los derechos de marca pertenecen a sus respectivos due&ntilde;os</p>
+  </footer>
+
+  <script src="data.js"></script>
+  <script>
+const QS = [
+  {id:"q1", txt:"&iquest;Qu&eacute; tipo de aroma prefieres?", multi:false, opts:[
+    {i:"&#9893;", l:"Masculino",  d:"Notas frescas, maderosas, especiadas", v:"masc"},
+    {i:"&#9792;", l:"Femenino",   d:"Notas florales, frutales, suaves",     v:"fem"},
+    {i:"&#9678;", l:"Unisex",     d:"Fragancias sin g&eacute;nero definido",v:"unisex"},
+    {i:"&#9671;", l:"Indiferente",d:"El g&eacute;nero no me importa",       v:"indie"}
+  ]},
+  {id:"q2", txt:"&iquest;En qu&eacute; estaci&oacute;n lo usar&aacute;s principalmente?", multi:false, opts:[
+    {i:"&#127800;",l:"Primavera", d:"Fresco, floral, renovador",    v:"spring"},
+    {i:"&#9728;",  l:"Verano",   d:"Ligero, c&iacute;trico, marino",v:"summer"},
+    {i:"&#127810;",l:"Oto&ntilde;o", d:"Amaderado, especiado, c&aacute;lido",v:"autumn"},
+    {i:"&#10052;", l:"Invierno", d:"Oriental, denso, envolvente",   v:"winter"},
+    {i:"&#9672;",  l:"Todo el a&ntilde;o", d:"Vers&aacute;til y equilibrado",v:"all"}
+  ]},
+  {id:"q3", txt:"&iquest;En qu&eacute; momento del d&iacute;a lo usar&aacute;s m&aacute;s?", multi:false, opts:[
+    {i:"&#9728;",  l:"De d&iacute;a",  d:"Ma&ntilde;ana y tarde",  v:"day"},
+    {i:"&#127769;",l:"De noche",  d:"Tarde-noche y eventos",  v:"night"},
+    {i:"&#9672;",  l:"Todo el d&iacute;a",d:"Sin restricci&oacute;n",v:"anytime"}
+  ]},
+  {id:"q4", txt:"&iquest;Qu&eacute; perfil quieres proyectar?", multi:false, opts:[
+    {i:"&#10022;", l:"Juvenil y vibrante",      d:"Energ&iacute;a y frescura",          v:"joven"},
+    {i:"&#9672;",  l:"Moderno",                 d:"Contempor&aacute;neo y minimalista", v:"moderno"},
+    {i:"&#9819;",  l:"Maduro y elegante",        d:"Sofisticaci&oacute;n y presencia",   v:"elegante"},
+    {i:"&#9671;",  l:"Cl&aacute;sico",           d:"Atemporal y reconocible",            v:"clasico"},
+    {i:"&#9108;",  l:"Atemporal y equilibrado",  d:"Vers&aacute;til y duradero",         v:"atemporal"}
+  ]},
+  {id:"q5", txt:"&iquest;D&oacute;nde lo usar&aacute;s con m&aacute;s frecuencia?", multi:true,
+   sub:"Puedes elegir varias opciones", opts:[
+    {i:"&#128188;",l:"En la oficina",      d:"Ambiente profesional",          v:"oficina"},
+    {i:"&#10084;", l:"En citas",           d:"Momentos &iacute;ntimos",       v:"citas"},
+    {i:"&#9992;",  l:"De viaje",           d:"Port&aacute;til y vers&aacute;til",v:"viaje"},
+    {i:"&#127870;",l:"Eventos especiales", d:"Celebraciones y galas",         v:"eventos"},
+    {i:"&#127748;",l:"A diario",           d:"Uso cotidiano",                 v:"diario"},
+    {i:"&#127807;",l:"Al aire libre",      d:"Deporte y naturaleza",          v:"exterior"}
+  ]},
+  {id:"q6", txt:"&iquest;Qu&eacute; familias olfativas te atraen m&aacute;s?", multi:true,
+   sub:"Marca todas las que apliquen", wide:true, opts:[
+    {i:"&#127819;",l:"C&iacute;tricos",   d:"Lim&oacute;n, bergamota, naranja",v:"citricos"},
+    {i:"&#127801;",l:"Florales",          d:"Rosa, jazm&iacute;n, lirio",      v:"florales"},
+    {i:"&#127794;",l:"Amaderadas",        d:"Cedro, s&aacute;ndalo, vetiver",  v:"amaderadas"},
+    {i:"&#127798;",l:"Orientales",        d:"Vainilla, &aacute;mbar, especias",v:"orientales"},
+    {i:"&#127807;",l:"Foug&egrave;re",    d:"Lavanda, helecho, musgo",         v:"fougere"},
+    {i:"&#127811;",l:"Chipre",            d:"Bergamota, musgo, pachul&iacute;",v:"chipre"},
+    {i:"&#127856;",l:"Gourmand",          d:"Chocolate, caf&eacute;, caramelo",v:"gourmand"},
+    {i:"&#128167;",l:"Acu&aacute;ticas",  d:"Marino, ozono, brisa",            v:"acuaticas"},
+    {i:"&#127827;",l:"Frutales",          d:"Manzana, pera, frutos rojos",     v:"frutales"},
+    {i:"&#127807;",l:"Verdes",            d:"Hierba, t&eacute;, hojas frescas", v:"verdes"}
+  ]},
+  {id:"q7", txt:"&iquest;Qu&eacute; notas prefieres evitar?", multi:true,
+   sub:"Marca las que no te gustan &mdash; o deja en blanco si no hay restricciones", wide:true, opts:[
+    {i:"&#127807;",l:"Pachul&iacute;",   d:"Terroso e intenso",      v:"pachuli"},
+    {i:"&#127801;",l:"Rosa",             d:"Floral cl&aacute;sico",  v:"rosa"},
+    {i:"&#127855;",l:"Vainilla",         d:"Dulce y c&aacute;lido",  v:"vainilla"},
+    {i:"&#128084;",l:"Cuero",            d:"Anim&aacute;lico y ahumado",v:"cuero"},
+    {i:"&#129717;",l:"Oud",              d:"Madera intensa y oscura",v:"oud"},
+    {i:"&#9729;",  l:"Almizclado",       d:"Musk suave o fuerte",    v:"almizcle"},
+    {i:"&#128369;",l:"Incienso",         d:"Ahumado y sagrado",      v:"incienso"},
+    {i:"&#127798;",l:"Canela",           d:"Especiado y c&aacute;lido",v:"canela"},
+    {i:"&#129381;",l:"Coco",             d:"Tropical y cremoso",     v:"coco"},
+    {i:"&#9671;",  l:"Ninguna",          d:"Sin restricciones",      v:"ninguna"}
+  ]},
+  {id:"q8", txt:"&iquest;Qu&eacute; proyecci&oacute;n prefieres?", multi:false, opts:[
+    {i:"&#9676;",  l:"Sutil",    d:"Discreta, solo a corta distancia",       v:"sutil"},
+    {i:"&#9678;",  l:"Moderada", d:"Estela natural y equilibrada",           v:"moderada"},
+    {i:"&#9679;",  l:"Potente",  d:"Presencia notoria e inolvidable",        v:"potente"}
+  ]},
+  {id:"q9", txt:"&iquest;Cu&aacute;l es tu presupuesto aproximado?", multi:false, opts:[
+    {i:"&#9671;",  l:"Menos de 30 &euro;",  d:"Fragancias accesibles y populares",v:"bajo"},
+    {i:"&#9672;",  l:"30 &ndash; 70 &euro;",d:"Gama media-alta del mercado",      v:"medio"},
+    {i:"&#9670;",  l:"70 &ndash; 150 &euro;",d:"Marcas premium y selectivas",     v:"alto"},
+    {i:"&#9819;",  l:"M&aacute;s de 150 &euro;",d:"Nicho, artesanal y gran lujo", v:"lujo"}
+  ]},
+  {id:"q10", txt:"&iquest;Qu&eacute; quieres transmitir con tu fragancia?", multi:true,
+   sub:"Elige hasta tres opciones", max:3, opts:[
+    {i:"&#11035;", l:"Curiosidad y misterio",    v:"misterio"},
+    {i:"&#9819;",  l:"Elegancia y equilibrio",   v:"elegancia"},
+    {i:"&#9889;",  l:"Poder y confianza",         v:"poder"},
+    {i:"&#9676;",  l:"Calma y serenidad",         v:"calma"},
+    {i:"&#127754;",l:"Libertad y frescura",       v:"libertad"},
+    {i:"&#10022;", l:"Creatividad y originalidad",v:"creatividad"},
+    {i:"&#9672;",  l:"Deseo y magnetismo",        v:"deseo"}
+  ]},
+  {id:"q11", txt:"&iquest;Cu&aacute;l es tu experiencia con los perfumes?", multi:false, opts:[
+    {i:"&#9671;",  l:"Nuevo/a",           d:"Quiero recomendaciones claras",   v:"nuevo"},
+    {i:"&#9672;",  l:"Me gusta descubrir",d:"Exploro, pero no soy experto/a",  v:"descubrir"},
+    {i:"&#9670;",  l:"Con experiencia",   d:"Me gustan las notas complejas",   v:"experto"}
+  ]}
+];
+
+const FKW = {
+  masc:    ["pour homme","for men","homme","men","man","vetiver","green irish","tobacco","leather","cuir","drakkar","fougere","aromatic","oud wood","blue"],
+  fem:     ["pour elle","pour femme","for her","femme","rose","fleur","floral","gardenia","lily","jasmin","daisy","narciso","bloom","blossom","violet","peony","miss dior","coco mademoiselle","magnolia","candy","mon paris"],
+  unisex:  ["le labo","byredo","molecule","santal","acqua di parma","clean","escentric","diptyque","neroli"],
+  indie:   []
+};
+const Q2KW = {
+  spring: ["fleur","rose","blossom","jasmin","lily","fresh","citron","grapefruit","spring","garden","bloom","lilac","violet","neroli","peach"],
+  summer: ["aqua","marine","light blue","citrus","grapefruit","neroli","summer","fresh","clean","lime","bergamot","sea","ocean","aqva"],
+  autumn: ["santal","vetiver","amber","tobacco","wood","oud","spice","patchouli","leather","incense","myrrh","fig","resin","bois"],
+  winter: ["vanilla","vanille","amber","ambre","opium","shalimar","oud","tobacco","dark","noir","intense","musc","resin","incense","tonka"],
+  all:    ["chance","colonia","acqua di parma","molecule","santal 33","no. 5","daisy"]
+};
+const Q3KW = {
+  day:     ["light blue","clean","chance","daisy","acqua","citrus","fresh","cologne","green","orange","lemon","grapefruit","colonia"],
+  night:   ["opium","shalimar","angel","tobacco","oud","noir","black","dark","musc","amber","intense","poison","midnight","obsession"],
+  anytime: []
+};
+const Q4KW = {
+  joven:    ["daisy","fruity","sweet","pink","sugar","fresh","candy","bright","light blue","miss dior blooming","pink sugar"],
+  moderno:  ["le labo","byredo","santal 33","molecule","diptyque","clean","maison francis","molecule 01","santal"],
+  elegante: ["no. 5","mitsouko","shalimar","guerlain","chanel","hermes","cartier","dior","armani","private collection","cristalle","samsara","jicky"],
+  clasico:  ["no. 5","shalimar","heure bleue","habit rouge","guerlain","jean patou","houbigant","fracas","lanvin","arpege"],
+  atemporal:["acqua di parma","chanel","guerlain","dior","jo malone","santal","rose","lavender","neroli","chance","colonia"]
+};
+const Q5KW = {
+  oficina:  ["fresh","clean","light","citrus","green","acqua","chance","daisy","colonia"],
+  citas:    ["rose","jasmin","musk","amber","oriental","oud","tobacco","obsession","opium","shalimar"],
+  viaje:    ["acqua di parma","colonia","jo malone","fresh","citrus","light"],
+  eventos:  ["no. 5","creed","le labo","kilian","tom ford","intense","baccarat","extrait"],
+  diario:   ["clean","fresh","acqua","colonia","chance","daisy","light blue","citrus"],
+  exterior: ["fresh","citrus","aqua","green","sea","ocean","neroli"]
+};
+const Q6KW = {
+  citricos:   ["citron","grapefruit","lemon","bergamot","mandarin","orange","lime","citrus","neroli"],
+  florales:   ["rose","fleur","jasmin","lily","gardenia","orchid","bloom","blossom","violet","peony","narciso","tuberose","magnolia"],
+  amaderadas: ["santal","cedar","vetiver","wood","bois","guaiac","green irish","patchouli","oud"],
+  orientales: ["vanilla","vanille","amber","ambre","oud","incense","myrrh","resin","balsam","tonka","opium","shalimar"],
+  fougere:    ["lavender","fern","geranium","aromatic","cool water","pour homme","drakkar","aventus"],
+  chipre:     ["oakmoss","labdanum","bergamot","patchouli","mitsouko","arpege"],
+  gourmand:   ["vanilla","caramel","chocolate","coffee","sugar","candy","sweet","honey","praline"],
+  acuaticas:  ["aqua","sea","ocean","marine","water","clean","fresh","rain","aqva","light blue"],
+  frutales:   ["apple","pear","peach","berry","strawberry","raspberry","fruit","lychee","melon"],
+  verdes:     ["green","tea","herb","grass","leaf","moss","fern","garden","iris","fig"]
+};
+const Q7NEG = {
+  pachuli:  ["patchouli","pachuli"],
+  rosa:     ["rose","rosa"],
+  vainilla: ["vanilla","vanille"],
+  cuero:    ["leather","cuir"],
+  oud:      ["oud"],
+  almizcle: ["musk","musc"],
+  incienso: ["incense","encens","myrrh"],
+  canela:   ["cinnamon","canela"],
+  coco:     ["coconut","coco"],
+  ninguna:  []
+};
+const Q8KW = {
+  sutil:    ["fraiche","cologne","fresh","light","soft","delicate","colonia","clean","eau"],
+  moderada: ["toilette","moderate","balanced","chance","daisy","acqua"],
+  potente:  ["parfum","extrait","intense","absolue","extreme","strong","heavy","santal 33","black","elixir"]
+};
+const Q9BR = {
+  bajo:  ["demeter","avon","yardley","jovan","aquolina"],
+  medio: ["calvin klein","hugo boss","lacoste","bvlgari","lancome","givenchy","dior","chanel","marc jacobs","versace","prada","armani","burberry","hermes","narciso rodriguez"],
+  alto:  ["jo malone","tom ford","byredo","diptyque","le labo","acqua di parma","maison margiela","kilian","penhaligon"],
+  lujo:  ["creed","frederic malle","maison francis","kilian","roja dove","xerjoff","baccarat"]
+};
+const Q10KW = {
+  misterio:     ["oud","noir","dark","black","tobacco","leather","incense","unusual","molecule","comme des"],
+  elegancia:    ["no. 5","guerlain","chanel","hermes","dior","cartier","shalimar","mitsouko","narciso"],
+  poder:        ["intense","bold","potent","invictus","oud","tobacco","leather","noir","black","creed"],
+  calma:        ["clean","fresh","white","cotton","soft","lavender","chamomile","tea","light"],
+  libertad:     ["citrus","fresh","sea","ocean","aqua","green","light","neroli"],
+  creatividad:  ["molecule","escentric","comme des","etat libre","byredo","le labo","unusual"],
+  deseo:        ["rose","jasmin","musk","amber","oriental","opium","obsession","addict","hypnotic"]
+};
+
+function scoreC(c, ans){
+  const str = c.perfumes.map(p => (p.perfume+" "+p.marca).toLowerCase()).join(" ");
+  let sc=0, neg=0;
+  sc += c.perfumes.length * 0.15;
+  if(ans.q1 && ans.q1!=="indie"){ for(const kw of (FKW[ans.q1]||[])) if(str.includes(kw)) sc+=3; }
+  for(const kw of (Q2KW[ans.q2]||[])) if(str.includes(kw)) sc+=2;
+  if(ans.q3!=="anytime") for(const kw of (Q3KW[ans.q3]||[])) if(str.includes(kw)) sc+=2;
+  for(const kw of (Q4KW[ans.q4]||[])) if(str.includes(kw)) sc+=2;
+  for(const ctx of (ans.q5||[])){ for(const kw of (Q5KW[ctx]||[])) if(str.includes(kw)) sc+=1; }
+  for(const fam of (ans.q6||[])){ for(const kw of (Q6KW[fam]||[])) if(str.includes(kw)) sc+=4; }
+  for(const av of (ans.q7||[])){ if(av==="ninguna") continue; for(const kw of (Q7NEG[av]||[])) if(str.includes(kw)) neg+=5; }
+  for(const kw of (Q8KW[ans.q8]||[])) if(str.includes(kw)) sc+=1;
+  const tier=ans.q9;
+  const tbs = tier==="bajo"  ? Q9BR.bajo
+            : tier==="medio" ? [...Q9BR.bajo,...Q9BR.medio]
+            : tier==="alto"  ? [...Q9BR.medio,...Q9BR.alto]
+            :                  [...Q9BR.alto,...Q9BR.lujo];
+  for(const b of tbs) if(str.includes(b)) sc+=2;
+  for(const feel of (ans.q10||[])){ for(const kw of (Q10KW[feel]||[])) if(str.includes(kw)) sc+=2; }
+  if(ans.q11==="nuevo"){         for(const b of ["chanel","dior","guerlain","jo malone","armani","lancome","hermes"]) if(str.includes(b)) sc+=2; }
+  else if(ans.q11==="experto"){  for(const b of ["le labo","byredo","frederic malle","escentric","comme des","etat libre","kilian"]) if(str.includes(b)) sc+=2; }
+  else if(ans.q11==="descubrir"){for(const b of ["diptyque","jo malone","acqua di parma","maison margiela","tom ford","penhaligon"]) if(str.includes(b)) sc+=1; }
+  return sc - neg;
+}
+
+let tAns = {q1:null,q2:null,q3:null,q4:null,q5:[],q6:[],q7:[],q8:null,q9:null,q10:[],q11:null};
+let tStep = 0;
+
+function renderQ(){
+  const q = QS[tStep];
+  const pct = ((tStep+1)/QS.length*100).toFixed(0);
+  document.getElementById("pf").style.width = pct + "%";
+  document.getElementById("pl").textContent = "Pregunta " + (tStep+1) + " de " + QS.length;
+  document.getElementById("qc").style.display = "block";
+  document.getElementById("rc").classList.remove("show");
+
+  const curVal = tAns[q.id];
+  const gridCls = "ogrid" + (q.wide ? " wide" : "");
+  const maxNote = q.max ? "M&aacute;ximo " + q.max : "Selecci&oacute;n m&uacute;ltiple";
+
+  let html = "<div class='qnum'>Pregunta " + (tStep+1) + "</div>";
+  html += "<div class='qtxt'>" + q.txt + "</div>";
+  if(q.sub) html += "<div class='qsub'>" + q.sub + "</div>";
+  html += "<div class='" + gridCls + "'>";
+  q.opts.forEach(o => {
+    const isSel = Array.isArray(curVal) ? curVal.includes(o.v) : curVal===o.v;
+    html += "<button class='obtn" + (isSel?" sel":"") + "' data-v='" + o.v + "' onclick='pick(\"" + q.id + "\",\"" + o.v + "\"," + (q.multi?1:0) + "," + (q.max||0) + ",this)'>";
+    html += "<span class='oi'>" + o.i + "</span>";
+    html += "<span class='ol'>" + o.l + "</span>";
+    if(o.d) html += "<span class='od'>" + o.d + "</span>";
+    html += "</button>";
+  });
+  html += "</div>";
+  if(q.multi){
+    const dis = !curVal || (Array.isArray(curVal) && curVal.length===0) ? " disabled" : "";
+    html += "<div class='cnext'><span class='cnext-hint'>" + maxNote + "</span>";
+    html += "<button class='btnNext' id='btnNext'" + dis + " onclick='nextQ()'>Continuar &nbsp;&#8250;</button></div>";
+  }
+  document.getElementById("qc").innerHTML = html;
+}
+
+function pick(qid, val, isMulti, maxSel, btn){
+  if(isMulti){
+    let arr = tAns[qid] || [];
+    if(arr.includes(val)){
+      arr = arr.filter(v => v!==val);
+      btn.classList.remove("sel");
+    } else {
+      if(maxSel && arr.length >= maxSel){
+        const firstSel = document.querySelector(".obtn.sel");
+        if(firstSel){ arr.shift(); firstSel.classList.remove("sel"); }
+      }
+      arr.push(val);
+      btn.classList.add("sel");
+    }
+    if(qid==="q7" && val==="ninguna"){
+      tAns[qid] = ["ninguna"];
+      document.querySelectorAll(".obtn.sel").forEach(b => { if(b.dataset.v!=="ninguna") b.classList.remove("sel"); });
+      btn.classList.add("sel");
+    } else if(qid==="q7" && val!=="ninguna" && arr.includes("ninguna")){
+      arr = arr.filter(v => v!=="ninguna");
+      document.querySelectorAll(".obtn.sel").forEach(b => { if(b.dataset.v==="ninguna") b.classList.remove("sel"); });
+      tAns[qid] = arr;
+    } else {
+      tAns[qid] = arr;
+    }
+    const nb = document.getElementById("btnNext");
+    if(nb) nb.disabled = (tAns[qid].length === 0);
+  } else {
+    document.querySelectorAll(".obtn").forEach(b => b.classList.remove("sel"));
+    btn.classList.add("sel");
+    tAns[qid] = val;
+    setTimeout(nextQ, 360);
+  }
+}
+
+function nextQ(){
+  tStep++;
+  if(tStep < QS.length) renderQ();
+  else showResult();
+}
+
+function showResult(){
+  let best=null, bestSc=-Infinity;
+  for(const c of CELEBRITIES){
+    if(!c.perfumes.length) continue;
+    const s = scoreC(c, tAns);
+    if(s > bestSc){ bestSc=s; best=c; }
+  }
+  if(!best) best = CELEBRITIES[Math.floor(Math.random()*CELEBRITIES.length)];
+
+  let bp = best.perfumes[0], bps=-1;
+  for(const p of best.perfumes){
+    const str = (p.perfume+" "+p.marca).toLowerCase();
+    let s = 0;
+    for(const fam of (tAns.q6||[])){ for(const kw of (Q6KW[fam]||[])) if(str.includes(kw)) s+=2; }
+    for(const kw of (Q4KW[tAns.q4]||[])) if(str.includes(kw)) s++;
+    for(const kw of (Q3KW[tAns.q3]||[])) if(str.includes(kw)) s++;
+    if(s > bps){ bps=s; bp=p; }
+  }
+
+  document.getElementById("qc").style.display = "none";
+  document.getElementById("pl").textContent = "Tu resultado";
+  document.getElementById("pf").style.width = "100%";
+  document.getElementById("rn").textContent = best.nombre;
+  document.getElementById("rpr").textContent = best.profesion;
+  document.getElementById("rpn").textContent = bp.perfume;
+  document.getElementById("rpb").textContent = bp.marca;
+  const others = best.perfumes.filter(p=>p!==bp).slice(0,2).map(p=>p.perfume).join("  \u00b7  ");
+  document.getElementById("ro").innerHTML = others ? "Tambi&eacute;n usa: <span>" + others + "</span>" : "";
+  document.getElementById("rc").classList.add("show");
+}
+
+function restartTest(){
+  tAns = {q1:null,q2:null,q3:null,q4:null,q5:[],q6:[],q7:[],q8:null,q9:null,q10:[],q11:null};
+  tStep = 0;
+  document.getElementById("pf").style.width = "9%";
+  document.getElementById("rc").classList.remove("show");
+  renderQ();
+}
+renderQ();
+  </script>
+
+</body>
+</html>

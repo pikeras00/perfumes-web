@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Celebrity Perfumes &mdash; Biblioteca</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Raleway:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <nav>
+    <a href="index.html" class="logo">&#9670; Celebrity <em>Perfumes</em></a>
+    <div class="nav-links">
+      <a href="index.html" class="nbtn active">Biblioteca</a>
+      <a href="test.html" class="nbtn">Test</a>
+      <a href="sostenible.html" class="nbtn">Sostenible</a>
+    </div>
+  </nav>
+
+  <div class="hero">
+    <div class="hero-line"></div>
+    <h1 class="hero-title">Celebrity<strong>Perfumes</strong></h1>
+    <p class="hero-sub">Descubre las fragancias que eligen las m&aacute;s grandes figuras del entretenimiento, la moda y el deporte.</p>
+    <div class="hero-orn">&#9670; &nbsp; &#9670; &nbsp; &#9670;</div>
+  </div>
+
+  <section id="biblioteca">
+    <div class="shdr">
+      <div class="stag">Colecci&oacute;n</div>
+      <h2 class="stitle">Biblioteca de Celebrities</h2>
+      <p class="sdesc">Explora los perfumes favoritos de cantantes, actores, deportistas y figuras del mundo de la moda.</p>
+      <div class="sline"></div>
+    </div>
+
+    <div class="fbar" id="fbar">
+      <button class="fbtn active" data-f="all">Todos</button>
+      <button class="fbtn" data-f="Cantante">Cantantes</button>
+      <button class="fbtn" data-f="Actriz">Actrices</button>
+      <button class="fbtn" data-f="Actor">Actores</button>
+      <button class="fbtn" data-f="Modelo">Modelos</button>
+      <button class="fbtn" data-f="disenadora">Dise&ntilde;adores/as</button>
+      <button class="fbtn" data-f="Deportista">Deportistas</button>
+      <button class="fbtn" data-f="rapero">Raperos/as</button>
+    </div>
+
+    <div class="sbox">
+      <input class="sinput" id="si" type="text" placeholder="Buscar celebrity o perfume&hellip;" oninput="onSrch()">
+    </div>
+
+    <div class="cbadge">Mostrando <strong id="cn">0</strong> celebrities</div>
+
+    <div class="cgrid" id="cg"></div>
+
+    <div class="pgbar" id="pg"></div>
+  </section>
+
+  <footer>
+    <p>&#9670; &nbsp;<strong>Celebrity Perfumes</strong>&nbsp; &#9670; &nbsp; Datos extra&iacute;dos de fuentes p&uacute;blicas &nbsp;&middot;&nbsp; Todos los derechos de marca pertenecen a sus respectivos due&ntilde;os</p>
+  </footer>
+
+  <script src="data.js"></script>
+  <script>
+const PS = 24;
+let fil = [], cp = 1, cf = "all", cs = "";
+
+function ini(n){ return n.split(" ").slice(0,2).map(w=>w[0]).join("").toUpperCase(); }
+
+function applyF(){
+  fil = CELEBRITIES.filter(c => {
+    const matchF = cf==="all" || c.profesion===cf ||
+      (cf==="disenadora" && (c.profesion==="Diseñadora"||c.profesion==="Diseñador")) ||
+      (cf==="rapero" && (c.profesion==="Rapero"||c.profesion==="Rapera"));
+    if(!matchF) return false;
+    if(!cs) return true;
+    const q = cs.toLowerCase();
+    return c.nombre.toLowerCase().includes(q) ||
+      c.perfumes.some(p => p.perfume.toLowerCase().includes(q) || p.marca.toLowerCase().includes(q));
+  });
+}
+
+function renderG(){ applyF(); cp=1; renderP(); renderPg(); document.getElementById("cn").textContent = fil.length; }
+
+function renderP(){
+  const g = document.getElementById("cg");
+  const sl = fil.slice((cp-1)*PS, cp*PS);
+  g.innerHTML = sl.map(c => {
+    const pls = c.perfumes.length
+      ? c.perfumes.map(p => "<li><span class='pn'>" + p.perfume + "</span><span class='pm'>" + p.marca + "</span></li>").join("")
+      : "<li class='noperf'>Sin datos de perfume</li>";
+    return "<div class='ccard'><div class='ctop'><div class='ava'>" + ini(c.nombre) +
+           "</div><div><div class='cname'>" + c.nombre +
+           "</div><div class='cprof'>" + c.profesion +
+           "</div></div></div><div class='cbody'><ul class='plist'>" + pls + "</ul></div></div>";
+  }).join("");
+}
+
+function renderPg(){
+  const tot = Math.ceil(fil.length / PS);
+  const b = document.getElementById("pg");
+  if(tot <= 1){ b.innerHTML = ""; return; }
+  let h = "";
+  if(cp > 1) h += "<button class='pgbtn' onclick='gp(" + (cp-1) + ")'>&#8249;</button>";
+  const s = Math.max(1, cp-2), e = Math.min(tot, cp+2);
+  if(s > 1){ h += "<button class='pgbtn' onclick='gp(1)'>1</button>"; if(s>2) h += "<span style='padding:0 .5rem;color:var(--cream3)'>&#8230;</span>"; }
+  for(let i=s; i<=e; i++) h += "<button class='pgbtn" + (i===cp?" active":"") + "' onclick='gp(" + i + ")'>" + i + "</button>";
+  if(e < tot){ if(e<tot-1) h += "<span style='padding:0 .5rem;color:var(--cream3)'>&#8230;</span>"; h += "<button class='pgbtn' onclick='gp(" + tot + ")'>" + tot + "</button>"; }
+  if(cp < tot) h += "<button class='pgbtn' onclick='gp(" + (cp+1) + ")'>&#8250;</button>";
+  b.innerHTML = h;
+}
+
+function gp(p){ cp=p; renderP(); renderPg(); document.getElementById("biblioteca").scrollIntoView({behavior:"smooth"}); }
+function onSrch(){ cs = document.getElementById("si").value; renderG(); }
+
+document.getElementById("fbar").querySelectorAll(".fbtn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".fbtn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    cf = btn.dataset.f;
+    renderG();
+  });
+});
+renderG();
+  </script>
+
+</body>
+</html>
