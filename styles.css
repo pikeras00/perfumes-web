@@ -97,29 +97,33 @@ nav {
 /* ── Hero ── */
 .hero {
   position: relative;
-  padding: 8rem 2.5rem 7rem;
+  min-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6rem 2.5rem 5rem;
   text-align: center;
-  background: linear-gradient(175deg, #100D07 0%, #0E0C06 50%, #0B0907 100%);
+  background: url('./perfume.png') center 40% / cover no-repeat;
   overflow: hidden;
 }
 .hero::before {
   content: '';
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(ellipse 80% 55% at 50% 110%, rgba(196,153,40,.09) 0%, transparent 65%),
-    radial-gradient(ellipse 50% 40% at 15% 30%,  rgba(196,153,40,.04) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 40% at 85% 20%,  rgba(196,153,40,.04) 0%, transparent 60%);
+  background: linear-gradient(
+    180deg,
+    rgba(11,9,7,.92) 0%,
+    rgba(11,9,7,.50) 40%,
+    rgba(11,9,7,.60) 70%,
+    rgba(11,9,7,.94) 100%
+  );
 }
 .hero::after {
   content: '';
   position: absolute;
-  left: 50%;
-  top: 0;
-  transform: translateX(-50%);
-  width: 1px;
-  height: 80px;
-  background: linear-gradient(var(--gold-d), transparent);
+  inset: 0;
+  background: radial-gradient(ellipse 60% 50% at 50% 50%, transparent 30%, rgba(11,9,7,.4) 100%);
 }
 .hero-badge {
   display: inline-block;
@@ -132,6 +136,7 @@ nav {
   padding: .35rem 1.6rem;
   margin-bottom: 2.8rem;
   position: relative;
+  z-index: 1;
 }
 .hero-title {
   font-family: 'Cormorant Garamond', serif;
@@ -142,6 +147,7 @@ nav {
   letter-spacing: 5px;
   margin-bottom: 1.6rem;
   position: relative;
+  z-index: 1;
 }
 .hero-title strong {
   color: var(--gold-l);
@@ -151,20 +157,44 @@ nav {
 }
 .hero-sub {
   font-size: .9rem;
-  color: var(--cream3);
+  color: rgba(237,225,201,.75);
   font-weight: 300;
   letter-spacing: 1px;
   max-width: 520px;
   margin: 0 auto 3rem;
   line-height: 2;
   position: relative;
+  z-index: 1;
 }
+.hero-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: .8rem;
+  background: var(--gold);
+  color: #0B0907;
+  font-family: 'Raleway', sans-serif;
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  padding: .85rem 2.2rem;
+  text-decoration: none;
+  transition: background .25s, transform .25s;
+  position: relative;
+  z-index: 1;
+  margin-bottom: 3rem;
+  cursor: pointer;
+  border: none;
+}
+.hero-cta:hover { background: var(--gold-l); transform: translateY(-2px); }
+.hero-cta-arrow { font-size: .9rem; }
 .hero-divider {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 1.2rem;
   position: relative;
+  z-index: 1;
 }
 .hero-dline { width: 50px; height: 1px; background: var(--gold-d); display: block; }
 .hero-dorn  { color: var(--gold-d); font-size: .52rem; letter-spacing: 4px; }
@@ -265,7 +295,7 @@ section { padding: 5rem 2.5rem; }
 /* Card image area */
 .cimg {
   width: 100%;
-  height: 210px;
+  height: 260px;
   position: relative;
   overflow: hidden;
   flex-shrink: 0;
@@ -277,70 +307,77 @@ section { padding: 5rem 2.5rem; }
   background: radial-gradient(ellipse at 30% 0%, rgba(255,255,255,.07) 0%, transparent 60%);
   pointer-events: none;
 }
+.cimg-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
 .cimg-bottle {
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -52%);
-  width: 70px;
+  transform: translate(-50%, -58%);
+  width: 72px;
   height: auto;
   pointer-events: none;
 }
+/* Celebrity info overlaid dentro de la imagen */
 .cimg-overlay {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  padding: .75rem 1rem;
-  background: linear-gradient(transparent, rgba(0,0,0,.78));
+  padding: 1.4rem 1.2rem .9rem;
+  background: linear-gradient(transparent, rgba(0,0,0,.88) 55%);
+  display: flex;
+  align-items: flex-end;
+  gap: .8rem;
 }
-.cimg-marca {
-  display: block;
-  font-size: .58rem;
-  font-weight: 700;
-  letter-spacing: 2.5px;
-  text-transform: uppercase;
-  color: rgba(230,196,90,.65);
-  margin-bottom: .15rem;
-}
-.cimg-perfume {
-  display: block;
-  font-family: 'Cormorant Garamond', serif;
-  font-size: .95rem;
-  font-weight: 400;
-  color: var(--cream);
-  letter-spacing: .5px;
-  line-height: 1.2;
-}
-
-/* Card header */
-.ctop { border-bottom: 1px solid var(--border); padding: 1rem 1.2rem; display: flex; align-items: center; gap: .9rem; }
 .ava {
-  width: 42px;
-  height: 42px;
+  width: 38px;
+  height: 38px;
   flex-shrink: 0;
-  border: 1px solid var(--gold-d);
+  border: 1px solid rgba(196,153,40,.6);
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: 'Cormorant Garamond', serif;
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--gold-l);
-  background: linear-gradient(135deg, var(--bg3), var(--bg2));
+  background: rgba(0,0,0,.55);
   letter-spacing: 1px;
+  backdrop-filter: blur(4px);
 }
-.cname { font-family: 'Cormorant Garamond', serif; font-size: 1.05rem; font-weight: 600; color: var(--cream); letter-spacing: .4px; margin-bottom: .15rem; line-height: 1.2; }
-.cprof { font-size: .6rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--gold-d); }
+.cname { font-family: 'Cormorant Garamond', serif; font-size: 1.08rem; font-weight: 600; color: var(--cream); letter-spacing: .4px; margin-bottom: .1rem; line-height: 1.2; }
+.cprof { font-size: .58rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: rgba(230,196,90,.75); }
 
 /* Card body */
-.cbody { padding: .9rem 1.2rem; flex: 1; }
+.cbody { padding: .8rem 1.2rem; flex: 1; }
 .plist { list-style: none; }
-.plist li { padding: .42rem 0; border-bottom: 1px solid rgba(196,153,40,.06); display: flex; flex-direction: column; gap: .05rem; }
+.plist li { padding: .4rem 0; border-bottom: 1px solid rgba(196,153,40,.06); display: flex; flex-direction: column; gap: .05rem; }
 .plist li:last-child { border-bottom: none; }
 .pn { font-size: .82rem; color: var(--cream2); }
 .pm { font-size: .68rem; color: var(--gold-d); font-style: italic; letter-spacing: .3px; }
 .noperf { font-size: .8rem; color: var(--cream3); font-style: italic; }
+.pmore  { font-size: .7rem; color: var(--cream3); font-style: italic; padding-top: .3rem; }
+
+/* Card footer — botón estilo boceto */
+.cfoot {
+  border-top: 1px solid var(--border);
+  padding: .7rem 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: .62rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold);
+  transition: background .2s;
+}
+.cfoot:hover { background: rgba(196,153,40,.05); }
+.cfoot-arrow { font-size: .8rem; color: var(--gold-d); }
 
 /* ── Pagination ── */
 .pgbar { display: flex; justify-content: center; align-items: center; gap: .3rem; margin-top: 3rem; flex-wrap: wrap; }
@@ -453,8 +490,8 @@ footer strong { color: var(--gold); }
   .nbtn { font-size: .65rem; padding: .4rem .75rem; letter-spacing: 1.2px; }
   .hero-title { letter-spacing: 2px; }
   .cgrid { grid-template-columns: 1fr 1fr; gap: 1rem; }
-  .cimg { height: 170px; }
-  .cimg-bottle { width: 56px; }
+  .cimg { height: 200px; }
+  .cimg-bottle { width: 58px; }
   .qcard { padding: 1.6rem; }
   .ogrid, .ogrid.wide { grid-template-columns: 1fr 1fr; }
 }

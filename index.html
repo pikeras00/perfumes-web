@@ -22,8 +22,9 @@
 
   <div class="hero">
     <div class="hero-badge">Fragancias de &eacute;lite</div>
-    <h1 class="hero-title">Celebrity<strong>Perfumes</strong></h1>
+    <h1 class="hero-title">The Art<strong>of Scent</strong></h1>
     <p class="hero-sub">Descubre las fragancias que eligen las m&aacute;s grandes figuras del entretenimiento, la moda y el deporte.</p>
+    <a class="hero-cta" href="#biblioteca">Explorar colecci&oacute;n <span class="hero-cta-arrow">&#8250;</span></a>
     <div class="hero-divider">
       <span class="hero-dline"></span>
       <span class="hero-dorn">&#9670; &nbsp; &#9670; &nbsp; &#9670;</span>
@@ -161,30 +162,32 @@ function cardHTML(c) {
   const pf  = c.perfumes[0] || null;
   const pal = getBP(pf?.marca);
 
-  const imgArea = `<div class="cimg">
-    <div class="cimg-bg" style="background:linear-gradient(155deg,${pal.c1} 0%,${pal.c2} 100%)"></div>
-    <div class="cimg-shine" style="background:radial-gradient(ellipse at 35% 0%,${pal.ac}22 0%,transparent 60%)"></div>
-    ${BOTTLE}
-    ${pf ? `<div class="cimg-overlay">
-      <span class="cimg-marca">${pf.marca}</span>
-      <span class="cimg-perfume">${pf.perfume}</span>
-    </div>` : ''}
-  </div>`;
-
   const pList = c.perfumes.length
-    ? c.perfumes.map(p => `<li><span class="pn">${p.perfume}</span><span class="pm">${p.marca}</span></li>`).join("")
+    ? c.perfumes.slice(0, 3).map(p => `<li><span class="pn">${p.perfume}</span><span class="pm">${p.marca}</span></li>`).join("")
     : "<li class='noperf'>Sin datos de perfume</li>";
+  const more = c.perfumes.length > 3
+    ? `<li class="pmore">+${c.perfumes.length - 3} fragancia${c.perfumes.length - 3 > 1 ? 's' : ''} m\u00e1s</li>`
+    : '';
 
   return `<div class="ccard">
-    ${imgArea}
-    <div class="ctop">
-      <div class="ava">${ini(c.nombre)}</div>
-      <div>
-        <div class="cname">${c.nombre}</div>
-        <div class="cprof">${c.profesion}</div>
+    <div class="cimg">
+      <div class="cimg-bg" style="background:linear-gradient(155deg,${pal.c1} 0%,${pal.c2} 100%)"></div>
+      <div class="cimg-glow" style="background:radial-gradient(ellipse at 50% 110%,${pal.ac}28 0%,transparent 65%)"></div>
+      <div class="cimg-shine"></div>
+      ${BOTTLE}
+      <div class="cimg-overlay">
+        <div class="ava">${ini(c.nombre)}</div>
+        <div>
+          <div class="cname">${c.nombre}</div>
+          <div class="cprof">${c.profesion}</div>
+        </div>
       </div>
     </div>
-    <div class="cbody"><ul class="plist">${pList}</ul></div>
+    <div class="cbody"><ul class="plist">${pList}${more}</ul></div>
+    <div class="cfoot">
+      <span>${pf ? pf.marca : 'Fragancia'}</span>
+      <span class="cfoot-arrow">&#8250;</span>
+    </div>
   </div>`;
 }
 
