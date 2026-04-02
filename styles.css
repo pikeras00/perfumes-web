@@ -11,11 +11,11 @@
   --card2: #1C1C1A;
 
   /* Dorado viejo — detalles y bordes */
-  --gold:   #C6A361;
-  /* Champagne dorado — botones */
-  --gold-l: #E0C38A;
-  --gold-xl:#EED8AA;
-  --gold-d: #8A6E3A;
+  --gold:   #C6960A;
+  /* Dorado brillante — botones */
+  --gold-l: #D9AF18;
+  --gold-xl:#E8C828;
+  --gold-d: #8A6808;
 
   /* Blanco crudo — textos */
   --cream:  #F2EDE4;
@@ -173,7 +173,7 @@ nav {
   display: inline-flex;
   align-items: center;
   gap: .8rem;
-  background: linear-gradient(180deg, var(--gold-xl) 0%, var(--gold-l) 45%, var(--gold) 100%);
+  background: linear-gradient(180deg, #E8C828 0%, #D9AF18 45%, #C6960A 100%);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.30), inset 0 -1px 0 rgba(0,0,0,.20);
   color: #0D0D0D;
   font-family: 'Raleway', sans-serif;
@@ -389,7 +389,7 @@ section { padding: 5rem 2.5rem; }
   letter-spacing: 2.5px;
   text-transform: uppercase;
   color: #0D0D0D;
-  background: linear-gradient(180deg, #EED8AA 0%, #E0C38A 40%, #C6A361 100%);
+  background: linear-gradient(180deg, #E8C828 0%, #D9AF18 40%, #C6960A 100%);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.30), inset 0 -1px 0 rgba(0,0,0,.22);
   position: relative;
   overflow: hidden;
