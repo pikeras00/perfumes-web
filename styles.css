@@ -3,25 +3,25 @@
    ================================================ */
 
 :root {
-  --bg:    #0B0907;
-  --bg2:   #0F0D09;
-  --bg3:   #151210;
-  --card:  #121008;
-  --card2: #1A1710;
+  --bg:    #0E0C09;
+  --bg2:   #120F0B;
+  --bg3:   #181410;
+  --card:  #161410;
+  --card2: #1E1B15;
 
-  --gold:   #C49928;
-  --gold-l: #E6C45A;
-  --gold-xl:#F4E49A;
-  --gold-d: #7A6018;
+  --gold:   #C8A020;
+  --gold-l: #E8C840;
+  --gold-xl:#F5E090;
+  --gold-d: #8A7010;
 
-  --cream:  #EDE1C9;
-  --cream2: #A89262;
-  --cream3: #564E34;
+  --cream:  #F0EAE0;
+  --cream2: #A8A090;
+  --cream3: #605850;
 
-  --border:   rgba(196,153,40,.15);
-  --border-h: rgba(196,153,40,.45);
-  --shadow:   0 8px 40px rgba(0,0,0,.65);
-  --glow:     0 0 36px rgba(196,153,40,.14);
+  --border:   rgba(200,160,32,.18);
+  --border-h: rgba(200,160,32,.52);
+  --shadow:   0 8px 40px rgba(0,0,0,.72);
+  --glow:     0 0 38px rgba(200,160,32,.18);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -361,22 +361,24 @@ section { padding: 5rem 2.5rem; }
 .noperf { font-size: .8rem; color: var(--cream3); font-style: italic; }
 .pmore  { font-size: .7rem; color: var(--cream3); font-style: italic; padding-top: .3rem; }
 
-/* Card footer — botón estilo boceto */
+/* Card footer — botón estilo "SHOP NOW" del boceto */
 .cfoot {
-  border-top: 1px solid var(--border);
-  padding: .7rem 1.2rem;
+  margin: 0 1.2rem 1.2rem;
+  padding: .6rem 1rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   font-size: .62rem;
   font-weight: 700;
-  letter-spacing: 2px;
+  letter-spacing: 2.5px;
   text-transform: uppercase;
-  color: var(--gold);
-  transition: background .2s;
+  color: #0E0C09;
+  background: var(--gold);
+  transition: background .2s, transform .2s;
+  cursor: default;
 }
-.cfoot:hover { background: rgba(196,153,40,.05); }
-.cfoot-arrow { font-size: .8rem; color: var(--gold-d); }
+.ccard:hover .cfoot { background: var(--gold-l); }
+.cfoot-arrow { font-size: .85rem; }
 
 /* ── Pagination ── */
 .pgbar { display: flex; justify-content: center; align-items: center; gap: .3rem; margin-top: 3rem; flex-wrap: wrap; }
