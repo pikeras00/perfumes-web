@@ -361,7 +361,7 @@ section { padding: 5rem 2.5rem; }
 .noperf { font-size: .8rem; color: var(--cream3); font-style: italic; }
 .pmore  { font-size: .7rem; color: var(--cream3); font-style: italic; padding-top: .3rem; }
 
-/* Card footer — botón estilo "SHOP NOW" del boceto */
+/* Card footer — botón estilo "SHOP NOW" con brillo */
 .cfoot {
   margin: 0 1.2rem 1.2rem;
   padding: .6rem 1rem;
@@ -373,11 +373,27 @@ section { padding: 5rem 2.5rem; }
   letter-spacing: 2.5px;
   text-transform: uppercase;
   color: #0E0C09;
-  background: var(--gold);
-  transition: background .2s, transform .2s;
+  background: linear-gradient(180deg, #E8C840 0%, #C8A020 50%, #A88018 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.35), inset 0 -1px 0 rgba(0,0,0,.25);
+  position: relative;
+  overflow: hidden;
   cursor: default;
+  transition: filter .2s;
 }
-.ccard:hover .cfoot { background: var(--gold-l); }
+.cfoot::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -120%;
+  width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.4), transparent);
+  transform: skewX(-15deg);
+  transition: left 0s;
+}
+.ccard:hover .cfoot { filter: brightness(1.1); }
+.ccard:hover .cfoot::after {
+  left: 160%;
+  transition: left .55s ease;
+}
 .cfoot-arrow { font-size: .85rem; }
 
 /* ── Pagination ── */
