@@ -6,7 +6,7 @@
   <title>Celebrity Perfumes &mdash; Biblioteca</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Raleway:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Raleway:wght@300;400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -21,10 +21,14 @@
   </nav>
 
   <div class="hero">
-    <div class="hero-line"></div>
+    <div class="hero-badge">Fragancias de &eacute;lite</div>
     <h1 class="hero-title">Celebrity<strong>Perfumes</strong></h1>
     <p class="hero-sub">Descubre las fragancias que eligen las m&aacute;s grandes figuras del entretenimiento, la moda y el deporte.</p>
-    <div class="hero-orn">&#9670; &nbsp; &#9670; &nbsp; &#9670;</div>
+    <div class="hero-divider">
+      <span class="hero-dline"></span>
+      <span class="hero-dorn">&#9670; &nbsp; &#9670; &nbsp; &#9670;</span>
+      <span class="hero-dline"></span>
+    </div>
   </div>
 
   <section id="biblioteca">
@@ -53,7 +57,6 @@
     <div class="cbadge">Mostrando <strong id="cn">0</strong> celebrities</div>
 
     <div class="cgrid" id="cg"></div>
-
     <div class="pgbar" id="pg"></div>
   </section>
 
@@ -66,53 +69,161 @@
 const PS = 24;
 let fil = [], cp = 1, cf = "all", cs = "";
 
-function ini(n){ return n.split(" ").slice(0,2).map(w=>w[0]).join("").toUpperCase(); }
+/* ── Paletas de color por marca ── */
+const BP = {
+  'Chanel':             {c1:'#0D0D0D',c2:'#1C1C1A',ac:'#C8A050'},
+  'Dior':               {c1:'#060318',c2:'#0E082C',ac:'#9070C4'},
+  'YSL':                {c1:'#0D0D00',c2:'#1A1A00',ac:'#D4B800'},
+  'Yves Saint Laurent': {c1:'#0D0D00',c2:'#1A1A00',ac:'#D4B800'},
+  'Gucci':              {c1:'#0D0500',c2:'#1C0A00',ac:'#C84820'},
+  'Tom Ford':           {c1:'#090707',c2:'#141010',ac:'#B87848'},
+  'Versace':            {c1:'#120500',c2:'#200900',ac:'#D49010'},
+  'Prada':              {c1:'#070710',c2:'#0F0F1C',ac:'#A0A0B4'},
+  'Givenchy':           {c1:'#0F0505',c2:'#1A0808',ac:'#C04040'},
+  'Herm\u00e8s':        {c1:'#130800',c2:'#201400',ac:'#E06818'},
+  'Hermes':             {c1:'#130800',c2:'#201400',ac:'#E06818'},
+  'Burberry':           {c1:'#060B12',c2:'#0A1820',ac:'#8090A0'},
+  'Giorgio Armani':     {c1:'#080808',c2:'#141414',ac:'#908070'},
+  'Armani':             {c1:'#080808',c2:'#141414',ac:'#908070'},
+  'Lanc\u00f4me':       {c1:'#100006',c2:'#1C000C',ac:'#D06090'},
+  'Lancome':            {c1:'#100006',c2:'#1C000C',ac:'#D06090'},
+  'Viktor & Rolf':      {c1:'#04041A',c2:'#08082C',ac:'#6870C0'},
+  'Calvin Klein':       {c1:'#0A0A0A',c2:'#141414',ac:'#B8B8B8'},
+  'Hugo Boss':          {c1:'#060606',c2:'#101010',ac:'#808080'},
+  'Dolce & Gabbana':    {c1:'#100A00',c2:'#1C1400',ac:'#C8A040'},
+  'Valentino':          {c1:'#100004',c2:'#1C0008',ac:'#C82840'},
+  'Bvlgari':            {c1:'#040610',c2:'#080C1A',ac:'#5090C4'},
+  'Bulgari':            {c1:'#040610',c2:'#080C1A',ac:'#5090C4'},
+  'Cartier':            {c1:'#100004',c2:'#1C0008',ac:'#C83050'},
+  'Montblanc':          {c1:'#040408',c2:'#08080E',ac:'#4060B8'},
+  'Creed':              {c1:'#05090A',c2:'#0A1210',ac:'#60A060'},
+  'Maison Margiela':    {c1:'#0C0C0C',c2:'#181818',ac:'#D8D8CC'},
+  'Jean Paul Gaultier': {c1:'#0A0010',c2:'#14001C',ac:'#8850B8'},
+  'Paco Rabanne':       {c1:'#070B10',c2:'#10181C',ac:'#7890A0'},
+  'Thierry Mugler':     {c1:'#080010',c2:'#10001C',ac:'#7840B0'},
+  'Issey Miyake':       {c1:'#041010',c2:'#081A1A',ac:'#38A0A0'},
+  'Marc Jacobs':        {c1:'#080410',c2:'#100818',ac:'#7868A8'},
+  'Narciso Rodriguez':  {c1:'#100010',c2:'#1C001C',ac:'#A848A8'},
+  'Jo Malone':          {c1:'#070707',c2:'#111111',ac:'#C0B89C'},
+  'Jo Malone London':   {c1:'#070707',c2:'#111111',ac:'#C0B89C'},
+  'Guerlain':           {c1:'#040510',c2:'#080A1C',ac:'#5878C0'},
+  'Kenzo':              {c1:'#050A05',c2:'#0C1408',ac:'#58B060'},
+  'Lacoste':            {c1:'#040810',c2:'#081018',ac:'#3898A8'},
+  'Balenciaga':         {c1:'#0A0A0A',c2:'#141414',ac:'#888888'},
+  'Bottega Veneta':     {c1:'#0A0800',c2:'#181400',ac:'#B89848'},
+  'Miu Miu':            {c1:'#0C0808',c2:'#180C0C',ac:'#C07890'},
+  'Alexander McQueen':  {c1:'#080508',c2:'#10091A',ac:'#7848A0'},
+  'Stella McCartney':   {c1:'#060A08',c2:'#0C1410',ac:'#60A878'},
+  'Dsquared2':          {c1:'#080A0A',c2:'#141A1A',ac:'#A0B8B8'},
+  'Carolina Herrera':   {c1:'#0E0008',c2:'#1C0010',ac:'#C84878'},
+  'Chlo\u00e9':         {c1:'#100A04',c2:'#1C1408',ac:'#D09848'},
+  'Chloe':              {c1:'#100A04',c2:'#1C1408',ac:'#D09848'},
+  'Roberto Cavalli':    {c1:'#0A0800',c2:'#181400',ac:'#C89040'},
+  'Trussardi':          {c1:'#080C08',c2:'#101810',ac:'#709860'},
+  'Davidoff':           {c1:'#050810',c2:'#0A1018',ac:'#4870A8'},
+  'Escada':             {c1:'#0C0608',c2:'#180C10',ac:'#C86080'},
+  'Joop!':              {c1:'#0A0510',c2:'#141018',ac:'#8058A8'},
+  'Dunhill':            {c1:'#060A08',c2:'#0C1410',ac:'#608870'},
+  'Chopard':            {c1:'#0A0A06',c2:'#141408',ac:'#B8B040'},
+  'Elie Saab':          {c1:'#0E0A06',c2:'#1C1408',ac:'#D0A860'},
+};
 
-function applyF(){
+function getBP(marca) {
+  if (!marca) return {c1:'#0A0806',c2:'#161210',ac:'#C49928'};
+  if (BP[marca]) return BP[marca];
+  let h = 0;
+  for (let i = 0; i < marca.length; i++) h = (Math.imul(31, h) + marca.charCodeAt(i)) | 0;
+  const hue = Math.abs(h) % 360;
+  const sat = 30 + Math.abs(h >> 8) % 25;
+  return {
+    c1: `hsl(${hue},${sat}%,5%)`,
+    c2: `hsl(${hue},${sat}%,9%)`,
+    ac: `hsl(${hue},${Math.min(sat+25,75)}%,52%)`
+  };
+}
+
+/* ── SVG frasco de perfume ── */
+const BOTTLE = `<svg class="cimg-bottle" viewBox="0 0 80 155" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="28" y="1" width="24" height="12" rx="2" fill="rgba(255,255,255,.28)" stroke="rgba(255,255,255,.12)" stroke-width=".5"/>
+  <rect x="33" y="12" width="14" height="16" fill="rgba(255,255,255,.2)" stroke="rgba(255,255,255,.1)" stroke-width=".5"/>
+  <path d="M10 46 Q10 28 33 28 L47 28 Q70 28 70 46" fill="rgba(255,255,255,.15)" stroke="rgba(255,255,255,.08)" stroke-width=".5"/>
+  <rect x="10" y="46" width="60" height="88" rx="3" fill="rgba(255,255,255,.11)" stroke="rgba(255,255,255,.08)" stroke-width=".5"/>
+  <rect x="17" y="66" width="46" height="36" rx="1" fill="rgba(255,255,255,.07)" stroke="rgba(255,255,255,.1)" stroke-width=".5"/>
+  <rect x="13" y="48" width="9" height="52" rx="3" fill="rgba(255,255,255,.07)"/>
+  <line x1="19" y1="69" x2="61" y2="69" stroke="rgba(255,255,255,.1)" stroke-width=".5"/>
+  <line x1="19" y1="99" x2="61" y2="99" stroke="rgba(255,255,255,.1)" stroke-width=".5"/>
+  <ellipse cx="40" cy="134" rx="28" ry="4" fill="rgba(0,0,0,.25)"/>
+</svg>`;
+
+function ini(n) { return n.split(" ").slice(0,2).map(w => w[0]).join("").toUpperCase(); }
+
+function cardHTML(c) {
+  const pf  = c.perfumes[0] || null;
+  const pal = getBP(pf?.marca);
+
+  const imgArea = `<div class="cimg">
+    <div class="cimg-bg" style="background:linear-gradient(155deg,${pal.c1} 0%,${pal.c2} 100%)"></div>
+    <div class="cimg-shine" style="background:radial-gradient(ellipse at 35% 0%,${pal.ac}22 0%,transparent 60%)"></div>
+    ${BOTTLE}
+    ${pf ? `<div class="cimg-overlay">
+      <span class="cimg-marca">${pf.marca}</span>
+      <span class="cimg-perfume">${pf.perfume}</span>
+    </div>` : ''}
+  </div>`;
+
+  const pList = c.perfumes.length
+    ? c.perfumes.map(p => `<li><span class="pn">${p.perfume}</span><span class="pm">${p.marca}</span></li>`).join("")
+    : "<li class='noperf'>Sin datos de perfume</li>";
+
+  return `<div class="ccard">
+    ${imgArea}
+    <div class="ctop">
+      <div class="ava">${ini(c.nombre)}</div>
+      <div>
+        <div class="cname">${c.nombre}</div>
+        <div class="cprof">${c.profesion}</div>
+      </div>
+    </div>
+    <div class="cbody"><ul class="plist">${pList}</ul></div>
+  </div>`;
+}
+
+function applyF() {
   fil = CELEBRITIES.filter(c => {
     const matchF = cf==="all" || c.profesion===cf ||
-      (cf==="disenadora" && (c.profesion==="Diseñadora"||c.profesion==="Diseñador")) ||
+      (cf==="disenadora" && (c.profesion==="Dise\u00f1adora"||c.profesion==="Dise\u00f1ador")) ||
       (cf==="rapero" && (c.profesion==="Rapero"||c.profesion==="Rapera"));
-    if(!matchF) return false;
-    if(!cs) return true;
+    if (!matchF) return false;
+    if (!cs) return true;
     const q = cs.toLowerCase();
     return c.nombre.toLowerCase().includes(q) ||
       c.perfumes.some(p => p.perfume.toLowerCase().includes(q) || p.marca.toLowerCase().includes(q));
   });
 }
 
-function renderG(){ applyF(); cp=1; renderP(); renderPg(); document.getElementById("cn").textContent = fil.length; }
+function renderG() { applyF(); cp=1; renderP(); renderPg(); document.getElementById("cn").textContent = fil.length; }
 
-function renderP(){
-  const g = document.getElementById("cg");
+function renderP() {
   const sl = fil.slice((cp-1)*PS, cp*PS);
-  g.innerHTML = sl.map(c => {
-    const pls = c.perfumes.length
-      ? c.perfumes.map(p => "<li><span class='pn'>" + p.perfume + "</span><span class='pm'>" + p.marca + "</span></li>").join("")
-      : "<li class='noperf'>Sin datos de perfume</li>";
-    return "<div class='ccard'><div class='ctop'><div class='ava'>" + ini(c.nombre) +
-           "</div><div><div class='cname'>" + c.nombre +
-           "</div><div class='cprof'>" + c.profesion +
-           "</div></div></div><div class='cbody'><ul class='plist'>" + pls + "</ul></div></div>";
-  }).join("");
+  document.getElementById("cg").innerHTML = sl.map(cardHTML).join("");
 }
 
-function renderPg(){
+function renderPg() {
   const tot = Math.ceil(fil.length / PS);
   const b = document.getElementById("pg");
-  if(tot <= 1){ b.innerHTML = ""; return; }
+  if (tot <= 1) { b.innerHTML = ""; return; }
   let h = "";
-  if(cp > 1) h += "<button class='pgbtn' onclick='gp(" + (cp-1) + ")'>&#8249;</button>";
+  if (cp > 1) h += `<button class="pgbtn" onclick="gp(${cp-1})">&#8249;</button>`;
   const s = Math.max(1, cp-2), e = Math.min(tot, cp+2);
-  if(s > 1){ h += "<button class='pgbtn' onclick='gp(1)'>1</button>"; if(s>2) h += "<span style='padding:0 .5rem;color:var(--cream3)'>&#8230;</span>"; }
-  for(let i=s; i<=e; i++) h += "<button class='pgbtn" + (i===cp?" active":"") + "' onclick='gp(" + i + ")'>" + i + "</button>";
-  if(e < tot){ if(e<tot-1) h += "<span style='padding:0 .5rem;color:var(--cream3)'>&#8230;</span>"; h += "<button class='pgbtn' onclick='gp(" + tot + ")'>" + tot + "</button>"; }
-  if(cp < tot) h += "<button class='pgbtn' onclick='gp(" + (cp+1) + ")'>&#8250;</button>";
+  if (s > 1) { h += `<button class="pgbtn" onclick="gp(1)">1</button>`; if(s>2) h += `<span style="padding:0 .5rem;color:var(--cream3)">&#8230;</span>`; }
+  for (let i=s; i<=e; i++) h += `<button class="pgbtn${i===cp?" active":""}" onclick="gp(${i})">${i}</button>`;
+  if (e < tot) { if(e<tot-1) h += `<span style="padding:0 .5rem;color:var(--cream3)">&#8230;</span>`; h += `<button class="pgbtn" onclick="gp(${tot})">${tot}</button>`; }
+  if (cp < tot) h += `<button class="pgbtn" onclick="gp(${cp+1})">&#8250;</button>`;
   b.innerHTML = h;
 }
 
-function gp(p){ cp=p; renderP(); renderPg(); document.getElementById("biblioteca").scrollIntoView({behavior:"smooth"}); }
-function onSrch(){ cs = document.getElementById("si").value; renderG(); }
+function gp(p) { cp=p; renderP(); renderPg(); document.getElementById("biblioteca").scrollIntoView({behavior:"smooth"}); }
+function onSrch() { cs = document.getElementById("si").value; renderG(); }
 
 document.getElementById("fbar").querySelectorAll(".fbtn").forEach(btn => {
   btn.addEventListener("click", () => {
