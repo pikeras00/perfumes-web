@@ -104,26 +104,25 @@ nav {
   justify-content: center;
   padding: 6rem 2.5rem 5rem;
   text-align: center;
-  background: url('./perfume.png') center 40% / cover no-repeat;
+  background: #0B0907;
   overflow: hidden;
 }
 .hero::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(11,9,7,.92) 0%,
-    rgba(11,9,7,.50) 40%,
-    rgba(11,9,7,.60) 70%,
-    rgba(11,9,7,.94) 100%
-  );
+  background:
+    radial-gradient(ellipse 90% 60% at 50% 110%, rgba(196,153,40,.13) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 20% 50%,  rgba(196,153,40,.05) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 50% at 80% 50%,  rgba(196,153,40,.05) 0%, transparent 55%);
 }
 .hero::after {
   content: '';
   position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse 60% 50% at 50% 50%, transparent 30%, rgba(11,9,7,.4) 100%);
+  left: 50%; top: 0;
+  transform: translateX(-50%);
+  width: 1px; height: 90px;
+  background: linear-gradient(var(--gold-d), transparent);
 }
 .hero-badge {
   display: inline-block;
@@ -157,7 +156,7 @@ nav {
 }
 .hero-sub {
   font-size: .9rem;
-  color: rgba(237,225,201,.75);
+  color: var(--cream3);
   font-weight: 300;
   letter-spacing: 1px;
   max-width: 520px;
