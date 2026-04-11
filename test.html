@@ -3,16 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Celebrity Perfumes &mdash; Test</title>
+  <title>Perfumity &mdash; Test</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Raleway:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
+  <div class="bg-blob bg-blob-1" aria-hidden="true"></div>
+  <div class="bg-blob bg-blob-2" aria-hidden="true"></div>
+  <div class="bg-blob bg-blob-3" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+
   <nav>
-    <a href="index.html" class="logo">&#9670; Celebrity <em>Perfumes</em></a>
+    <a href="index.html" class="logo">Perfumity</a>
     <div class="nav-links">
       <a href="index.html" class="nbtn">Biblioteca</a>
       <a href="test.html" class="nbtn active">Test</a>
@@ -51,10 +56,12 @@
   </section>
 
   <footer>
-    <p>&#9670; &nbsp;<strong>Celebrity Perfumes</strong>&nbsp; &#9670; &nbsp; Datos extra&iacute;dos de fuentes p&uacute;blicas &nbsp;&middot;&nbsp; Todos los derechos de marca pertenecen a sus respectivos due&ntilde;os</p>
+    <p>&#9670; &nbsp;<strong>Perfumity</strong>&nbsp; &#9670; &nbsp; Datos extra&iacute;dos de fuentes p&uacute;blicas &nbsp;&middot;&nbsp; Todos los derechos de marca pertenecen a sus respectivos due&ntilde;os</p>
   </footer>
 
+  <script src="effects.js"></script>
   <script src="data.js"></script>
+  <script src="perfume_db.js"></script>
   <script>
 const QS = [
   {id:"q1", txt:"&iquest;Qu&eacute; tipo de aroma prefieres?", multi:false, opts:[
@@ -223,29 +230,147 @@ const Q10KW = {
   deseo:        ["rose","jasmin","musk","amber","oriental","opium","obsession","addict","hypnotic"]
 };
 
+// ── ALGORITMO HÍBRIDO CON BASE DE DATOS ────────────────────────────────────
+// Convierte un nombre de perfume a clave normalizada (sin tildes, minúsculas)
+function normKey(s){
+  return s.toLowerCase().trim()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .replace(/\s+/g," ");
+}
+
+// Tablas de correspondencia: respuesta del test → valor en la BD
+const DB_GENERO    = {masc:"Masculino", fem:"Femenino", unisex:"Unisex", indie:null};
+const DB_ESTACION  = {
+  spring:["Primavera","Primavera/Verano","Todo el año"],
+  summer:["Verano","Primavera/Verano","Todo el año"],
+  autumn:["Otoño/Invierno","Todo el año"],
+  winter:["Otoño/Invierno","Todo el año"],
+  all:   ["Todo el año"]
+};
+const DB_MOMENTO   = {
+  day:    ["Día","Todo el día"],
+  night:  ["Noche","Todo el día"],
+  anytime:["Día","Noche","Todo el día"]
+};
+const DB_PERFIL    = {joven:"Joven", moderno:"Moderno", elegante:"Maduro", clasico:"Atemporal", atemporal:"Atemporal"};
+const DB_OCASION   = {oficina:"Oficina", citas:"Citas", viaje:"Viaje", eventos:"Eventos", diario:"Diario", exterior:"Deporte"};
+const DB_FAMILIA   = {
+  citricos:"Cítrico", florales:"Floral", amaderadas:"Amaderado",
+  orientales:"Oriental", fougere:"Aromático", chipre:"Chipre",
+  gourmand:"Gourmand", acuaticas:"Acuático", frutales:"Frutal", verdes:"Verde"
+};
+const DB_NOTAS     = {
+  pachuli:"Pachul", rosa:"Rosa", vainilla:"Vainilla", cuero:"Cuero",
+  oud:"Oud", almizcle:"Almizcle", incienso:"Incienso", canela:"Canela", coco:"Coco"
+};
+const DB_PROYECCION = {sutil:"Suave", moderada:"Moderada", potente:"Potente"};
+const DB_PRECIO_MAP = {bajo:"<50€", medio:"50–100€", alto:"100–200€", lujo:">200€"};
+const DB_PRECIO_ORD = ["<50€","50–100€","100–200€",">200€"];
+const DB_VIBE = {
+  misterio:   ["Misterio","Misterio Oriental","Misterio Oscuro","Hipnosis","Obsesión","Dramatismo","Lujo Oscuro","Sofisticación Oscura"],
+  elegancia:  ["Elegancia","Elegancia Clásica","Elegancia Ecuestre","Elegancia Inglesa","Elegancia Terrosa","Sofisticación","Distinción","Ícono","Ícono Vintage","Nobleza","Atemporalidad","Clasicismo","Majestuosidad","Magnificencia"],
+  poder:      ["Poder","Poder Femenino","Fiereza","Audacia","Audacia Vintage","Confianza","Intensidad","Masculinidad","Masculinidad Extrema","Masculinidad Terrosa"],
+  calma:      ["Serenidad","Zen","Bienestar","Confort","Pureza","Ligereza","Naturalidad","Nitidez","Suavidad","Limpieza","Equilibrio","Espiritualidad"],
+  libertad:   ["Libertad","Independencia","Aventura","Frescura","Frescura Herbal","Naturaleza","Naturaleza Exótica","Vitalidad","Energía","Mediterráneo","Italianidad","Costa Amalfitana"],
+  creatividad:["Arte","Originalidad","Minimalismo","Modernidad","Contraste","Rebeldía","Transgresión","Humor","Fantasía","Extravagancia","Exuberancia","Ilusión"],
+  deseo:      ["Deseo","Seducción","Sensualidad","Sensualidad Extrema","Sensualidad Minimalista","Sensualidad Sutil","Magnetismo","Provocación","Dulce Provocación","Feminidad Provocadora","Romance","Romanticismo","Amor","Animalidad","Glamour"]
+};
+const DB_NIVEL_ORD = ["Nuevo","Intermedio","Experto"];
+const DB_NIVEL_MAP = {nuevo:"Nuevo", descubrir:"Intermedio", experto:"Experto"};
+
+// Puntúa un perfume de la BD contra las respuestas del usuario
+function scoreFromDB(d, ans){
+  let sc=0, penalty=0;
+
+  // Q1 Género (+5 exacto, +2 unisex, -2 incorrecto)
+  const gt = DB_GENERO[ans.q1];
+  if(gt){ if(d.genero===gt) sc+=5; else if(d.genero==="Unisex") sc+=2; else sc-=2; }
+
+  // Q2 Estación (+4 exacto, +2 comodín "Todo el año")
+  const estOK = DB_ESTACION[ans.q2]||[];
+  if(estOK.includes(d.estacion)) sc += (d.estacion==="Todo el año"?2:4);
+
+  // Q3 Momento (+3)
+  if((DB_MOMENTO[ans.q3]||[]).includes(d.momento)) sc+=3;
+
+  // Q4 Perfil (+4)
+  if(d.perfil===DB_PERFIL[ans.q4]) sc+=4;
+
+  // Q5 Ocasión (+2 por cada uso coincidente)
+  for(const ctx of (ans.q5||[])){
+    const oc=DB_OCASION[ctx]; if(oc && d.ocasion.includes(oc)) sc+=2;
+  }
+
+  // Q6 Familia olfativa (+5 por familia coincidente — peso más alto)
+  for(const fam of (ans.q6||[])){
+    const fc=DB_FAMILIA[fam]; if(fc && d.familia.includes(fc)) sc+=5;
+  }
+
+  // Q7 Notas a evitar (penalización -6 por nota presente)
+  for(const av of (ans.q7||[])){
+    if(av==="ninguna") continue;
+    const nc=DB_NOTAS[av]; if(nc && d.notas.includes(nc)) penalty+=6;
+  }
+
+  // Q8 Proyección (+3)
+  if(d.proyeccion===DB_PROYECCION[ans.q8]) sc+=3;
+
+  // Q9 Precio (+4 exacto, +2 rango adyacente)
+  const pTarget=DB_PRECIO_MAP[ans.q9];
+  const piDB=DB_PRECIO_ORD.indexOf(d.precio), piT=DB_PRECIO_ORD.indexOf(pTarget);
+  if(piDB!==-1&&piT!==-1){ const diff=Math.abs(piDB-piT); if(diff===0) sc+=4; else if(diff===1) sc+=2; }
+
+  // Q10 Vibe / sensación (+3 por vibe coincidente)
+  for(const feel of (ans.q10||[])){
+    if((DB_VIBE[feel]||[]).includes(d.vibe)) sc+=3;
+  }
+
+  // Q11 Nivel de experiencia (+3 exacto, +1 adyacente)
+  const nTarget=DB_NIVEL_MAP[ans.q11];
+  const niDB=DB_NIVEL_ORD.indexOf(d.nivel), niT=DB_NIVEL_ORD.indexOf(nTarget);
+  if(niDB!==-1&&niT!==-1){ const diff=Math.abs(niDB-niT); if(diff===0) sc+=3; else if(diff===1) sc+=1; }
+
+  return sc - penalty;
+}
+
+// Puntúa una celebrity con algoritmo HÍBRIDO:
+//   1) Para cada perfume encontrado en la BD → puntuación explícita (alta precisión)
+//   2) Para los no encontrados → puntuación por palabras clave (fallback)
+// Score final = mejor puntuación DB (80%) + puntuación kw (20%), o solo kw si no hay BD
 function scoreC(c, ans){
-  const str = c.perfumes.map(p => (p.perfume+" "+p.marca).toLowerCase()).join(" ");
-  let sc=0, neg=0;
-  sc += c.perfumes.length * 0.15;
-  if(ans.q1 && ans.q1!=="indie"){ for(const kw of (FKW[ans.q1]||[])) if(str.includes(kw)) sc+=3; }
-  for(const kw of (Q2KW[ans.q2]||[])) if(str.includes(kw)) sc+=2;
-  if(ans.q3!=="anytime") for(const kw of (Q3KW[ans.q3]||[])) if(str.includes(kw)) sc+=2;
-  for(const kw of (Q4KW[ans.q4]||[])) if(str.includes(kw)) sc+=2;
-  for(const ctx of (ans.q5||[])){ for(const kw of (Q5KW[ctx]||[])) if(str.includes(kw)) sc+=1; }
-  for(const fam of (ans.q6||[])){ for(const kw of (Q6KW[fam]||[])) if(str.includes(kw)) sc+=4; }
-  for(const av of (ans.q7||[])){ if(av==="ninguna") continue; for(const kw of (Q7NEG[av]||[])) if(str.includes(kw)) neg+=5; }
-  for(const kw of (Q8KW[ans.q8]||[])) if(str.includes(kw)) sc+=1;
+  const kwStr = c.perfumes.map(p=>(p.perfume+" "+p.marca).toLowerCase()).join(" ");
+  let dbScores=[], kwSc=0, kwNeg=0;
+
+  // — Fallback por palabras clave (conservado del algoritmo anterior) —
+  kwSc += c.perfumes.length * 0.15;
+  if(ans.q1&&ans.q1!=="indie"){ for(const kw of (FKW[ans.q1]||[])) if(kwStr.includes(kw)) kwSc+=3; }
+  for(const kw of (Q2KW[ans.q2]||[])) if(kwStr.includes(kw)) kwSc+=2;
+  if(ans.q3!=="anytime") for(const kw of (Q3KW[ans.q3]||[])) if(kwStr.includes(kw)) kwSc+=2;
+  for(const kw of (Q4KW[ans.q4]||[])) if(kwStr.includes(kw)) kwSc+=2;
+  for(const ctx of (ans.q5||[])){ for(const kw of (Q5KW[ctx]||[])) if(kwStr.includes(kw)) kwSc+=1; }
+  for(const fam of (ans.q6||[])){ for(const kw of (Q6KW[fam]||[])) if(kwStr.includes(kw)) kwSc+=4; }
+  for(const av of (ans.q7||[])){ if(av==="ninguna") continue; for(const kw of (Q7NEG[av]||[])) if(kwStr.includes(kw)) kwNeg+=5; }
+  for(const kw of (Q8KW[ans.q8]||[])) if(kwStr.includes(kw)) kwSc+=1;
   const tier=ans.q9;
-  const tbs = tier==="bajo"  ? Q9BR.bajo
-            : tier==="medio" ? [...Q9BR.bajo,...Q9BR.medio]
-            : tier==="alto"  ? [...Q9BR.medio,...Q9BR.alto]
-            :                  [...Q9BR.alto,...Q9BR.lujo];
-  for(const b of tbs) if(str.includes(b)) sc+=2;
-  for(const feel of (ans.q10||[])){ for(const kw of (Q10KW[feel]||[])) if(str.includes(kw)) sc+=2; }
-  if(ans.q11==="nuevo"){         for(const b of ["chanel","dior","guerlain","jo malone","armani","lancome","hermes"]) if(str.includes(b)) sc+=2; }
-  else if(ans.q11==="experto"){  for(const b of ["le labo","byredo","frederic malle","escentric","comme des","etat libre","kilian"]) if(str.includes(b)) sc+=2; }
-  else if(ans.q11==="descubrir"){for(const b of ["diptyque","jo malone","acqua di parma","maison margiela","tom ford","penhaligon"]) if(str.includes(b)) sc+=1; }
-  return sc - neg;
+  const tbs=tier==="bajo"?Q9BR.bajo:tier==="medio"?[...Q9BR.bajo,...Q9BR.medio]:tier==="alto"?[...Q9BR.medio,...Q9BR.alto]:[...Q9BR.alto,...Q9BR.lujo];
+  for(const b of tbs) if(kwStr.includes(b)) kwSc+=2;
+  for(const feel of (ans.q10||[])){ for(const kw of (Q10KW[feel]||[])) if(kwStr.includes(kw)) kwSc+=2; }
+  if(ans.q11==="nuevo"){          for(const b of ["chanel","dior","guerlain","jo malone","armani","lancome","hermes"]) if(kwStr.includes(b)) kwSc+=2; }
+  else if(ans.q11==="experto"){   for(const b of ["le labo","byredo","frederic malle","escentric","comme des","etat libre","kilian"]) if(kwStr.includes(b)) kwSc+=2; }
+  else if(ans.q11==="descubrir"){ for(const b of ["diptyque","jo malone","acqua di parma","maison margiela","tom ford","penhaligon"]) if(kwStr.includes(b)) kwSc+=1; }
+  const kwFinal = kwSc - kwNeg;
+
+  // — Puntuación explícita con la BD —
+  for(const p of c.perfumes){
+    const entry = PERFUME_DB[normKey(p.perfume)];
+    if(entry) dbScores.push(scoreFromDB(entry, ans));
+  }
+
+  if(dbScores.length===0) return kwFinal;
+  const maxDB = Math.max(...dbScores);
+  const avgDB = dbScores.reduce((a,b)=>a+b,0)/dbScores.length;
+  const dbFinal = maxDB + avgDB*0.2;
+  return dbFinal*0.8 + kwFinal*0.2;
 }
 
 let tAns = {q1:null,q2:null,q3:null,q4:null,q5:[],q6:[],q7:[],q8:null,q9:null,q10:[],q11:null};
