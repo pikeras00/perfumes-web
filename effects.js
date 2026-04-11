@@ -437,13 +437,15 @@
   }
 
   /* ── Texto sólido con gradiente metálico + shimmer (fase holding final) ── */
-  function drawSolid(now, alpha) {
-    /* Mismo shimmer que el CSS del logo: background-size 250%, ciclo ~5s */
-    var shift = (now * 0.0002) % 1;          // 0→1 en ~5 s
-    var gx0   = -shift * cW * 1.5;           // desplazamiento 0 → -1.5·cW
-    var gx1   = gx0 + cW * 2.5;              // ancho 250%
+  function drawSolid(now) {
+    if (!cachedFont) return;
 
-    var grad  = ctx.createLinearGradient(gx0, 0, gx1, 0);
+    /* Shimmer: mismo comportamiento que logoShimmer del CSS (ciclo ~5 s) */
+    var shift = (now * 0.0002) % 1;   // 0 → 1 en ~5 s
+    var gx0   = -shift * cW * 1.5;    // offset: 0 → -1.5·cW
+    var gx1   = gx0 + cW * 2.5;       // ancho 250% del elemento
+
+    var grad = ctx.createLinearGradient(gx0, 0, gx1, 0);
     grad.addColorStop(0.00, '#4a2e05');
     grad.addColorStop(0.10, '#9a6e18');
     grad.addColorStop(0.20, '#c9a03d');
@@ -457,23 +459,30 @@
     grad.addColorStop(1.00, '#9a6e18');
 
     ctx.save();
-    ctx.globalAlpha  = alpha;
     ctx.font         = cachedFont;
     ctx.textBaseline = 'middle';
+    ctx.textAlign    = 'center';
     ctx.fillStyle    = grad;
-    ctx.shadowBlur   = 16;
-    ctx.shadowColor  = 'rgba(220,190,70,0.6)';
+    ctx.shadowBlur   = 18;
+    ctx.shadowColor  = 'rgba(220,190,70,0.65)';
 
-    /* Dibujar letra a letra para respetar letter-spacing exacto */
-    var chars  = 'PERFUMITY'.split('');
-    var ls     = cachedLS;
-    var widths = chars.map(function(c) { return ctx.measureText(c).width; });
-    var total  = widths.reduce(function(a, b) { return a + b; }, 0) + ls * (chars.length - 1);
-    var cx     = (cW - total) / 2;
-    chars.forEach(function(c, i) {
-      ctx.fillText(c, cx, cH / 2);
-      cx += widths[i] + ls;
-    });
+    /* letter-spacing: usar la propiedad nativa si el navegador la soporta,
+       si no, centrar manualmente letra a letra */
+    if ('letterSpacing' in ctx) {
+      ctx.letterSpacing = cachedLS + 'px';
+      ctx.fillText('PERFUMITY', cW / 2, cH / 2);
+    } else {
+      /* fallback: medir y centrar a mano */
+      ctx.textAlign = 'left';
+      var chars  = 'PERFUMITY'.split('');
+      var ws     = chars.map(function(c){ return ctx.measureText(c).width; });
+      var total  = ws.reduce(function(a,b){ return a+b; }, 0) + cachedLS * (chars.length - 1);
+      var cx     = (cW - total) / 2;
+      chars.forEach(function(c, i){
+        ctx.fillText(c, cx, cH / 2);
+        cx += ws[i] + cachedLS;
+      });
+    }
 
     ctx.restore();
   }
@@ -519,37 +528,16 @@
       draw(false);
       if (elapsed > 2100) { phase = 'holding'; phaseT = now; }
 
-    /* ── HOLDING: transición partículas → texto sólido con gradiente ── */
+    /* ── HOLDING: texto sólido con gradiente metálico ── */
     } else if (phase === 'holding') {
-      /* solidAlpha sube de 0 a 1 en ~20 frames (~330ms) */
-      solidAlpha = Math.min(solidAlpha + 0.05, 1);
-
-      /* Mientras transicionamos, actualizar posición de partículas */
-      if (solidAlpha < 1) {
-        for (i = 0; i < pts.length; i++) {
-          p = pts[i];
-          p.fa += p.fs * 0.22;
-          p.x   = p.tx + Math.cos(p.fa) * p.fr * 0.04;
-          p.y   = p.ty + Math.sin(p.fa) * p.fr * 0.03;
-          p.a   = Math.min(p.a + 0.1, 1);
-        }
-        /* Partículas se desvanecen mientras el sólido aparece */
-        drawGolden(now);
-      }
-      /* Texto sólido encima, con fade-in */
-      drawSolid(now, solidAlpha);
+      drawSolid(now);
 
       if (elapsed > 3600) {
-        solidAlpha = 0;  /* reset para el próximo ciclo */
-        /* Restaurar posiciones exactas en las partículas antes de dispersar */
+        /* Colocar partículas en posiciones exactas antes de dispersar */
         for (i = 0; i < pts.length; i++) {
           p = pts[i];
           p.x = p.tx; p.y = p.ty; p.a = 1;
-        }
-        /* Velocidad inicial de explosión radial desde su posición actual */
-        for (i = 0; i < pts.length; i++) {
-          p = pts[i];
-          var ang = Math.atan2(p.y - cH / 2, p.x - cW / 2) + (Math.random() - 0.5) * 1.2;
+          var ang = Math.atan2(p.ty - cH / 2, p.tx - cW / 2) + (Math.random() - 0.5) * 1.2;
           var spd = Math.random() * 2.8 + 0.8;
           p.vx = Math.cos(ang) * spd;
           p.vy = Math.sin(ang) * spd * 0.6;
