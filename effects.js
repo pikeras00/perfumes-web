@@ -283,7 +283,10 @@
   var phase    = 'converging';
   var phaseT   = 0;
   var rafId;
-  var firstRun = true;
+  var firstRun   = true;
+  var solidAlpha = 0;          // 0 = partículas, 1 = texto sólido
+  var cachedFont = '';
+  var cachedLS   = 0;
 
   /* ── Muestrear píxeles del texto para obtener posiciones objetivo ── */
   function sample() {
@@ -305,7 +308,9 @@
 
     var cs  = window.getComputedStyle(titleEl);
     var ls  = parseFloat(cs.letterSpacing) || 0;
-    oc.font         = '600 ' + cs.fontSize + ' "Cormorant Garamond", serif';
+    cachedFont = '600 ' + cs.fontSize + ' "Cormorant Garamond", serif';
+    cachedLS   = ls;
+    oc.font         = cachedFont;
     oc.textBaseline = 'middle';
     oc.fillStyle    = '#fff';
 
@@ -431,6 +436,48 @@
     ctx.shadowBlur  = 0;
   }
 
+  /* ── Texto sólido con gradiente metálico + shimmer (fase holding final) ── */
+  function drawSolid(now, alpha) {
+    /* Mismo shimmer que el CSS del logo: background-size 250%, ciclo ~5s */
+    var shift = (now * 0.0002) % 1;          // 0→1 en ~5 s
+    var gx0   = -shift * cW * 1.5;           // desplazamiento 0 → -1.5·cW
+    var gx1   = gx0 + cW * 2.5;              // ancho 250%
+
+    var grad  = ctx.createLinearGradient(gx0, 0, gx1, 0);
+    grad.addColorStop(0.00, '#4a2e05');
+    grad.addColorStop(0.10, '#9a6e18');
+    grad.addColorStop(0.20, '#c9a03d');
+    grad.addColorStop(0.32, '#eed96a');
+    grad.addColorStop(0.42, '#fff8b0');
+    grad.addColorStop(0.50, '#f0cc50');
+    grad.addColorStop(0.60, '#c9a03d');
+    grad.addColorStop(0.72, '#8b5e0a');
+    grad.addColorStop(0.82, '#c09030');
+    grad.addColorStop(0.92, '#e8c840');
+    grad.addColorStop(1.00, '#9a6e18');
+
+    ctx.save();
+    ctx.globalAlpha  = alpha;
+    ctx.font         = cachedFont;
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle    = grad;
+    ctx.shadowBlur   = 16;
+    ctx.shadowColor  = 'rgba(220,190,70,0.6)';
+
+    /* Dibujar letra a letra para respetar letter-spacing exacto */
+    var chars  = 'PERFUMITY'.split('');
+    var ls     = cachedLS;
+    var widths = chars.map(function(c) { return ctx.measureText(c).width; });
+    var total  = widths.reduce(function(a, b) { return a + b; }, 0) + ls * (chars.length - 1);
+    var cx     = (cW - total) / 2;
+    chars.forEach(function(c, i) {
+      ctx.fillText(c, cx, cH / 2);
+      cx += widths[i] + ls;
+    });
+
+    ctx.restore();
+  }
+
   /* ── Loop principal ── */
   function tick(now) {
     rafId = requestAnimationFrame(tick);
@@ -472,18 +519,33 @@
       draw(false);
       if (elapsed > 2100) { phase = 'holding'; phaseT = now; }
 
-    /* ── HOLDING: texto formado con micro-float y gradiente metálico ── */
+    /* ── HOLDING: transición partículas → texto sólido con gradiente ── */
     } else if (phase === 'holding') {
-      for (i = 0; i < pts.length; i++) {
-        p = pts[i];
-        p.fa += p.fs * 0.22;
-        /* float prácticamente imperceptible: máx ~0.16 px en fr=4 */
-        p.x   = p.tx + Math.cos(p.fa) * p.fr * 0.04;
-        p.y   = p.ty + Math.sin(p.fa) * p.fr * 0.03;
-        p.a   = Math.min(p.a + 0.1, 1);
+      /* solidAlpha sube de 0 a 1 en ~20 frames (~330ms) */
+      solidAlpha = Math.min(solidAlpha + 0.05, 1);
+
+      /* Mientras transicionamos, actualizar posición de partículas */
+      if (solidAlpha < 1) {
+        for (i = 0; i < pts.length; i++) {
+          p = pts[i];
+          p.fa += p.fs * 0.22;
+          p.x   = p.tx + Math.cos(p.fa) * p.fr * 0.04;
+          p.y   = p.ty + Math.sin(p.fa) * p.fr * 0.03;
+          p.a   = Math.min(p.a + 0.1, 1);
+        }
+        /* Partículas se desvanecen mientras el sólido aparece */
+        drawGolden(now);
       }
-      drawGolden(now);   /* gradiente metálico + shimmer */
+      /* Texto sólido encima, con fade-in */
+      drawSolid(now, solidAlpha);
+
       if (elapsed > 3600) {
+        solidAlpha = 0;  /* reset para el próximo ciclo */
+        /* Restaurar posiciones exactas en las partículas antes de dispersar */
+        for (i = 0; i < pts.length; i++) {
+          p = pts[i];
+          p.x = p.tx; p.y = p.ty; p.a = 1;
+        }
         /* Velocidad inicial de explosión radial desde su posición actual */
         for (i = 0; i < pts.length; i++) {
           p = pts[i];
