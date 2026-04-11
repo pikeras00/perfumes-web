@@ -358,6 +358,37 @@
     return true;
   }
 
+  /* ── Gradiente metálico dorado (mismo que el logo del nav) ── */
+  var GRAD_STOPS = [
+    [0.00, [74,  46,   5]],
+    [0.10, [154, 110,  24]],
+    [0.20, [201, 160,  61]],
+    [0.32, [238, 217, 106]],
+    [0.42, [255, 248, 176]],
+    [0.50, [240, 204,  80]],
+    [0.60, [201, 160,  61]],
+    [0.72, [139,  94,  10]],
+    [0.82, [192, 144,  48]],
+    [0.92, [232, 200,  64]],
+    [1.00, [154, 110,  24]]
+  ];
+
+  function sampleGrad(t) {
+    t = Math.max(0, Math.min(1, t));
+    for (var i = 1; i < GRAD_STOPS.length; i++) {
+      if (t <= GRAD_STOPS[i][0]) {
+        var t0 = GRAD_STOPS[i-1][0], t1 = GRAD_STOPS[i][0];
+        var f  = (t - t0) / (t1 - t0);
+        var c0 = GRAD_STOPS[i-1][1], c1 = GRAD_STOPS[i][1];
+        return 'rgb(' +
+          Math.round(c0[0] + (c1[0]-c0[0]) * f) + ',' +
+          Math.round(c0[1] + (c1[1]-c0[1]) * f) + ',' +
+          Math.round(c0[2] + (c1[2]-c0[2]) * f) + ')';
+      }
+    }
+    return 'rgb(201,160,61)';
+  }
+
   /* ── Renderizar — con o sin glow dorado ── */
   function draw(glow) {
     if (glow) {
@@ -376,6 +407,28 @@
     }
     ctx.globalAlpha = 1;
     if (glow) ctx.shadowBlur = 0;
+  }
+
+  /* ── Renderizar en modo "holding": gradiente metálico + shimmer ── */
+  function drawGolden(now) {
+    /* shimmer: desplazamiento que avanza en bucle cada ~5 s */
+    var shift = ((now * 0.0002) % 1) * 2.5;  /* rango 0..2.5 (background-size 250%) */
+    ctx.shadowBlur  = 10;
+    ctx.shadowColor = 'rgba(212,185,70,0.55)';
+    var i, p, pos;
+    for (i = 0; i < pts.length; i++) {
+      p = pts[i];
+      if (p.a < 0.005) continue;
+      /* posición normalizada (0..1) dentro del ancho total + offset shimmer */
+      pos = ((p.tx / cW) + shift) % 1;
+      ctx.globalAlpha = p.a;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = sampleGrad(pos);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    ctx.shadowBlur  = 0;
   }
 
   /* ── Loop principal ── */
@@ -419,7 +472,7 @@
       draw(false);
       if (elapsed > 2100) { phase = 'holding'; phaseT = now; }
 
-    /* ── HOLDING: texto formado con micro-float y glow dorado ── */
+    /* ── HOLDING: texto formado con micro-float y gradiente metálico ── */
     } else if (phase === 'holding') {
       for (i = 0; i < pts.length; i++) {
         p = pts[i];
@@ -429,7 +482,7 @@
         p.y   = p.ty + Math.sin(p.fa) * p.fr * 0.03;
         p.a   = Math.min(p.a + 0.1, 1);
       }
-      draw(true);   /* glow activado */
+      drawGolden(now);   /* gradiente metálico + shimmer */
       if (elapsed > 3600) {
         /* Velocidad inicial de explosión radial desde su posición actual */
         for (i = 0; i < pts.length; i++) {
