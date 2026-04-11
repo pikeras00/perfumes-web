@@ -305,7 +305,7 @@
 
     var cs  = window.getComputedStyle(titleEl);
     var ls  = parseFloat(cs.letterSpacing) || 0;
-    oc.font         = '300 ' + cs.fontSize + ' "Cormorant Garamond", serif';
+    oc.font         = '600 ' + cs.fontSize + ' "Cormorant Garamond", serif';
     oc.textBaseline = 'middle';
     oc.fillStyle    = '#fff';
 
