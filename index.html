@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Perfumity &mdash; Biblioteca</title>
+  <title>Perfumity &mdash; Inicio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -21,7 +21,8 @@
   <nav>
     <a href="index.html" class="logo">Perfumity</a>
     <div class="nav-links">
-      <a href="index.html" class="nbtn active">Biblioteca</a>
+      <a href="index.html" class="nbtn active">Inicio</a>
+      <a href="catalogo.html" class="nbtn">Cat&aacute;logo</a>
       <a href="test.html" class="nbtn">Test</a>
       <a href="sostenible.html" class="nbtn">Sostenible</a>
     </div>
@@ -41,7 +42,7 @@
     <div class="hero-badge">Fragancias de &eacute;lite</div>
     <h1 class="hero-title" id="hero-title">PERFUMITY</h1>
     <p class="hero-sub">Descubre las fragancias que eligen las m&aacute;s grandes figuras del entretenimiento, la moda y el deporte. El universo olfativo del lujo, en un solo lugar.</p>
-    <a class="hero-cta" href="#biblioteca">Explorar colecci&oacute;n <span class="hero-cta-arrow">&#8250;</span></a>
+    <a class="hero-cta" href="catalogo.html">Explorar colecci&oacute;n <span class="hero-cta-arrow">&#8250;</span></a>
     <div class="hero-divider">
       <span class="hero-dline"></span>
       <span class="hero-dorn">&#9670; &nbsp; &#9670; &nbsp; &#9670;</span>
@@ -49,297 +50,301 @@
     </div>
   </div>
 
-  <!-- Showcase de familias olfativas -->
+  <div class="sec-divider" aria-hidden="true"><span class="sec-divider-orn">&#9670;</span></div>
+
+  <!-- Showcase de familias olfativas — Carousel coverflow -->
   <section class="showcase">
-    <div class="shdr" style="margin-bottom:2.5rem">
+    <div class="shdr" style="margin-bottom:1.5rem">
       <div class="stag">Universo Olfativo</div>
-      <h2 class="stitle">Familias de Fragancia</h2>
+      <h2 class="stitle">Familias Olfativas</h2>
       <div class="sline"></div>
+      <p class="sdesc">El mundo de los perfumes se organiza en grandes familias que comparten alma y caracter. Explora cada una y descubre cu&aacute;l resuena con tu piel, tu estado de &aacute;nimo y tu manera de estar en el mundo.</p>
     </div>
-    <div class="showcase-grid">
 
-      <div class="showcase-item">
-        <svg class="showcase-bottle" viewBox="0 0 80 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="26" y="2" width="28" height="22" rx="3" fill="rgba(212,175,55,0.5)" stroke="rgba(212,175,55,0.8)" stroke-width="0.8"/>
-          <rect x="29" y="4" width="22" height="2.5" rx="1" fill="rgba(255,255,255,0.35)"/>
-          <rect x="31" y="24" width="18" height="4" rx="1" fill="rgba(212,175,55,0.55)" stroke="rgba(212,175,55,0.75)" stroke-width="0.5"/>
-          <rect x="33" y="28" width="14" height="16" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.12)" stroke-width="0.5"/>
-          <path d="M10 58 Q10 44 33 44 L47 44 Q70 44 70 58" fill="rgba(255,255,255,0.12)" stroke="rgba(212,175,55,0.25)" stroke-width="0.5"/>
-          <rect x="10" y="58" width="60" height="124" rx="2" fill="rgba(255,255,255,0.09)" stroke="rgba(212,175,55,0.4)" stroke-width="0.8"/>
-          <rect x="12" y="70" width="56" height="110" rx="1" fill="rgba(212,175,55,0.05)"/>
-          <rect x="16" y="78" width="48" height="70" rx="1" fill="rgba(212,175,55,0.08)" stroke="rgba(212,175,55,0.3)" stroke-width="0.6"/>
-          <line x1="20" y1="93" x2="60" y2="93" stroke="rgba(212,175,55,0.45)" stroke-width="0.6"/>
-          <rect x="27" y="99" width="26" height="2" rx="1" fill="rgba(212,175,55,0.3)"/>
-          <line x1="22" y1="108" x2="58" y2="108" stroke="rgba(212,175,55,0.2)" stroke-width="0.4"/>
-          <line x1="24" y1="115" x2="56" y2="115" stroke="rgba(212,175,55,0.15)" stroke-width="0.4"/>
-          <line x1="20" y1="138" x2="60" y2="138" stroke="rgba(212,175,55,0.3)" stroke-width="0.5"/>
-          <rect x="12" y="60" width="8" height="88" rx="4" fill="rgba(255,255,255,0.07)"/>
-          <ellipse cx="40" cy="183" rx="28" ry="4.5" fill="rgba(212,175,55,0.2)"/>
-          <ellipse cx="40" cy="188" rx="20" ry="3" fill="rgba(0,0,0,0.4)"/>
-        </svg>
-        <div class="showcase-label">
-          <span class="showcase-family">Amaderadas</span>
-          <span class="showcase-notes">S&aacute;ndalo &middot; Cedro &middot; Oud</span>
-        </div>
+    <div class="cat-carousel" id="catCarousel" role="region" aria-label="Familias de fragancia">
+      <div class="cat-stage" id="catStage">
+
+        <article class="cat-card" data-i="0">
+          <img class="cat-img" src="ImgenesPerfumesCat/florales.jpg" alt="Florales" loading="lazy">
+          <div class="cat-overlay">
+            <p class="cat-name">Florales</p>
+            <p class="cat-notes">Rosa &middot; Jazm&iacute;n &middot; Peon&iacute;a</p>
+          </div>
+        </article>
+
+        <article class="cat-card" data-i="1">
+          <img class="cat-img" src="ImgenesPerfumesCat/orientales.jpg" alt="Orientales" loading="lazy">
+          <div class="cat-overlay">
+            <p class="cat-name">Orientales</p>
+            <p class="cat-notes">Vainilla &middot; &Aacute;mbar &middot; Especias</p>
+          </div>
+        </article>
+
+        <article class="cat-card" data-i="2">
+          <img class="cat-img" src="ImgenesPerfumesCat/amaderados.jpg" alt="Amaderados" loading="lazy">
+          <div class="cat-overlay">
+            <p class="cat-name">Amaderados</p>
+            <p class="cat-notes">S&aacute;ndalo &middot; Cedro &middot; Oud</p>
+          </div>
+        </article>
+
+        <article class="cat-card" data-i="3">
+          <img class="cat-img" src="ImgenesPerfumesCat/citricos.jpg" alt="C&iacute;tricos" loading="lazy">
+          <div class="cat-overlay">
+            <p class="cat-name">C&iacute;tricos</p>
+            <p class="cat-notes">Bergamota &middot; Lim&oacute;n &middot; Naranja</p>
+          </div>
+        </article>
+
+        <article class="cat-card" data-i="4">
+          <img class="cat-img" src="ImgenesPerfumesCat/acuaticos.jpg" alt="Acu&aacute;ticos" loading="lazy">
+          <div class="cat-overlay">
+            <p class="cat-name">Acu&aacute;ticos</p>
+            <p class="cat-notes">Marino &middot; Brisa &middot; Algas</p>
+          </div>
+        </article>
+
+        <article class="cat-card" data-i="5">
+          <img class="cat-img" src="ImgenesPerfumesCat/fouguere.jpg" alt="Fougère" loading="lazy">
+          <div class="cat-overlay">
+            <p class="cat-name">Fougère</p>
+            <p class="cat-notes">Lavanda &middot; Musgo &middot; Helecho</p>
+          </div>
+        </article>
+
       </div>
 
-      <div class="showcase-item">
-        <svg class="showcase-bottle" viewBox="0 0 100 185" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <ellipse cx="50" cy="9" rx="11" ry="9" fill="rgba(212,175,55,0.55)" stroke="rgba(212,175,55,0.82)" stroke-width="0.8"/>
-          <ellipse cx="50" cy="5.5" rx="7.5" ry="4" fill="rgba(255,255,255,0.35)"/>
-          <rect x="44" y="18" width="12" height="18" rx="2" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/>
-          <rect x="39" y="34" width="22" height="5" rx="2.5" fill="rgba(212,175,55,0.48)" stroke="rgba(212,175,55,0.65)" stroke-width="0.6"/>
-          <path d="M28 62 Q14 84 14 114 Q14 164 50 164 Q86 164 86 114 Q86 84 72 62 Q64 46 50 44 Q36 46 28 62Z" fill="rgba(255,255,255,0.09)" stroke="rgba(212,175,55,0.38)" stroke-width="0.8"/>
-          <path d="M30 66 Q17 87 17 114 Q17 158 50 158 Q83 158 83 114 Q83 87 70 66 Q62 51 50 49 Q38 51 30 66Z" fill="rgba(212,175,55,0.05)"/>
-          <ellipse cx="50" cy="108" rx="29" ry="40" fill="rgba(212,175,55,0.07)" stroke="rgba(212,175,55,0.28)" stroke-width="0.6"/>
-          <line x1="29" y1="90" x2="71" y2="90" stroke="rgba(212,175,55,0.38)" stroke-width="0.55"/>
-          <line x1="33" y1="100" x2="67" y2="100" stroke="rgba(212,175,55,0.2)" stroke-width="0.4"/>
-          <rect x="38" y="106" width="24" height="2" rx="1" fill="rgba(212,175,55,0.28)"/>
-          <line x1="32" y1="124" x2="68" y2="124" stroke="rgba(212,175,55,0.3)" stroke-width="0.45"/>
-          <path d="M20 78 Q17 95 17 114" stroke="rgba(255,255,255,0.18)" stroke-width="5" stroke-linecap="round"/>
-          <ellipse cx="50" cy="166" rx="34" ry="5" fill="rgba(212,175,55,0.18)"/>
-          <ellipse cx="50" cy="171" rx="24" ry="3.5" fill="rgba(0,0,0,0.38)"/>
-        </svg>
-        <div class="showcase-label">
-          <span class="showcase-family">Florales</span>
-          <span class="showcase-notes">Rosa &middot; Jazmín &middot; Peonia</span>
-        </div>
-      </div>
+      <button class="cat-btn cat-prev" aria-label="Anterior">&#8249;</button>
+      <button class="cat-btn cat-next" aria-label="Siguiente">&#8250;</button>
 
-      <div class="showcase-item">
-        <svg class="showcase-bottle" viewBox="0 0 70 175" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="18" y="2" width="34" height="18" rx="1" fill="rgba(212,175,55,0.5)" stroke="rgba(212,175,55,0.78)" stroke-width="0.8"/>
-          <line x1="18" y1="12" x2="52" y2="12" stroke="rgba(255,255,255,0.28)" stroke-width="0.7"/>
-          <rect x="24" y="20" width="22" height="14" rx="0" fill="rgba(255,255,255,0.16)" stroke="rgba(255,255,255,0.09)" stroke-width="0.5"/>
-          <path d="M10 46 L24 34 L46 34 L60 46" fill="rgba(255,255,255,0.1)" stroke="rgba(212,175,55,0.25)" stroke-width="0.5"/>
-          <rect x="10" y="46" width="50" height="116" rx="0" fill="rgba(255,255,255,0.09)" stroke="rgba(212,175,55,0.38)" stroke-width="0.8"/>
-          <rect x="15" y="62" width="40" height="82" rx="0" fill="rgba(212,175,55,0.07)" stroke="rgba(212,175,55,0.28)" stroke-width="0.6"/>
-          <line x1="15" y1="76" x2="55" y2="76" stroke="rgba(212,175,55,0.42)" stroke-width="0.6"/>
-          <line x1="15" y1="134" x2="55" y2="134" stroke="rgba(212,175,55,0.35)" stroke-width="0.6"/>
-          <rect x="21" y="83" width="28" height="2" rx="1" fill="rgba(212,175,55,0.28)"/>
-          <rect x="21" y="90" width="20" height="1" fill="rgba(212,175,55,0.18)"/>
-          <rect x="21" y="97" width="24" height="1" fill="rgba(212,175,55,0.14)"/>
-          <line x1="52" y1="46" x2="52" y2="162" stroke="rgba(212,175,55,0.12)" stroke-width="0.5"/>
-          <rect x="12" y="48" width="7" height="72" rx="0" fill="rgba(255,255,255,0.07)"/>
-          <ellipse cx="35" cy="164" rx="24" ry="4" fill="rgba(212,175,55,0.18)"/>
-          <ellipse cx="35" cy="168" rx="16" ry="2.5" fill="rgba(0,0,0,0.38)"/>
-        </svg>
-        <div class="showcase-label">
-          <span class="showcase-family">Orientales</span>
-          <span class="showcase-notes">Vainilla &middot; &Aacute;mbar &middot; Especias</span>
-        </div>
+      <div class="cat-dots" role="tablist" aria-label="Navegar categorías">
+        <button class="cat-dot" data-di="0" aria-label="Florales"></button>
+        <button class="cat-dot" data-di="1" aria-label="Orientales"></button>
+        <button class="cat-dot" data-di="2" aria-label="Amaderados"></button>
+        <button class="cat-dot" data-di="3" aria-label="Cítricos"></button>
+        <button class="cat-dot" data-di="4" aria-label="Acuáticos"></button>
+        <button class="cat-dot" data-di="5" aria-label="Fougère"></button>
       </div>
-
     </div>
   </section>
 
-  <section id="biblioteca">
-    <div class="shdr">
-      <div class="stag">Colecci&oacute;n</div>
-      <h2 class="stitle">Biblioteca de Fragancias</h2>
-      <p class="sdesc">Explora los perfumes favoritos de cantantes, actores, deportistas y figuras del mundo de la moda.</p>
-      <div class="sline"></div>
+  <div class="sec-divider" aria-hidden="true"><span class="sec-divider-orn">&#9670;</span></div>
+
+  <!-- Sección de famosos -->
+  <section class="famosos">
+    <div class="famosos-hdr">
+      <div class="shdr">
+        <div class="stag">Referentes del Lujo</div>
+        <h2 class="stitle">Nuestras Celebrities</h2>
+        <div class="sline"></div>
+        <p class="sdesc">Las figuras m&aacute;s influyentes del planeta eligen sus fragancias con la misma precisi&oacute;n con la que eligen sus looks. Aqu&iacute; reunimos a las celebridades que han convertido el perfume en parte esencial de su identidad, dejando una estela inconfundible all&iacute; donde van.</p>
+      </div>
     </div>
 
-    <div class="fbar" id="fbar">
-      <button class="fbtn active" data-f="all">Todos</button>
-      <button class="fbtn" data-f="Cantante">Cantantes</button>
-      <button class="fbtn" data-f="Actriz">Actrices</button>
-      <button class="fbtn" data-f="Actor">Actores</button>
-      <button class="fbtn" data-f="Modelo">Modelos</button>
-      <button class="fbtn" data-f="disenadora">Dise&ntilde;adores/as</button>
-      <button class="fbtn" data-f="Deportista">Deportistas</button>
-      <button class="fbtn" data-f="rapero">Raperos/as</button>
-    </div>
+    <div class="fam-marquee-wrap">
+      <div class="fam-fade fam-fade--l" aria-hidden="true"></div>
+      <div class="fam-fade fam-fade--r" aria-hidden="true"></div>
 
-    <div class="sbox">
-      <input class="sinput" id="si" type="text" placeholder="Buscar celebrity o perfume&hellip;" oninput="onSrch()">
-    </div>
+      <div class="fam-track" id="famTrack">
 
-    <div class="cbadge">Mostrando <strong id="cn">0</strong> celebrities</div>
+        <article class="fam-card">
+          <img src="Carpetas%20famosos/Taylor_Swift.jpg" alt="Taylor Swift" loading="lazy">
+          <div class="fam-overlay">
+            <h3 class="fam-name">Taylor Swift</h3>
+            <span class="fam-role">Artista Global</span>
+            <div class="fam-tags"><span class="fam-tag">Florales</span><span class="fam-tag">Gourmand</span></div>
+          </div>
+        </article>
 
-    <div class="cgrid" id="cg"></div>
-    <div class="pgbar" id="pg"></div>
+        <article class="fam-card">
+          <img src="Carpetas%20famosos/Beyonc3F.jpg" alt="Beyoncé" loading="lazy">
+          <div class="fam-overlay">
+            <h3 class="fam-name">Beyoncé</h3>
+            <span class="fam-role">Ícono Musical</span>
+            <div class="fam-tags"><span class="fam-tag">Florales</span><span class="fam-tag">Almizclados</span></div>
+          </div>
+        </article>
+
+        <article class="fam-card">
+          <img src="Carpetas%20famosos/rihanna.jpg" alt="Rihanna" loading="lazy">
+          <div class="fam-overlay">
+            <h3 class="fam-name">Rihanna</h3>
+            <span class="fam-role">Cantante &amp; Empresaria</span>
+            <div class="fam-tags"><span class="fam-tag">Orientales</span><span class="fam-tag">Frutales</span></div>
+          </div>
+        </article>
+
+        <article class="fam-card">
+          <img src="Carpetas%20famosos/Selena-Gomez.jpg" alt="Selena Gómez" loading="lazy">
+          <div class="fam-overlay">
+            <h3 class="fam-name">Selena Gómez</h3>
+            <span class="fam-role">Cantante &amp; Actriz</span>
+            <div class="fam-tags"><span class="fam-tag">Florales</span><span class="fam-tag">Frutales</span></div>
+          </div>
+        </article>
+
+        <article class="fam-card">
+          <img src="Carpetas%20famosos/Billie_Eilish_Square_24da6ce7-4f6a-4c8b-8e9f-fab810efc436.jpg" alt="Billie Eilish" loading="lazy">
+          <div class="fam-overlay">
+            <h3 class="fam-name">Billie Eilish</h3>
+            <span class="fam-role">Pop Alternativo</span>
+            <div class="fam-tags"><span class="fam-tag">Gourmand</span><span class="fam-tag">Amaderados</span></div>
+          </div>
+        </article>
+
+        <article class="fam-card">
+          <img src="Carpetas%20famosos/como-hacer-el-peinado-de-ariana-grande.jpg" alt="Ariana Grande" loading="lazy">
+          <div class="fam-overlay">
+            <h3 class="fam-name">Ariana Grande</h3>
+            <span class="fam-role">Pop Icon</span>
+            <div class="fam-tags"><span class="fam-tag">Florales</span><span class="fam-tag">Gourmand</span></div>
+          </div>
+        </article>
+
+        <article class="fam-card">
+          <img src="Carpetas%20famosos/Dua202.jpg" alt="Dua Lipa" loading="lazy">
+          <div class="fam-overlay">
+            <h3 class="fam-name">Dua Lipa</h3>
+            <span class="fam-role">Estrella del Pop</span>
+            <div class="fam-tags"><span class="fam-tag">Orientales</span><span class="fam-tag">Florales</span></div>
+          </div>
+        </article>
+
+        <article class="fam-card">
+          <img src="Carpetas%20famosos/Shakira.jpg" alt="Shakira" loading="lazy">
+          <div class="fam-overlay">
+            <h3 class="fam-name">Shakira</h3>
+            <span class="fam-role">Artista Internacional</span>
+            <div class="fam-tags"><span class="fam-tag">Florales</span><span class="fam-tag">Frutales</span></div>
+          </div>
+        </article>
+
+        <article class="fam-card">
+          <img src="Carpetas%20famosos/Legends-Profile_Cristiano-Ronaldo1523460877263.jpg" alt="Cristiano Ronaldo" loading="lazy">
+          <div class="fam-overlay">
+            <h3 class="fam-name">Cristiano Ronaldo</h3>
+            <span class="fam-role">Leyenda del Fútbol</span>
+            <div class="fam-tags"><span class="fam-tag">Fougère</span><span class="fam-tag">Amaderados</span></div>
+          </div>
+        </article>
+
+        <article class="fam-card">
+          <img src="Carpetas%20famosos/harry-styles-2022-barba-1675246702.jpg" alt="Harry Styles" loading="lazy">
+          <div class="fam-overlay">
+            <h3 class="fam-name">Harry Styles</h3>
+            <span class="fam-role">Ícono de la Moda</span>
+            <div class="fam-tags"><span class="fam-tag">Florales</span><span class="fam-tag">Almizclados</span></div>
+          </div>
+        </article>
+
+        <article class="fam-card">
+          <img src="Carpetas%20famosos/Gigi_Hadid_for_Rabanne.jpg" alt="Gigi Hadid" loading="lazy">
+          <div class="fam-overlay">
+            <h3 class="fam-name">Gigi Hadid</h3>
+            <span class="fam-role">Supermodelo</span>
+            <div class="fam-tags"><span class="fam-tag">Cítricos</span><span class="fam-tag">Amaderados</span></div>
+          </div>
+        </article>
+
+        <article class="fam-card">
+          <img src="Carpetas%20famosos/angelina-jolie-505313846-1525340290.jpg" alt="Angelina Jolie" loading="lazy">
+          <div class="fam-overlay">
+            <h3 class="fam-name">Angelina Jolie</h3>
+            <span class="fam-role">Actriz de Hollywood</span>
+            <div class="fam-tags"><span class="fam-tag">Orientales</span><span class="fam-tag">Amaderados</span></div>
+          </div>
+        </article>
+
+        <article class="fam-card">
+          <img src="Carpetas%20famosos/scarlett_johansson.jpg" alt="Scarlett Johansson" loading="lazy">
+          <div class="fam-overlay">
+            <h3 class="fam-name">Scarlett Johansson</h3>
+            <span class="fam-role">Actriz de Hollywood</span>
+            <div class="fam-tags"><span class="fam-tag">Florales</span><span class="fam-tag">Almizclados</span></div>
+          </div>
+        </article>
+
+        <article class="fam-card">
+          <img src="Carpetas%20famosos/Emma_Watson.jpg" alt="Emma Watson" loading="lazy">
+          <div class="fam-overlay">
+            <h3 class="fam-name">Emma Watson</h3>
+            <span class="fam-role">Actriz &amp; Activista</span>
+            <div class="fam-tags"><span class="fam-tag">Verdes</span><span class="fam-tag">Florales</span></div>
+          </div>
+        </article>
+
+        <article class="fam-card">
+          <img src="Carpetas%20famosos/ryan_reynolds.jpg" alt="Ryan Reynolds" loading="lazy">
+          <div class="fam-overlay">
+            <h3 class="fam-name">Ryan Reynolds</h3>
+            <span class="fam-role">Actor &amp; Empresario</span>
+            <div class="fam-tags"><span class="fam-tag">Fougère</span><span class="fam-tag">Amaderados</span></div>
+          </div>
+        </article>
+
+        <article class="fam-card">
+          <img src="Carpetas%20famosos/salma_hayek.jpg" alt="Salma Hayek" loading="lazy">
+          <div class="fam-overlay">
+            <h3 class="fam-name">Salma Hayek</h3>
+            <span class="fam-role">Actriz &amp; Empresaria</span>
+            <div class="fam-tags"><span class="fam-tag">Orientales</span><span class="fam-tag">Florales</span></div>
+          </div>
+        </article>
+
+        <article class="fam-card">
+          <img src="Carpetas%20famosos/Sydney_Sweeney.jpg" alt="Sydney Sweeney" loading="lazy">
+          <div class="fam-overlay">
+            <h3 class="fam-name">Sydney Sweeney</h3>
+            <span class="fam-role">Actriz</span>
+            <div class="fam-tags"><span class="fam-tag">Florales</span><span class="fam-tag">Gourmand</span></div>
+          </div>
+        </article>
+
+        <article class="fam-card">
+          <img src="Carpetas%20famosos/tom_cruise.jpg" alt="Tom Cruise" loading="lazy">
+          <div class="fam-overlay">
+            <h3 class="fam-name">Tom Cruise</h3>
+            <span class="fam-role">Actor de Hollywood</span>
+            <div class="fam-tags"><span class="fam-tag">Amaderados</span><span class="fam-tag">Especiados</span></div>
+          </div>
+        </article>
+
+        <article class="fam-card">
+          <img src="Carpetas%20famosos/zac_efron.jpg" alt="Zac Efron" loading="lazy">
+          <div class="fam-overlay">
+            <h3 class="fam-name">Zac Efron</h3>
+            <span class="fam-role">Actor</span>
+            <div class="fam-tags"><span class="fam-tag">Acuáticos</span><span class="fam-tag">Fougère</span></div>
+          </div>
+        </article>
+
+        <article class="fam-card">
+          <img src="Carpetas%20famosos/Zoe_Saldaña.jpg" alt="Zoe Saldaña" loading="lazy">
+          <div class="fam-overlay">
+            <h3 class="fam-name">Zoe Saldaña</h3>
+            <span class="fam-role">Actriz</span>
+            <div class="fam-tags"><span class="fam-tag">Orientales</span><span class="fam-tag">Florales</span></div>
+          </div>
+        </article>
+
+      </div><!-- /fam-track -->
+    </div><!-- /fam-marquee-wrap -->
   </section>
+
+  <div class="sec-divider" aria-hidden="true"><span class="sec-divider-orn">&#9670;</span></div>
 
   <footer>
     <p>&#9670; &nbsp;<strong>Perfumity</strong>&nbsp; &#9670; &nbsp; Datos extra&iacute;dos de fuentes p&uacute;blicas &nbsp;&middot;&nbsp; Todos los derechos de marca pertenecen a sus respectivos due&ntilde;os</p>
   </footer>
 
-  <script src="effects.js"></script>
-  <script src="data.js"></script>
+  <!-- Duplicar tarjetas para el marquee infinito -->
   <script>
-const PS = 24;
-let fil = [], cp = 1, cf = "all", cs = "";
-
-/* ── Paletas de color por marca ── */
-const BP = {
-  'Chanel':             {c1:'#0D0D0D',c2:'#1C1C1A',ac:'#C8A050'},
-  'Dior':               {c1:'#060318',c2:'#0E082C',ac:'#9070C4'},
-  'YSL':                {c1:'#0D0D00',c2:'#1A1A00',ac:'#D4B800'},
-  'Yves Saint Laurent': {c1:'#0D0D00',c2:'#1A1A00',ac:'#D4B800'},
-  'Gucci':              {c1:'#0D0500',c2:'#1C0A00',ac:'#C84820'},
-  'Tom Ford':           {c1:'#090707',c2:'#141010',ac:'#B87848'},
-  'Versace':            {c1:'#120500',c2:'#200900',ac:'#D49010'},
-  'Prada':              {c1:'#070710',c2:'#0F0F1C',ac:'#A0A0B4'},
-  'Givenchy':           {c1:'#0F0505',c2:'#1A0808',ac:'#C04040'},
-  'Herm\u00e8s':        {c1:'#130800',c2:'#201400',ac:'#E06818'},
-  'Hermes':             {c1:'#130800',c2:'#201400',ac:'#E06818'},
-  'Burberry':           {c1:'#060B12',c2:'#0A1820',ac:'#8090A0'},
-  'Giorgio Armani':     {c1:'#080808',c2:'#141414',ac:'#908070'},
-  'Armani':             {c1:'#080808',c2:'#141414',ac:'#908070'},
-  'Lanc\u00f4me':       {c1:'#100006',c2:'#1C000C',ac:'#D06090'},
-  'Lancome':            {c1:'#100006',c2:'#1C000C',ac:'#D06090'},
-  'Viktor & Rolf':      {c1:'#04041A',c2:'#08082C',ac:'#6870C0'},
-  'Calvin Klein':       {c1:'#0A0A0A',c2:'#141414',ac:'#B8B8B8'},
-  'Hugo Boss':          {c1:'#060606',c2:'#101010',ac:'#808080'},
-  'Dolce & Gabbana':    {c1:'#100A00',c2:'#1C1400',ac:'#C8A040'},
-  'Valentino':          {c1:'#100004',c2:'#1C0008',ac:'#C82840'},
-  'Bvlgari':            {c1:'#040610',c2:'#080C1A',ac:'#5090C4'},
-  'Bulgari':            {c1:'#040610',c2:'#080C1A',ac:'#5090C4'},
-  'Cartier':            {c1:'#100004',c2:'#1C0008',ac:'#C83050'},
-  'Montblanc':          {c1:'#040408',c2:'#08080E',ac:'#4060B8'},
-  'Creed':              {c1:'#05090A',c2:'#0A1210',ac:'#60A060'},
-  'Maison Margiela':    {c1:'#0C0C0C',c2:'#181818',ac:'#D8D8CC'},
-  'Jean Paul Gaultier': {c1:'#0A0010',c2:'#14001C',ac:'#8850B8'},
-  'Paco Rabanne':       {c1:'#070B10',c2:'#10181C',ac:'#7890A0'},
-  'Thierry Mugler':     {c1:'#080010',c2:'#10001C',ac:'#7840B0'},
-  'Issey Miyake':       {c1:'#041010',c2:'#081A1A',ac:'#38A0A0'},
-  'Marc Jacobs':        {c1:'#080410',c2:'#100818',ac:'#7868A8'},
-  'Narciso Rodriguez':  {c1:'#100010',c2:'#1C001C',ac:'#A848A8'},
-  'Jo Malone':          {c1:'#070707',c2:'#111111',ac:'#C0B89C'},
-  'Jo Malone London':   {c1:'#070707',c2:'#111111',ac:'#C0B89C'},
-  'Guerlain':           {c1:'#040510',c2:'#080A1C',ac:'#5878C0'},
-  'Kenzo':              {c1:'#050A05',c2:'#0C1408',ac:'#58B060'},
-  'Lacoste':            {c1:'#040810',c2:'#081018',ac:'#3898A8'},
-  'Balenciaga':         {c1:'#0A0A0A',c2:'#141414',ac:'#888888'},
-  'Bottega Veneta':     {c1:'#0A0800',c2:'#181400',ac:'#B89848'},
-  'Miu Miu':            {c1:'#0C0808',c2:'#180C0C',ac:'#C07890'},
-  'Alexander McQueen':  {c1:'#080508',c2:'#10091A',ac:'#7848A0'},
-  'Stella McCartney':   {c1:'#060A08',c2:'#0C1410',ac:'#60A878'},
-  'Dsquared2':          {c1:'#080A0A',c2:'#141A1A',ac:'#A0B8B8'},
-  'Carolina Herrera':   {c1:'#0E0008',c2:'#1C0010',ac:'#C84878'},
-  'Chlo\u00e9':         {c1:'#100A04',c2:'#1C1408',ac:'#D09848'},
-  'Chloe':              {c1:'#100A04',c2:'#1C1408',ac:'#D09848'},
-  'Roberto Cavalli':    {c1:'#0A0800',c2:'#181400',ac:'#C89040'},
-  'Trussardi':          {c1:'#080C08',c2:'#101810',ac:'#709860'},
-  'Davidoff':           {c1:'#050810',c2:'#0A1018',ac:'#4870A8'},
-  'Escada':             {c1:'#0C0608',c2:'#180C10',ac:'#C86080'},
-  'Joop!':              {c1:'#0A0510',c2:'#141018',ac:'#8058A8'},
-  'Dunhill':            {c1:'#060A08',c2:'#0C1410',ac:'#608870'},
-  'Chopard':            {c1:'#0A0A06',c2:'#141408',ac:'#B8B040'},
-  'Elie Saab':          {c1:'#0E0A06',c2:'#1C1408',ac:'#D0A860'},
-};
-
-function getBP(marca) {
-  if (!marca) return {c1:'#0A0806',c2:'#161210',ac:'#C49928'};
-  if (BP[marca]) return BP[marca];
-  let h = 0;
-  for (let i = 0; i < marca.length; i++) h = (Math.imul(31, h) + marca.charCodeAt(i)) | 0;
-  const hue = Math.abs(h) % 360;
-  const sat = 30 + Math.abs(h >> 8) % 25;
-  return {
-    c1: `hsl(${hue},${sat}%,5%)`,
-    c2: `hsl(${hue},${sat}%,9%)`,
-    ac: `hsl(${hue},${Math.min(sat+25,75)}%,52%)`
-  };
-}
-
-/* ── SVG frasco de perfume ── */
-const BOTTLE = `<svg class="cimg-bottle" viewBox="0 0 80 155" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect x="28" y="1" width="24" height="12" rx="2" fill="rgba(255,255,255,.28)" stroke="rgba(255,255,255,.12)" stroke-width=".5"/>
-  <rect x="33" y="12" width="14" height="16" fill="rgba(255,255,255,.2)" stroke="rgba(255,255,255,.1)" stroke-width=".5"/>
-  <path d="M10 46 Q10 28 33 28 L47 28 Q70 28 70 46" fill="rgba(255,255,255,.15)" stroke="rgba(255,255,255,.08)" stroke-width=".5"/>
-  <rect x="10" y="46" width="60" height="88" rx="3" fill="rgba(255,255,255,.11)" stroke="rgba(255,255,255,.08)" stroke-width=".5"/>
-  <rect x="17" y="66" width="46" height="36" rx="1" fill="rgba(255,255,255,.07)" stroke="rgba(255,255,255,.1)" stroke-width=".5"/>
-  <rect x="13" y="48" width="9" height="52" rx="3" fill="rgba(255,255,255,.07)"/>
-  <line x1="19" y1="69" x2="61" y2="69" stroke="rgba(255,255,255,.1)" stroke-width=".5"/>
-  <line x1="19" y1="99" x2="61" y2="99" stroke="rgba(255,255,255,.1)" stroke-width=".5"/>
-  <ellipse cx="40" cy="134" rx="28" ry="4" fill="rgba(0,0,0,.25)"/>
-</svg>`;
-
-function ini(n) { return n.split(" ").slice(0,2).map(w => w[0]).join("").toUpperCase(); }
-
-function cardHTML(c) {
-  const pf  = c.perfumes[0] || null;
-  const pal = getBP(pf?.marca);
-
-  const pList = c.perfumes.length
-    ? c.perfumes.slice(0, 3).map(p => `<li><span class="pn">${p.perfume}</span><span class="pm">${p.marca}</span></li>`).join("")
-    : "<li class='noperf'>Sin datos de perfume</li>";
-  const more = c.perfumes.length > 3
-    ? `<li class="pmore">+${c.perfumes.length - 3} fragancia${c.perfumes.length - 3 > 1 ? 's' : ''} m\u00e1s</li>`
-    : '';
-
-  return `<div class="ccard">
-    <div class="cimg">
-      <div class="cimg-bg" style="background:linear-gradient(155deg,${pal.c1} 0%,${pal.c2} 100%)"></div>
-      <div class="cimg-glow" style="background:radial-gradient(ellipse at 50% 110%,${pal.ac}28 0%,transparent 65%)"></div>
-      <div class="cimg-shine"></div>
-      ${BOTTLE}
-      <div class="cimg-overlay">
-        <div class="ava">${ini(c.nombre)}</div>
-        <div>
-          <div class="cname">${c.nombre}</div>
-          <div class="cprof">${c.profesion}</div>
-        </div>
-      </div>
-    </div>
-    <div class="cbody"><ul class="plist">${pList}${more}</ul></div>
-    <div class="cfoot">
-      <span>${pf ? pf.marca : 'Fragancia'}</span>
-      <span class="cfoot-arrow">&#8250;</span>
-    </div>
-  </div>`;
-}
-
-function applyF() {
-  fil = CELEBRITIES.filter(c => {
-    const matchF = cf==="all" || c.profesion===cf ||
-      (cf==="disenadora" && (c.profesion==="Dise\u00f1adora"||c.profesion==="Dise\u00f1ador")) ||
-      (cf==="rapero" && (c.profesion==="Rapero"||c.profesion==="Rapera"));
-    if (!matchF) return false;
-    if (!cs) return true;
-    const q = cs.toLowerCase();
-    return c.nombre.toLowerCase().includes(q) ||
-      c.perfumes.some(p => p.perfume.toLowerCase().includes(q) || p.marca.toLowerCase().includes(q));
-  });
-}
-
-function renderG() { applyF(); cp=1; renderP(); renderPg(); document.getElementById("cn").textContent = fil.length; }
-
-function renderP() {
-  const sl = fil.slice((cp-1)*PS, cp*PS);
-  document.getElementById("cg").innerHTML = sl.map(cardHTML).join("");
-}
-
-function renderPg() {
-  const tot = Math.ceil(fil.length / PS);
-  const b = document.getElementById("pg");
-  if (tot <= 1) { b.innerHTML = ""; return; }
-  let h = "";
-  if (cp > 1) h += `<button class="pgbtn" onclick="gp(${cp-1})">&#8249;</button>`;
-  const s = Math.max(1, cp-2), e = Math.min(tot, cp+2);
-  if (s > 1) { h += `<button class="pgbtn" onclick="gp(1)">1</button>`; if(s>2) h += `<span style="padding:0 .5rem;color:var(--cream3)">&#8230;</span>`; }
-  for (let i=s; i<=e; i++) h += `<button class="pgbtn${i===cp?" active":""}" onclick="gp(${i})">${i}</button>`;
-  if (e < tot) { if(e<tot-1) h += `<span style="padding:0 .5rem;color:var(--cream3)">&#8230;</span>`; h += `<button class="pgbtn" onclick="gp(${tot})">${tot}</button>`; }
-  if (cp < tot) h += `<button class="pgbtn" onclick="gp(${cp+1})">&#8250;</button>`;
-  b.innerHTML = h;
-}
-
-function gp(p) { cp=p; renderP(); renderPg(); document.getElementById("biblioteca").scrollIntoView({behavior:"smooth"}); }
-function onSrch() { cs = document.getElementById("si").value; renderG(); }
-
-document.getElementById("fbar").querySelectorAll(".fbtn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll(".fbtn").forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-    cf = btn.dataset.f;
-    renderG();
-  });
-});
-renderG();
+    (function() {
+      var t = document.getElementById('famTrack');
+      if (t) t.innerHTML += t.innerHTML;
+    })();
   </script>
+  <script src="effects.js"></script>
 
 </body>
 </html>

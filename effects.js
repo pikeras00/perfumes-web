@@ -88,35 +88,64 @@
 // ── 3. Scroll-reveal with stagger ────────────────
 (function () {
   var io;
+  var SEL = '.shdr > *,.sintro,.sstat,.scard,.tip,.qcard';
+
+  function revealEl(el) {
+    var siblings = el.parentElement
+      ? Array.prototype.slice.call(el.parentElement.children) : [];
+    var idx = siblings.indexOf(el);
+    el.style.transitionDelay = Math.min(idx * 0.06, 0.4) + 's';
+    el.classList.add('sr-in');
+    if (io) io.unobserve(el);
+  }
 
   function setup() {
-    if (!window.IntersectionObserver) return;
+    if (!window.IntersectionObserver) {
+      // Sin soporte: mostrar todo
+      document.querySelectorAll(SEL).forEach(function (el) {
+        el.classList.remove('sr-out');
+        el.classList.add('sr-in');
+      });
+      return;
+    }
+
+    // Desconectar observer anterior sin perder elementos pendientes
     if (io) io.disconnect();
 
     io = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
-        if (!entry.isIntersecting) return;
-        var el  = entry.target;
-        var siblings = el.parentElement ? Array.prototype.slice.call(el.parentElement.children) : [];
-        var idx = siblings.indexOf(el);
-        el.style.transitionDelay = Math.min(idx * 0.06, 0.4) + 's';
-        el.classList.add('sr-in');
-        io.unobserve(el);
+        if (entry.isIntersecting) revealEl(entry.target);
       });
     }, { threshold: 0.07, rootMargin: '0px 0px -30px 0px' });
 
-    document.querySelectorAll(
-      '.shdr > *,.sintro,.sstat,.scard,.tip,.qcard'
-    ).forEach(function (el) {
-      if (!el.classList.contains('sr-out')) {
-        el.classList.add('sr-out');
-        io.observe(el);
-      }
+    document.querySelectorAll(SEL).forEach(function (el) {
+      if (el.classList.contains('sr-in')) return; // ya visible, no tocar
+      if (!el.classList.contains('sr-out')) el.classList.add('sr-out');
+      io.observe(el); // re-observar aunque ya tenga sr-out
     });
   }
 
-  document.addEventListener('DOMContentLoaded', setup);
-  new MutationObserver(function () { setTimeout(setup, 50); })
+  // Revelar todo lo que siga oculto (safety net tras 1.4 s)
+  function forceRevealAll() {
+    document.querySelectorAll(SEL + '.sr-out:not(.sr-in)').forEach(revealEl);
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    // Esperar 2 frames para que el layout esté asentado
+    requestAnimationFrame(function () {
+      requestAnimationFrame(setup);
+    });
+    setTimeout(forceRevealAll, 1400);
+  });
+
+  // Bfcache restore: la página vuelve sin re-ejecutar JS
+  window.addEventListener('pageshow', function (e) {
+    if (e.persisted) {
+      document.querySelectorAll(SEL + '.sr-out:not(.sr-in)').forEach(revealEl);
+    }
+  });
+
+  new MutationObserver(function () { setTimeout(setup, 80); })
     .observe(document.body, { childList: true, subtree: false });
 })();
 
@@ -227,153 +256,376 @@
 })();
 
 
-// ── 7. PERFUMITY: nube de spray → condensar → evaporar (bucle) ───
+// ── 7. PERFUMITY: Magic Text Reveal — partículas canvas ─────────
 (function () {
   var titleEl = document.getElementById('hero-title');
   if (!titleEl) return;
 
-  /* ── tiempos — menos partículas en móvil para no sobrecargar ── */
-  var isMobile   = window.innerWidth < 600;
-  var N_DROPS    = isMobile ? 90 : 320;
-  var RAIN_START = 0.12;
-  var RAIN_SPAN  = 1.4;
-  var COND_START = 1.6;
-  var STAGGER    = 0.07;
-  var LETTER_DUR = 0.55;
-  var HOLD       = 2.8;
-  var EVAP_DUR   = 1.1;   // más lento = más fluido
-  var EVAP_STG   = 0.03;  // stagger mínimo para no trabar
-  var PAUSE      = 0.5;
+  /* El texto permanece en el DOM para SEO; se oculta visualmente */
+  titleEl.innerHTML = 'PERFUMITY';
+  titleEl.style.color = 'transparent';
 
-  var letters = 'PERFUMITY'.split('');
-  var spans   = [];
-  var dropWrap  = null;
-  var timers    = [];
+  /* Canvas con padding vertical para que el glow no se recorte */
+  var PAD    = 24;
+  var canvas = document.createElement('canvas');
+  canvas.setAttribute('aria-hidden', 'true');
+  Object.assign(canvas.style, {
+    position: 'absolute', top: '50%', left: '50%',
+    transform: 'translate(-50%,-50%)',
+    pointerEvents: 'none', zIndex: '2'
+  });
+  titleEl.appendChild(canvas);
 
-  /* ── construir spans (solo una vez) ── */
-  (function buildSpans() {
-    titleEl.innerHTML = '';
-    spans = letters.map(function (ch) {
-      var s = document.createElement('span');
-      s.className   = 'htl';
-      s.textContent = ch;
-      s.style.opacity = '0';
-      titleEl.appendChild(s);
-      return s;
+  var ctx      = canvas.getContext('2d');
+  var dpr      = Math.min(window.devicePixelRatio || 1, 2);
+  var pts      = [];
+  var cW = 0, cH = 0;
+  var phase    = 'converging';
+  var phaseT   = 0;
+  var rafId;
+  var firstRun = true;
+
+  /* ── Muestrear píxeles del texto para obtener posiciones objetivo ── */
+  function sample() {
+    var rect = titleEl.getBoundingClientRect();
+    cW = Math.max(rect.width, 120);
+    cH = Math.max(rect.height + PAD * 2, 80);   // padding arriba y abajo
+
+    canvas.width  = Math.round(cW * dpr);
+    canvas.height = Math.round(cH * dpr);
+    canvas.style.width  = cW + 'px';
+    canvas.style.height = cH + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    /* Canvas offscreen: texto con fuente/tamaño/tracking idénticos al h1 */
+    var off = document.createElement('canvas');
+    var oW  = Math.round(cW), oH = Math.round(cH);
+    off.width = oW; off.height = oH;
+    var oc  = off.getContext('2d');
+
+    var cs  = window.getComputedStyle(titleEl);
+    var ls  = parseFloat(cs.letterSpacing) || 0;
+    oc.font         = '300 ' + cs.fontSize + ' "Cormorant Garamond", serif';
+    oc.textBaseline = 'middle';
+    oc.fillStyle    = '#fff';
+
+    /* Dibujamos letra a letra para respetar el letter-spacing exacto */
+    var chars  = 'PERFUMITY'.split('');
+    var widths = chars.map(function (c) { return oc.measureText(c).width; });
+    var total  = widths.reduce(function (a, b) { return a + b; }, 0) + ls * (chars.length - 1);
+    var cx     = (oW - total) / 2;
+    chars.forEach(function (c, i) {
+      oc.fillText(c, cx, oH / 2);    // centrado en el canvas con PAD incluido
+      cx += widths[i] + ls;
     });
-  })();
 
-  /* ── crear nube de gotitas ── */
-  function createDrops() {
-    if (dropWrap) dropWrap.remove();
-    dropWrap = document.createElement('div');
-    dropWrap.setAttribute('aria-hidden', 'true');
-    dropWrap.style.cssText =
-      'position:absolute;inset:0;overflow:visible;pointer-events:none;z-index:1;';
-    titleEl.insertBefore(dropWrap, titleEl.firstChild);
+    var data   = oc.getImageData(0, 0, oW, oH).data;
+    var mobile = window.innerWidth < 600;
+    /* Radio fijo según dispositivo: garantiza cobertura sólida del texto */
+    var step   = mobile ? 4 : 3;
+    var R      = mobile ? 2.1 : 1.85;
+    var out    = [];
+    for (var y = 0; y < oH; y += step) {
+      for (var x = 0; x < oW; x += step) {
+        if (data[(y * oW + x) * 4 + 3] > 110) out.push([x, y, R]);
+      }
+    }
+    return out;
+  }
 
-    for (var i = 0; i < N_DROPS; i++) {
-      var dot  = document.createElement('div');
+  /* ── Crear partículas desde posiciones dispersas ── */
+  function build() {
+    var targets = sample();
+    if (!targets.length) return false;
 
-      var size   = (Math.pow(Math.random(), 1.8) * 2.5 + 0.8).toFixed(1);
-      var left   = (Math.random() * 104 - 2).toFixed(1);
-      var dly    = (Math.random() * RAIN_SPAN + RAIN_START).toFixed(2);
+    pts = targets.map(function (t) {
+      var ang = Math.random() * Math.PI * 2;
+      var d   = Math.random() * Math.max(cW, cH) * 1.1 + 60;
+      return {
+        x:  cW / 2 + Math.cos(ang) * d,
+        y:  cH / 2 + Math.sin(ang) * d * 0.5,
+        tx: t[0], ty: t[1], r: t[2],
+        vx: 0, vy: 0,
+        a:  0,
+        fa: Math.random() * Math.PI * 2,    // ángulo de float
+        fs: Math.random() * 0.014 + 0.006,  // velocidad angular float
+        fr: Math.random() * 4 + 1.5,        // radio de float
+        cr: 200 + (Math.random() * 16 | 0),
+        cg: 160 + (Math.random() * 14 | 0),
+        cb:  54 + (Math.random() * 20 | 0)
+      };
+    });
+    return true;
+  }
 
-      /* duración larga = flotado lento; varía mucho para sensación orgánica */
-      var dur    = (Math.random() * 1.1 + 0.85).toFixed(2);
+  /* ── Renderizar — con o sin glow dorado ── */
+  function draw(glow) {
+    if (glow) {
+      ctx.shadowBlur  = 7;
+      ctx.shadowColor = 'rgba(212,175,55,0.5)';
+    }
+    var i, p;
+    for (i = 0; i < pts.length; i++) {
+      p = pts[i];
+      if (p.a < 0.005) continue;
+      ctx.globalAlpha = p.a;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgb(' + p.cr + ',' + p.cg + ',' + p.cb + ')';
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    if (glow) ctx.shadowBlur = 0;
+  }
 
-      /* la mayoría caen, algunas suben levemente (spray real asciende) */
-      var goingUp = Math.random() < 0.22;
-      var fallY   = goingUp
-        ? (-(Math.random() * 20 + 8)).toFixed(1)           // sube 8–28 px
-        : (Math.random() * 38 + 14).toFixed(1);            // baja 14–52 px
-      var driftX  = ((Math.random() - 0.5) * 40).toFixed(1);
-      var startY  = (-(Math.random() * 55 + 45)).toFixed(1);
-      var peakOp  = (Math.random() * 0.5 + 0.3).toFixed(2);
+  /* ── Loop principal ── */
+  function tick(now) {
+    rafId = requestAnimationFrame(tick);
+    var elapsed = now - phaseT;
+    var i, p;
 
-      /* tono dorado ligeramente variable */
-      var r = 193 + Math.floor(Math.random() * 22);
-      var g = 152 + Math.floor(Math.random() * 28);
-      var b = 48  + Math.floor(Math.random() * 32);
+    ctx.clearRect(0, 0, cW, cH);
 
-      /* ease-out: rápido al salir del frasco, se frena al flotar */
-      var easings = [
-        'cubic-bezier(0.12,0.8,0.3,1)',
-        'cubic-bezier(0.08,0.7,0.25,1)',
-        'cubic-bezier(0.18,0.85,0.4,1)'
-      ];
-      var ease = easings[Math.floor(Math.random() * easings.length)];
+    /* ── FLOATING: niebla de partículas que pulsan suavemente ── */
+    if (phase === 'floating') {
+      for (i = 0; i < pts.length; i++) {
+        p = pts[i];
+        p.fa += p.fs;
+        p.x  += Math.cos(p.fa) * p.fr * 0.055;
+        p.y  += Math.sin(p.fa) * p.fr * 0.04;
+        /* pulso de opacidad orgánico */
+        var pulse = 0.10 + 0.09 * Math.sin(now * 0.0009 + p.fa * 2.5);
+        p.a = p.a + (pulse - p.a) * 0.04;
+      }
+      draw(false);
+      if (elapsed > 1300) { phase = 'converging'; phaseT = now; }
 
-      dot.style.cssText =
-        'position:absolute;border-radius:50%;' +
-        'background:rgb(' + r + ',' + g + ',' + b + ');' +
-        'width:' + size + 'px;height:' + size + 'px;' +
-        'left:'  + left + '%;top:50%;' +
-        '--sy:'     + startY + 'px;' +
-        '--fallY:'  + fallY  + 'px;' +
-        '--driftX:' + driftX + 'px;' +
-        '--op:'     + peakOp + ';' +
-        'animation:dropFall ' + dur + 's ' + ease + ' ' + dly + 's both;';
-      dropWrap.appendChild(dot);
+    /* ── CONVERGING: muelle críticamente amortiguado → sin oscilación ── */
+    } else if (phase === 'converging') {
+      var t      = Math.min(elapsed / 1900, 1);
+      /* ease-in-out cúbico para que arranque suave y se frene al llegar */
+      var ease   = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+      var spring = 0.038 + ease * 0.052;  // 0.038 → 0.09, progresivo
+      var damp   = 0.84;                  // alto amortiguamiento = sin rebote
+      for (i = 0; i < pts.length; i++) {
+        p = pts[i];
+        p.vx += (p.tx - p.x) * spring;
+        p.vy += (p.ty - p.y) * spring;
+        p.vx *= damp; p.vy *= damp;
+        p.x  += p.vx;  p.y += p.vy;
+        /* alpha sigue la curva ease: arranque suave, llegada opaca */
+        p.a = Math.min(p.a + 0.018 + ease * 0.022, 1);
+      }
+      draw(false);
+      if (elapsed > 2100) { phase = 'holding'; phaseT = now; }
+
+    /* ── HOLDING: texto formado con micro-float y glow dorado ── */
+    } else if (phase === 'holding') {
+      for (i = 0; i < pts.length; i++) {
+        p = pts[i];
+        p.fa += p.fs * 0.22;
+        /* float prácticamente imperceptible: máx ~0.16 px en fr=4 */
+        p.x   = p.tx + Math.cos(p.fa) * p.fr * 0.04;
+        p.y   = p.ty + Math.sin(p.fa) * p.fr * 0.03;
+        p.a   = Math.min(p.a + 0.1, 1);
+      }
+      draw(true);   /* glow activado */
+      if (elapsed > 3600) {
+        /* Velocidad inicial de explosión radial desde su posición actual */
+        for (i = 0; i < pts.length; i++) {
+          p = pts[i];
+          var ang = Math.atan2(p.y - cH / 2, p.x - cW / 2) + (Math.random() - 0.5) * 1.2;
+          var spd = Math.random() * 2.8 + 0.8;
+          p.vx = Math.cos(ang) * spd;
+          p.vy = Math.sin(ang) * spd * 0.6;
+        }
+        phase = 'dispersing'; phaseT = now;
+      }
+
+    /* ── DISPERSING: explosión orgánica hacia afuera y desvanecimiento ── */
+    } else if (phase === 'dispersing') {
+      for (i = 0; i < pts.length; i++) {
+        p = pts[i];
+        p.vx *= 0.93; p.vy *= 0.93;
+        p.x  += p.vx; p.y  += p.vy;
+        p.a   = Math.max(p.a - 0.015, 0);
+      }
+      draw(false);
+      if (elapsed > 1500) {
+        /* Reposicionar para el siguiente ciclo (float) */
+        for (i = 0; i < pts.length; i++) {
+          p = pts[i];
+          var ang2 = Math.random() * Math.PI * 2;
+          var d2   = Math.random() * Math.max(cW, cH) * 0.9 + 60;
+          p.x = cW / 2 + Math.cos(ang2) * d2;
+          p.y = cH / 2 + Math.sin(ang2) * d2 * 0.5;
+          p.vx = 0; p.vy = 0; p.a = 0;
+        }
+        phase = 'floating'; phaseT = now;
+      }
     }
   }
 
-  /* ── ciclo ── */
-  function runCycle() {
-    timers.forEach(clearTimeout); timers = [];
-
-    /* reset letras */
-    spans.forEach(function (s) {
-      s.style.animation = 'none';
-      s.style.opacity   = '0';
-    });
-    titleEl.offsetHeight; /* reflow */
-
-    /* fase 1: lluvia */
-    createDrops();
-
-    /* fase 2: condensar letras */
-    spans.forEach(function (s, i) {
-      s.style.animation =
-        'letterCondense ' + LETTER_DUR + 's ease-out ' +
-        (COND_START + i * STAGGER).toFixed(2) + 's both';
-    });
-
-    /* quitar gotitas cuando ya no hacen falta */
-    var rainEnd = RAIN_START + RAIN_SPAN + 0.7 + 0.3;
-    timers.push(setTimeout(function () {
-      if (dropWrap) { dropWrap.remove(); dropWrap = null; }
-    }, rainEnd * 1000));
-
-    /* fase 3: evaporar tras HOLD */
-    var lastLetter = COND_START + (letters.length - 1) * STAGGER + LETTER_DUR;
-    timers.push(setTimeout(function () {
-      spans.forEach(function (s, i) {
-        s.style.setProperty('--drift', ((Math.random() - 0.5) * 28).toFixed(1) + 'px');
-        s.style.animation =
-          'evaporate ' + EVAP_DUR + 's ease-in ' +
-          (i * EVAP_STG).toFixed(2) + 's both';
-      });
-
-      /* nuevo ciclo tras evaporación */
-      var cycleEnd = EVAP_DUR + (letters.length - 1) * EVAP_STG + PAUSE;
-      timers.push(setTimeout(runCycle, cycleEnd * 1000));
-
-    }, (lastLetter + HOLD) * 1000));
+  /* ── Inicializar ── */
+  function init() {
+    if (!build()) { setTimeout(init, 400); return; }
+    /* Primera carga: ir directo a converging (más impacto visual) */
+    phase    = firstRun ? 'converging' : 'floating';
+    firstRun = false;
+    phaseT   = performance.now();
+    rafId    = requestAnimationFrame(tick);
   }
 
-  /* ── init ── */
+  var resizeTO;
+  window.addEventListener('resize', function () {
+    clearTimeout(resizeTO);
+    resizeTO = setTimeout(function () {
+      cancelAnimationFrame(rafId);
+      if (build()) {
+        phase = 'floating'; phaseT = performance.now();
+        rafId = requestAnimationFrame(tick);
+      }
+    }, 200);
+  }, { passive: true });
+
   function start() {
     if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(runCycle);
+      document.fonts.ready.then(function () { setTimeout(init, 80); });
     } else {
-      setTimeout(runCycle, 600);
+      setTimeout(init, 800);
     }
   }
-
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', start);
   } else {
     start();
+  }
+})();
+
+
+// ── 8. Carousel coverflow — Familias de Fragancia ────────────────
+(function () {
+  function init() {
+    var stage = document.getElementById('catStage');
+    if (!stage) return;
+
+    var cards  = Array.prototype.slice.call(stage.querySelectorAll('.cat-card'));
+    var dots   = Array.prototype.slice.call(document.querySelectorAll('#catCarousel .cat-dot'));
+    var n      = cards.length;
+    var active = 0;
+    var timer;
+    var dragStart = null;
+    var dragged   = false;
+
+    /* Calcula el ancho real de card para el offset de posición */
+    function cardW() {
+      return cards[0] ? cards[0].offsetWidth : 300;
+    }
+
+    /* Aplica posiciones coverflow a todas las cards */
+    function set(idx) {
+      active = ((idx % n) + n) % n;
+      var cw   = cardW();
+      var step = cw + 24;          /* separación entre cards: ancho + gap */
+
+      cards.forEach(function (card, i) {
+        var off = i - active;
+        /* camino más corto en loop circular */
+        if (off >  n / 2) off -= n;
+        if (off < -n / 2) off += n;
+
+        var abs  = Math.abs(off);
+        var sign = off >= 0 ? 1 : -1;
+
+        var tx      = off * step;
+        var ry      = -sign * Math.min(abs, 2) * 30;   /* rotación lateral */
+        var scale   = abs === 0 ? 1 : abs === 1 ? 0.82 : 0.66;
+        var opacity = abs === 0 ? 1 : abs === 1 ? 0.62 : abs === 2 ? 0.28 : 0;
+        var zi      = Math.max(10 - abs, 0);
+
+        card.style.transform   = 'translateX(' + tx + 'px) rotateY(' + ry + 'deg) scale(' + scale + ')';
+        card.style.opacity     = opacity;
+        card.style.zIndex      = zi;
+        card.style.pointerEvents = abs > 1 ? 'none' : 'auto';
+        card.classList.toggle('cat-active', abs === 0);
+      });
+
+      /* Dots */
+      dots.forEach(function (d, i) { d.classList.toggle('active', i === active); });
+    }
+
+    function next() { set(active + 1); }
+    function prev() { set(active - 1); }
+
+    function startAuto() {
+      clearInterval(timer);
+      timer = setInterval(next, 3400);
+    }
+    function stopAuto() { clearInterval(timer); }
+
+    /* Init */
+    set(0);
+    startAuto();
+
+    /* Botones */
+    var btnP = document.querySelector('#catCarousel .cat-prev');
+    var btnN = document.querySelector('#catCarousel .cat-next');
+    if (btnP) btnP.addEventListener('click', function () { prev(); startAuto(); });
+    if (btnN) btnN.addEventListener('click', function () { next(); startAuto(); });
+
+    /* Dots */
+    dots.forEach(function (d, i) {
+      d.addEventListener('click', function () { set(i); startAuto(); });
+    });
+
+    /* Click en card lateral → navegar a esa card */
+    cards.forEach(function (card, i) {
+      card.addEventListener('click', function () {
+        if (!dragged && !card.classList.contains('cat-active')) {
+          set(i); startAuto();
+        }
+      });
+    });
+
+    /* Pausa en hover */
+    stage.addEventListener('mouseenter', stopAuto);
+    stage.addEventListener('mouseleave', startAuto);
+
+    /* Drag con ratón */
+    stage.addEventListener('mousedown', function (e) {
+      dragStart = e.clientX; dragged = false;
+      stage.style.cursor = 'grabbing';
+    });
+    window.addEventListener('mousemove', function (e) {
+      if (dragStart !== null && Math.abs(e.clientX - dragStart) > 5) dragged = true;
+    });
+    window.addEventListener('mouseup', function (e) {
+      if (dragStart === null) return;
+      var dx = e.clientX - dragStart;
+      stage.style.cursor = '';
+      if (Math.abs(dx) > 44) { dx < 0 ? next() : prev(); startAuto(); }
+      dragStart = null;
+    });
+
+    /* Swipe táctil */
+    var touchX = null;
+    stage.addEventListener('touchstart', function (e) {
+      touchX = e.touches[0].clientX;
+    }, { passive: true });
+    stage.addEventListener('touchend', function (e) {
+      if (touchX === null) return;
+      var dx = e.changedTouches[0].clientX - touchX;
+      if (Math.abs(dx) > 44) { dx < 0 ? next() : prev(); startAuto(); }
+      touchX = null;
+    }, { passive: true });
+
+    /* Recalcular offsets si cambia el tamaño de ventana */
+    window.addEventListener('resize', function () { set(active); }, { passive: true });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
   }
 })();

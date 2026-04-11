@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perfumity &mdash; Cat&aacute;logo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Ambient blobs -->
+  <div class="bg-blob bg-blob-1" aria-hidden="true"></div>
+  <div class="bg-blob bg-blob-2" aria-hidden="true"></div>
+  <div class="bg-blob bg-blob-3" aria-hidden="true"></div>
+  <!-- Film grain -->
+  <div class="grain" aria-hidden="true"></div>
+
+  <nav>
+    <a href="index.html" class="logo">Perfumity</a>
+    <div class="nav-links">
+      <a href="index.html" class="nbtn">Inicio</a>
+      <a href="catalogo.html" class="nbtn active">Cat&aacute;logo</a>
+      <a href="test.html" class="nbtn">Test</a>
+      <a href="sostenible.html" class="nbtn">Sostenible</a>
+    </div>
+  </nav>
+
+  <section id="catalogo">
+    <div class="shdr" style="padding-top:6rem">
+      <div class="stag">M&aacute;s de 560 Celebrities</div>
+      <h2 class="stitle">Cat&aacute;logo</h2>
+      <div class="sline"></div>
+      <p class="sdesc">Hemos reunido m&aacute;s de 560 celebrities &mdash; cantantes, actores, deportistas, modelos y leyendas de todos los tiempos &mdash; junto a las fragancias que definen su sello personal. Desde los cl&aacute;sicos de Hollywood hasta los iconos del K-Pop y el reguet&oacute;n, cada perfil revela el universo olfativo de las figuras que marcan tendencia en el planeta. Filtra por categor&iacute;a o busca directamente tu celebrity favorita.</p>
+    </div>
+
+    <div class="fbar" id="fbar">
+      <button class="fbtn active" data-f="all">Todos</button>
+      <button class="fbtn" data-f="cantante">Cantantes</button>
+      <button class="fbtn" data-f="actriz">Actrices</button>
+      <button class="fbtn" data-f="actor">Actores</button>
+      <button class="fbtn" data-f="deportista">Deportistas</button>
+      <button class="fbtn" data-f="modelo">Modelos</button>
+      <button class="fbtn" data-f="politico">Pol&iacute;ticos</button>
+      <button class="fbtn" data-f="disenador">Dise&ntilde;adores</button>
+      <button class="fbtn" data-f="director">Directores</button>
+    </div>
+
+    <div class="sbox">
+      <input class="sinput" id="si" type="text" placeholder="Buscar celebrity o perfume&hellip;" oninput="onSrch()">
+    </div>
+
+    <div class="cbadge">Mostrando <strong id="cn">0</strong> celebrities</div>
+
+    <div class="cgrid" id="cg"></div>
+    <div class="pgbar" id="pg"></div>
+  </section>
+
+  <footer>
+    <p>&#9670; &nbsp;<strong>Perfumity</strong>&nbsp; &#9670; &nbsp; Datos extra&iacute;dos de fuentes p&uacute;blicas &nbsp;&middot;&nbsp; Todos los derechos de marca pertenecen a sus respectivos due&ntilde;os</p>
+  </footer>
+
+  <script src="effects.js"></script>
+  <script src="data.js"></script>
+  <script>
+const PS = 24;
+let fil = [], cp = 1, cf = "all", cs = "";
+
+/* ── Mapa celebrity → foto ── */
+const PHOTO_MAP = {
+  'Aaron Paul':          '30d095356578c200d4350928048d87b4cc-03-aaron-paul.rvertical.w1200.jpg',
+  'Adam Driver':         'AdamDriver.jpg',
+  'Adriana Karembeu':    'Adriana_Sklenarikova_Karembeu_NRJ_Music_Awards_2012_(cropped).jpg',
+  'Alexa Chung':         'Alexa-chung-hair-first-look-at-her-l-oreal-campaign-35539_w1000.jpg',
+  'Alycia Debnam-Carey': 'AlyciaDebnamCarey.jpg',
+  'Andrés Iniesta':      'Andrés_Iniesta_Euro_2012_vs_France_01.jpg',
+  'Angelina Jolie':      'angelina-jolie-505313846-1525340290.jpg',
+  'Anne Hathaway':       'anne-hathaway-con-vestido-versace.jpg',
+  'Ansel Elgort':        'ansel-elgort-88170183.jpg',
+  'Anya Taylor-Joy':     'anya-taylor-joy-rubio-ceniza-claro.jpg',
+  'Ariana Grande':       'como-hacer-el-peinado-de-ariana-grande.jpg',
+  'Ashley Graham':       'Ashley_Graham_2018.jpg',
+  'Aubrey Plaza':        'Aubrey_Plaza_at_the_2024_Cannes_Film_Festival_(cropped).jpg',
+  'Audrey Hepburn':      'audrey_hepburn-5110.jpg',
+  'Bae Suzy':            'Bae.Suzy.full.32140.jpg',
+  'Baekhyun':            'Foto_de_perfil_de_Baekhyun_29.jpg',
+  'Bang Chan':           'Bang_Chan_of_Stray_Kids,_October_15,_2025_(2).jpg',
+  'Becky G':             'https___s3.amazonaws.com_arc-wordpress-client-uploads_infobae-wp_wp-content_uploads_2018_05_30213759_Becky-G.jpg',
+  'Bella Hadid':         'Bella_Hadid_Cannes_2018_(cropped)_(cropped).jpg',
+  'Ben Affleck':         'benaffleck.jpg',
+  'Beyoncé':             'Beyonc3F.jpg',
+  'Bibi':                'BIBI_Animal_Farm.jpg',
+  'Billie Elish':        'Billie_Eilish_Square_24da6ce7-4f6a-4c8b-8e9f-fab810efc436.jpg',
+  'Bob Marley':          'bob-marley.jpg',
+  'Camarón de la Isla':  'camaron340.jpg',
+  'Cardi B':             'Cardi_B_2021_02.jpg',
+  'Carlos Alcaraz':      'carlos-alcaraz-of-spain-smiles-in-the-third-round-during-news-photo-1744921770.jpg',
+  'Cha Eunwoo':          'Cha_Eun-woo,_March_31,_2025.jpg',
+  'Chaewon':             '240219-LE-SSERAFIM-Chaewon-EASY-Album-Showcase-documents-1.jpg',
+  'Changsub':            'changsub.jpg',
+  'Chappel Roan':        'ChappellRoanRockES200825-198_(cropped).jpg',
+  'Charles Leclerc':     'Leclerc-About-02-Official-Pic-1.jpg',
+  'Chenoa':              'c92d25b4f8cf-chenoa-escotazo1-t.jpg',
+  'Cher':                'cher-attends-the-pre-grammy-gala-grammy-salute-to-industry-news-photo-1738319061.jpg',
+  'Choi Minho':          'Choi_Min-ho_최민호_220113.jpg',
+  'Choi Wooshik':        'choi_wooshik.jpg',
+  'Cristiano Ronaldo':   'Legends-Profile_Cristiano-Ronaldo1523460877263.jpg',
+  'Cyndi Lauper':        'cyndi-lauper-5_orig.jpg',
+  'Cynthia Erivo':       'Cynthia_Erivo_-_Wicked-FYC-1.jpg',
+  'D.O':                 'Do_Kyung_Soo.jpg',
+  'David Bustamante':    'david_bustamante.jpg',
+  'Dina Asher-Smith':    'Dina_Asher-Smith_2_Oregon_2022_(cropped).jpg',
+  'Dolly Parton':        'Dolly_Parton_at_\'Blue_Smoke_World_Tour\'_in_Knoxville.jpg',
+  'Dongwoon':            'dongwoon.jpg',
+  'Doyoung':             'nct-doyoung-announced-as-brand-ambassador-for-dolce-gabbana-v0-2c87d5k4npya1.jpg',
+  'Dr. Dre':             'Dr._Dre.jpg',
+  'Drake':               'noticia-drake-signs-louis-vuitton-2017-umomag.jpg',
+  'Dua Lipa':            'Dua202.jpg',
+  'Dwayne Johnson':      'Dwayne_Johnson.jpg',
+  'Elizabeth Olsen':     'Elizabeth_Olsen_-_Los_Angeles_Comic_Con_2025.jpg',
+  'Ellen Pompeo':        'Ellen_Pompeo_LF.jpg',
+  'Emily Browning':      'Emily_Browning_(Cropped).jpg',
+  'Emma Watson':         'Emma_Watson.jpg',
+  'Eric Clapton':        'Eric-Clapton-is-God-63urt0q16mxs8kwt89iv28gbxrfq75eurmvxz7qfjxkanjk7kpinkf2akd2am8.jpg',
+  'Francisco Franco':    'RETRATO_DEL_GRAL._FRANCISCO_FRANCO_BAHAMONDE_(adjusted_levels).jpg',
+  'Frank Sinatra':       'Frank_Sinatra_1961.jpg',
+  'Gaeul':               '260223-gaeul-ive-the-2nd-album-revive-genie-magazine-v0-nbd2j2jjtklg1.jpg',
+  'George Michael':      'George-Michael-Wham-1987.jpg',
+  'Gigi Hadid':          'Gigi_Hadid_for_Rabanne.jpg',
+  'Harry Styles':        'harry-styles-2022-barba-1675246702.jpg',
+  'Isabel Lucas':        'Isabel_Lucas_2013.jpg',
+  'Isabel Pantoja':      'isabel-pantoja_94671438_230828172518_1200x1789.jpg',
+  'Ivanka Trump':        'ivankatrump_new-2.jpg',
+  'J Balvin':            'J-BALVIN.jpg',
+  'Jack Nicholson':      'jack-nicholson.jpg',
+  'Rihanna':             'rihanna.jpg',
+  'Ricky Martin':        'ricky_martin.jpg',
+  'Rita Ora':            'rita_ora.jpg',
+  'Robin Wright':        'robin_wright.jpg',
+  'Ronan Keating':       'ronan-keating.jpg',
+  'Rosario Dawson':      'rosario_dawson.jpg',
+  'Russell Crowe':       'russell_crowe.jpg',
+  'Ryan Reynolds':       'ryan_reynolds.jpg',
+  'Sabrina Carpenter':   'sabrina-carpenter.jpg',
+  'Salma Hayek':         'salma_hayek.jpg',
+  'Sandra Bullock':      'Sandra_Bullock.jpg',
+  'Sarah Michelle Gellar': 'sarah-michelle-gellar.jpg',
+  'Scarlett Johansson':  'scarlett_johansson.jpg',
+  'Selena Gomez':        'Selena-Gomez.jpg',
+  'Serena Williams':     'Serena_Williams.jpg',
+  'Shakira':             'Shakira.jpg',
+  'Sharon Stone':        'sharon_stone.jpg',
+  'Sofia Vergara':       'Sofia_vergara.jpg',
+  'Sophia Loren':        'sophia_loren.jpg',
+  'Sophie Marceau':      'sophie-marceau.jpg',
+  'Sting':               'sting.jpg',
+  'Suga':                'suga.jpg',
+  'Sydney Sweeney':      'Sydney_Sweeney.jpg',
+  'Sylvester Stallone':  'Sylvester_Stallone_Cannes.jpg',
+  'Tamara Falcó':        'Tamara_Falcó.jpg',
+  'Taylor Swift':        'Taylor_Swift.jpg',
+  'Tilda Swinton':       'Tilda_Swinton.jpg',
+  'Tina Turner':         'Tina-Turner.jpg',
+  'Tom Cruise':          'tom_cruise.jpg',
+  'Tom Hanks':           'tom_hanks.jpg',
+  'Tom Hiddleston':      'Tom_Hiddleston.jpg',
+  'Tom Holland':         'Tom_Holland.jpg',
+  'Uma Thurman':         'uma_thurman.jpg',
+  'Usher':               'usher.jpg',
+  'Vanessa Paradis':     'vanessa_paradis.jpg',
+  'Victoria Beckham':    'VictoriaBeckham.jpg',
+  'Will Smith':          'will_smith.jpg',
+  'Winona Ryder':        'Winona_Ryder.jpg',
+  'Winter':              'winter.jpg',
+  'Wonyoung':            'wonyoung.jpg',
+  'Yeonjun':             'yeonjun.jpg',
+  'Yeji':                'yeji.jpg',
+  'Yujin':               'yujin.jpg',
+  'Yunjin':              'yunjin.jpg',
+  'Zac Efron':           'zac_efron.jpg',
+  'Zachary Quinto':      'zachary_quinto.jpg',
+  'Zayn Malik':          'zayn_malik.jpg',
+  'Zoe Saldaña':         'Zoe_Saldaña.jpg',
+  'Zoë Kravitz':         'Zoë_Kravitz.jpg',
+};
+
+/* ── Paletas de color por marca (fallback sin foto) ── */
+const BP = {
+  'Chanel':{'c1':'#0D0D0D','c2':'#1C1C1A','ac':'#C8A050'},'Dior':{'c1':'#060318','c2':'#0E082C','ac':'#9070C4'},
+  'YSL':{'c1':'#0D0D00','c2':'#1A1A00','ac':'#D4B800'},'Yves Saint Laurent':{'c1':'#0D0D00','c2':'#1A1A00','ac':'#D4B800'},
+  'Gucci':{'c1':'#0D0500','c2':'#1C0A00','ac':'#C84820'},'Tom Ford':{'c1':'#090707','c2':'#141010','ac':'#B87848'},
+  'Versace':{'c1':'#120500','c2':'#200900','ac':'#D49010'},'Prada':{'c1':'#070710','c2':'#0F0F1C','ac':'#A0A0B4'},
+  'Givenchy':{'c1':'#0F0505','c2':'#1A0808','ac':'#C04040'},'Hermès':{'c1':'#130800','c2':'#201400','ac':'#E06818'},
+  'Hermes':{'c1':'#130800','c2':'#201400','ac':'#E06818'},'Burberry':{'c1':'#060B12','c2':'#0A1820','ac':'#8090A0'},
+  'Giorgio Armani':{'c1':'#080808','c2':'#141414','ac':'#908070'},'Armani':{'c1':'#080808','c2':'#141414','ac':'#908070'},
+  'Lancôme':{'c1':'#100006','c2':'#1C000C','ac':'#D06090'},'Lancome':{'c1':'#100006','c2':'#1C000C','ac':'#D06090'},
+  'Viktor & Rolf':{'c1':'#04041A','c2':'#08082C','ac':'#6870C0'},'Calvin Klein':{'c1':'#0A0A0A','c2':'#141414','ac':'#B8B8B8'},
+  'Hugo Boss':{'c1':'#060606','c2':'#101010','ac':'#808080'},'Dolce & Gabbana':{'c1':'#100A00','c2':'#1C1400','ac':'#C8A040'},
+  'Valentino':{'c1':'#100004','c2':'#1C0008','ac':'#C82840'},'Bvlgari':{'c1':'#040610','c2':'#080C1A','ac':'#5090C4'},
+  'Creed':{'c1':'#05090A','c2':'#0A1210','ac':'#60A060'},'Maison Margiela':{'c1':'#0C0C0C','c2':'#181818','ac':'#D8D8CC'},
+  'Jo Malone':{'c1':'#070707','c2':'#111111','ac':'#C0B89C'},'Jo Malone London':{'c1':'#070707','c2':'#111111','ac':'#C0B89C'},
+  'Guerlain':{'c1':'#040510','c2':'#080A1C','ac':'#5878C0'},'Paco Rabanne':{'c1':'#070B10','c2':'#10181C','ac':'#7890A0'},
+  'Issey Miyake':{'c1':'#041010','c2':'#081A1A','ac':'#38A0A0'},'Carolina Herrera':{'c1':'#0E0008','c2':'#1C0010','ac':'#C84878'},
+  'Chloé':{'c1':'#100A04','c2':'#1C1408','ac':'#D09848'},'Elie Saab':{'c1':'#0E0A06','c2':'#1C1408','ac':'#D0A860'},
+};
+
+function getBP(marca) {
+  if (!marca) return {c1:'#0A0806',c2:'#161210',ac:'#C49928'};
+  if (BP[marca]) return BP[marca];
+  let h = 0;
+  for (let i = 0; i < marca.length; i++) h = (Math.imul(31,h) + marca.charCodeAt(i)) | 0;
+  const hue = Math.abs(h) % 360, sat = 30 + Math.abs(h>>8) % 25;
+  return {c1:`hsl(${hue},${sat}%,5%)`,c2:`hsl(${hue},${sat}%,9%)`,ac:`hsl(${hue},${Math.min(sat+25,75)}%,52%)`};
+}
+
+/* ── SVG frasco (fallback sin foto) ── */
+const BOTTLE = `<svg class="ccard-bottle" viewBox="0 0 80 155" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="28" y="1" width="24" height="12" rx="2" fill="rgba(255,255,255,.28)" stroke="rgba(255,255,255,.12)" stroke-width=".5"/>
+  <rect x="33" y="12" width="14" height="16" fill="rgba(255,255,255,.2)" stroke="rgba(255,255,255,.1)" stroke-width=".5"/>
+  <path d="M10 46 Q10 28 33 28 L47 28 Q70 28 70 46" fill="rgba(255,255,255,.15)" stroke="rgba(255,255,255,.08)" stroke-width=".5"/>
+  <rect x="10" y="46" width="60" height="88" rx="3" fill="rgba(255,255,255,.11)" stroke="rgba(255,255,255,.08)" stroke-width=".5"/>
+  <rect x="17" y="66" width="46" height="36" rx="1" fill="rgba(255,255,255,.07)" stroke="rgba(255,255,255,.1)" stroke-width=".5"/>
+  <rect x="13" y="48" width="9" height="52" rx="3" fill="rgba(255,255,255,.07)"/>
+  <line x1="19" y1="69" x2="61" y2="69" stroke="rgba(255,255,255,.1)" stroke-width=".5"/>
+  <line x1="19" y1="99" x2="61" y2="99" stroke="rgba(255,255,255,.1)" stroke-width=".5"/>
+  <ellipse cx="40" cy="134" rx="28" ry="4" fill="rgba(0,0,0,.25)"/>
+</svg>`;
+
+function ini(n) { return n.split(" ").slice(0,2).map(w=>w[0]).join("").toUpperCase(); }
+
+function photoSrc(nombre) {
+  const f = PHOTO_MAP[nombre];
+  if (!f) return null;
+  return 'Carpetas%20famosos/' + encodeURIComponent(f);
+}
+
+function cardHTML(c) {
+  const pf  = c.perfumes[0] || null;
+  const pal = getBP(pf ? pf.marca : null);
+  const src = photoSrc(c.nombre);
+  const noPhoto = !src ? ' no-photo' : '';
+
+  const perfName  = pf ? pf.perfume : 'Sin datos';
+  const perfBrand = pf ? pf.marca   : '';
+
+  return `<div class="ccard${noPhoto}">
+    ${src ? `<img class="ccard-photo" src="${src}" alt="${c.nombre}" loading="lazy" onerror="this.closest('.ccard').classList.add('no-photo');this.remove()">` : ''}
+    <div class="ccard-fallback" style="background:linear-gradient(160deg,${pal.c1} 0%,${pal.c2} 60%,${pal.ac}22 100%)"></div>
+    <div class="ccard-shade"></div>
+    ${noPhoto ? BOTTLE : ''}
+    <div class="ccard-info">
+      <div class="ccard-prof">${c.profesion}</div>
+      <div class="ccard-name">${c.nombre}</div>
+    </div>
+    <div class="ccard-btn">
+      <div class="ccard-btn-inner">
+        <div class="ccard-btn-perf">${perfName}</div>
+        <div class="ccard-btn-brand">${perfBrand}</div>
+      </div>
+      <span class="ccard-btn-arrow">&#8250;</span>
+    </div>
+  </div>`;
+}
+
+/* ── Efecto 3D tilt (card-7) ── */
+function addTilt() {
+  document.querySelectorAll('.ccard').forEach(function(card) {
+    if (card._tilt) return;
+    card._tilt = true;
+    card.addEventListener('mousemove', function(e) {
+      const r = card.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width  - 0.5;
+      const y = (e.clientY - r.top)  / r.height - 0.5;
+      card.style.transform = 'perspective(900px) rotateX('+(-y*8)+'deg) rotateY('+(x*8)+'deg) scale(1.04)';
+      card.style.transition = 'transform 0.1s ease-out, box-shadow .4s ease, border-color .4s ease';
+    });
+    card.addEventListener('mouseleave', function() {
+      card.style.transform = 'perspective(900px) rotateX(0deg) rotateY(0deg) scale(1)';
+      card.style.transition = 'transform 0.4s ease-in-out, box-shadow .4s ease, border-color .4s ease';
+    });
+  });
+}
+
+const PROFS = {
+  cantante:   p => p==="Cantante" || p==="M\u00fasico" || p==="Compositor" || p==="Rapero" || p==="Rapera",
+  actriz:     p => p==="Actriz" || p==="Actriz de teatro" || p==="Atriz",
+  actor:      p => p==="Actor",
+  deportista: p => ["Deportista","Futbolista","Tenista","Piloto","Jugador de baloncesto",
+                    "Golfista","Boxeador","Beisbolista","Baloncestista","Deportista Ol\u00edmpica",
+                    "Jugador de f\u00fatbol americano"].includes(p),
+  modelo:     p => p==="Modelo" || p==="Supermodelo",
+  politico:   p => p==="Pol\u00edtico" || p==="Politico" || p==="Presidente" || p==="Dictador" || p==="Militar",
+  disenador:  p => p.startsWith("Dise\u00f1") || p==="Estilista",
+  director:   p => p==="Director de cine" || p==="Director de Cine" || p==="Director" || p==="Directora",
+};
+
+function applyF() {
+  fil = CELEBRITIES.filter(c => {
+    const matchF = cf==="all" || (PROFS[cf] && PROFS[cf](c.profesion));
+    if (!matchF) return false;
+    if (!cs) return true;
+    const q = cs.toLowerCase();
+    return c.nombre.toLowerCase().includes(q) ||
+      c.perfumes.some(p => p.perfume.toLowerCase().includes(q) || p.marca.toLowerCase().includes(q));
+  });
+}
+
+function renderG() { applyF(); cp=1; renderP(); renderPg(); document.getElementById("cn").textContent = fil.length; }
+
+function renderP() {
+  const sl = fil.slice((cp-1)*PS, cp*PS);
+  document.getElementById("cg").innerHTML = sl.map(cardHTML).join("");
+  addTilt();
+}
+
+function renderPg() {
+  const tot = Math.ceil(fil.length / PS);
+  const b = document.getElementById("pg");
+  if (tot <= 1) { b.innerHTML = ""; return; }
+  let h = "";
+  if (cp > 1) h += `<button class="pgbtn" onclick="gp(${cp-1})">&#8249;</button>`;
+  const s = Math.max(1,cp-2), e = Math.min(tot,cp+2);
+  if (s>1){h+=`<button class="pgbtn" onclick="gp(1)">1</button>`;if(s>2)h+=`<span style="padding:0 .5rem;color:var(--cream3)">&#8230;</span>`;}
+  for(let i=s;i<=e;i++)h+=`<button class="pgbtn${i===cp?" active":""}" onclick="gp(${i})">${i}</button>`;
+  if(e<tot){if(e<tot-1)h+=`<span style="padding:0 .5rem;color:var(--cream3)">&#8230;</span>`;h+=`<button class="pgbtn" onclick="gp(${tot})">${tot}</button>`;}
+  if(cp<tot)h+=`<button class="pgbtn" onclick="gp(${cp+1})">&#8250;</button>`;
+  b.innerHTML = h;
+}
+
+function gp(p) { cp=p; renderP(); renderPg(); document.getElementById("catalogo").scrollIntoView({behavior:"smooth"}); }
+function onSrch() { cs = document.getElementById("si").value; renderG(); }
+
+document.getElementById("fbar").querySelectorAll(".fbtn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".fbtn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    cf = btn.dataset.f;
+    renderG();
+  });
+});
+renderG();
+  </script>
+
+</body>
+</html>
