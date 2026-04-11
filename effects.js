@@ -283,10 +283,12 @@
   var phase    = 'converging';
   var phaseT   = 0;
   var rafId;
-  var firstRun   = true;
-  var solidAlpha = 0;          // 0 = partículas, 1 = texto sólido
-  var cachedFont = '';
-  var cachedLS   = 0;
+  var firstRun    = true;
+  var solidAlpha  = 0;   // 0 = partículas, 1 = texto sólido
+  var cachedFont  = '';
+  var cachedLS    = 0;
+  var cachedStartX = 0;  // x inicial del primer carácter (mismo que offscreen)
+  var cachedWidths = []; // ancho de cada carácter (mismo que offscreen)
 
   /* ── Muestrear píxeles del texto para obtener posiciones objetivo ── */
   function sample() {
@@ -319,6 +321,9 @@
     var widths = chars.map(function (c) { return oc.measureText(c).width; });
     var total  = widths.reduce(function (a, b) { return a + b; }, 0) + ls * (chars.length - 1);
     var cx     = (oW - total) / 2;
+    /* Cachear posición y anchos para que drawSolid use exactamente los mismos */
+    cachedStartX = cx;
+    cachedWidths = widths.slice();
     chars.forEach(function (c, i) {
       oc.fillText(c, cx, oH / 2);    // centrado en el canvas con PAD incluido
       cx += widths[i] + ls;
@@ -414,19 +419,18 @@
     if (glow) ctx.shadowBlur = 0;
   }
 
-  /* ── Renderizar en modo "holding": gradiente metálico + shimmer ── */
-  function drawGolden(now) {
-    /* shimmer: desplazamiento que avanza en bucle cada ~5 s */
-    var shift = ((now * 0.0002) % 1) * 2.5;  /* rango 0..2.5 (background-size 250%) */
+  /* ── Renderizar partículas con gradiente metálico (outerAlpha para crossfade) ── */
+  function drawGolden(now, outerAlpha) {
+    if (outerAlpha === undefined) outerAlpha = 1;
+    var shift = ((now * 0.0002) % 1) * 2.5;
     ctx.shadowBlur  = 10;
     ctx.shadowColor = 'rgba(212,185,70,0.55)';
     var i, p, pos;
     for (i = 0; i < pts.length; i++) {
       p = pts[i];
       if (p.a < 0.005) continue;
-      /* posición normalizada (0..1) dentro del ancho total + offset shimmer */
       pos = ((p.tx / cW) + shift) % 1;
-      ctx.globalAlpha = p.a;
+      ctx.globalAlpha = p.a * outerAlpha;
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
       ctx.fillStyle = sampleGrad(pos);
@@ -436,14 +440,14 @@
     ctx.shadowBlur  = 0;
   }
 
-  /* ── Texto sólido con gradiente metálico + shimmer (fase holding final) ── */
-  function drawSolid(now) {
-    if (!cachedFont) return;
+  /* ── Texto sólido con gradiente metálico + shimmer ── */
+  function drawSolid(now, alpha) {
+    if (!cachedFont || !cachedWidths.length) return;
+    if (alpha === undefined) alpha = 1;
 
-    /* Shimmer: mismo comportamiento que logoShimmer del CSS (ciclo ~5 s) */
-    var shift = (now * 0.0002) % 1;   // 0 → 1 en ~5 s
-    var gx0   = -shift * cW * 1.5;    // offset: 0 → -1.5·cW
-    var gx1   = gx0 + cW * 2.5;       // ancho 250% del elemento
+    var shift = (now * 0.0002) % 1;
+    var gx0   = -shift * cW * 1.5;
+    var gx1   = gx0 + cW * 2.5;
 
     var grad = ctx.createLinearGradient(gx0, 0, gx1, 0);
     grad.addColorStop(0.00, '#4a2e05');
@@ -459,30 +463,21 @@
     grad.addColorStop(1.00, '#9a6e18');
 
     ctx.save();
+    ctx.globalAlpha  = alpha;
     ctx.font         = cachedFont;
     ctx.textBaseline = 'middle';
-    ctx.textAlign    = 'center';
+    ctx.textAlign    = 'left';
     ctx.fillStyle    = grad;
     ctx.shadowBlur   = 18;
     ctx.shadowColor  = 'rgba(220,190,70,0.65)';
 
-    /* letter-spacing: usar la propiedad nativa si el navegador la soporta,
-       si no, centrar manualmente letra a letra */
-    if ('letterSpacing' in ctx) {
-      ctx.letterSpacing = cachedLS + 'px';
-      ctx.fillText('PERFUMITY', cW / 2, cH / 2);
-    } else {
-      /* fallback: medir y centrar a mano */
-      ctx.textAlign = 'left';
-      var chars  = 'PERFUMITY'.split('');
-      var ws     = chars.map(function(c){ return ctx.measureText(c).width; });
-      var total  = ws.reduce(function(a,b){ return a+b; }, 0) + cachedLS * (chars.length - 1);
-      var cx     = (cW - total) / 2;
-      chars.forEach(function(c, i){
-        ctx.fillText(c, cx, cH / 2);
-        cx += ws[i] + cachedLS;
-      });
-    }
+    /* Usar las MISMAS posiciones cacheadas de sample() → sin salto de posición */
+    var chars = 'PERFUMITY'.split('');
+    var cx    = cachedStartX;
+    chars.forEach(function(c, i) {
+      ctx.fillText(c, cx, cH / 2);
+      cx += cachedWidths[i] + cachedLS;
+    });
 
     ctx.restore();
   }
@@ -528,12 +523,26 @@
       draw(false);
       if (elapsed > 2100) { phase = 'holding'; phaseT = now; }
 
-    /* ── HOLDING: texto sólido con gradiente metálico ── */
+    /* ── HOLDING: crossfade partículas → texto sólido (~500 ms) ── */
     } else if (phase === 'holding') {
-      drawSolid(now);
+      /* solidAlpha: 0→1 en ~500ms (≈30 frames a 60fps) */
+      solidAlpha = Math.min(solidAlpha + 0.033, 1);
+
+      /* Mantener partículas en posición con micro-float durante el blend */
+      if (solidAlpha < 1) {
+        for (i = 0; i < pts.length; i++) {
+          p = pts[i];
+          p.fa += p.fs * 0.22;
+          p.x   = p.tx + Math.cos(p.fa) * p.fr * 0.04;
+          p.y   = p.ty + Math.sin(p.fa) * p.fr * 0.03;
+          p.a   = 1;
+        }
+        drawGolden(now, 1 - solidAlpha);  /* partículas se desvanecen */
+      }
+      drawSolid(now, solidAlpha);          /* texto sólido aparece encima */
 
       if (elapsed > 3600) {
-        /* Colocar partículas en posiciones exactas antes de dispersar */
+        solidAlpha = 0;
         for (i = 0; i < pts.length; i++) {
           p = pts[i];
           p.x = p.tx; p.y = p.ty; p.a = 1;
