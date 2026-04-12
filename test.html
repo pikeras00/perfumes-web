@@ -787,7 +787,7 @@ function showResult(){
     for (const p of c.perfumes) {
       const key = p.perfume + '\x00' + p.marca;
       if (!perfMap[key]) perfMap[key] = { perfume: p.perfume, marca: p.marca, celebs: [] };
-      if (perfMap[key].celebs.length < 3) perfMap[key].celebs.push(c);
+      perfMap[key].celebs.push(c);
     }
   }
 
