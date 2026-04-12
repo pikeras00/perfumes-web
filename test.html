@@ -15,122 +15,121 @@
       stroke-width:1.35;stroke-linecap:round;stroke-linejoin:round;
       transition:stroke .2s;}
 
-    /* ── Resultado: perfume principal ── */
-    .rperfume-main{
-      display:flex;flex-direction:column;align-items:center;gap:.4rem;
-      margin:.9rem 0 .5rem;
-    }
-    .rperfume-main .rpname{
-      font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:600;
-      color:var(--gold);letter-spacing:.03em;text-align:center;line-height:1.1;
-    }
-    .rperfume-main .rpbrand{
-      font-size:.68rem;letter-spacing:.28em;text-transform:uppercase;
-      color:var(--cream3);
-    }
-    .rperfume-main .rpdot{color:rgba(201,160,61,.4);margin:0 .5rem;}
-
-    /* ── Grid de celebrity cards ── */
+    /* ── Grid de cards de perfume ── */
     .rcelebs{
-      display:grid;grid-template-columns:repeat(3,1fr);gap:1.6rem;
+      display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem;
       margin:1.6rem 0 2rem;width:100%;
     }
-    @media(max-width:820px){.rcelebs{grid-template-columns:1fr;max-width:380px;margin-left:auto;margin-right:auto;}}
+    @media(max-width:900px){.rcelebs{grid-template-columns:1fr;max-width:420px;margin-left:auto;margin-right:auto;}}
 
-    /* ── Card perfil celebrity ── */
-    .rcceleb{
+    /* ── Card perfume ── */
+    .rpcard{
       background:rgba(6,18,11,.7);
       border:1px solid rgba(201,160,61,.16);
-      border-radius:20px;overflow:hidden;
-      display:flex;flex-direction:column;
-      transition:border-color .3s,transform .35s,box-shadow .35s;
+      border-radius:20px;
+      padding:1.6rem 1rem 1.4rem;
+      display:flex;flex-direction:column;align-items:center;
+      text-align:center;
       box-shadow:0 8px 40px rgba(0,0,0,.5);
+      transition:border-color .3s,transform .35s,box-shadow .35s;
     }
-    .rcceleb:hover{
-      border-color:rgba(201,160,61,.45);
-      transform:translateY(-7px);
-      box-shadow:0 18px 50px rgba(0,0,0,.55),0 0 0 1px rgba(201,160,61,.12);
+    .rpcard:hover{
+      border-color:rgba(201,160,61,.38);
+      transform:translateY(-5px);
+      box-shadow:0 18px 50px rgba(0,0,0,.55);
     }
-
-    /* Zona foto — más alta */
-    .rcceleb-imgwrap{
-      position:relative;width:100%;height:320px;
-      background:rgba(201,160,61,.04);overflow:hidden;flex-shrink:0;
-    }
-    .rcceleb-photo{
-      width:100%;height:100%;object-fit:cover;object-position:top center;
-      display:none;transition:transform .6s ease;
-    }
-    .rcceleb:hover .rcceleb-photo{transform:scale(1.04);}
-    .rcceleb-placeholder{
-      width:100%;height:100%;display:flex;align-items:center;justify-content:center;
-      font-size:2.4rem;color:rgba(201,160,61,.15);letter-spacing:.15em;
-      background:linear-gradient(135deg,rgba(201,160,61,.04) 0%,transparent 60%);
-    }
-    /* gradient suave al pie de la foto */
-    .rcceleb-imgwrap::after{
-      content:'';position:absolute;inset:0;
-      background:linear-gradient(to bottom,transparent 40%,rgba(6,16,10,.97) 100%);
-      pointer-events:none;
-    }
-    /* badge % */
-    .rcceleb-pct{
-      position:absolute;top:13px;right:13px;z-index:2;
+    .rpcard-rank{
       font-family:'Montserrat',sans-serif;
-      font-size:.6rem;letter-spacing:.12em;font-weight:600;
-      color:rgba(201,160,61,.95);
-      background:rgba(6,16,10,.8);
-      border:1px solid rgba(201,160,61,.28);
-      padding:.25rem .6rem;border-radius:99px;
-      backdrop-filter:blur(6px);
+      font-size:.48rem;font-weight:700;letter-spacing:.28em;text-transform:uppercase;
+      color:rgba(201,160,61,.55);margin-bottom:.65rem;
     }
-    /* rank sobre la foto */
-    .rcceleb-rank{
-      position:absolute;bottom:62px;left:0;right:0;z-index:2;
-      text-align:center;
-      font-size:.5rem;letter-spacing:.3em;text-transform:uppercase;
-      color:rgba(201,160,61,.5);
+    .rpcard-name{
+      font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:600;
+      color:var(--gold);line-height:1.1;margin-bottom:.3rem;
     }
-    /* nombre superpuesto sobre el gradiente */
-    .rcceleb-overlay-name{
-      position:absolute;bottom:12px;left:0;right:0;z-index:2;
-      text-align:center;
-      font-family:'Cormorant Garamond',serif;
-      font-size:1.7rem;font-weight:600;
-      color:rgba(248,240,224,.92);
-      letter-spacing:.03em;line-height:1.15;
-      padding:0 1rem;
-      text-shadow:0 2px 12px rgba(0,0,0,.7);
+    .rpcard-brand{
+      font-size:.54rem;letter-spacing:.22em;text-transform:uppercase;
+      color:var(--cream3);margin-bottom:1.2rem;
     }
+    .rpcard-brand .rpdot{color:rgba(201,160,61,.35);margin:0 .45rem;}
 
-    /* Body info */
-    .rcceleb-body{
-      padding:1rem 1.4rem 1.6rem;
-      display:flex;flex-direction:column;gap:.28rem;
+    /* ── Carrusel de celebrities ── */
+    .rpcarousel{
+      position:relative;width:100%;height:295px;
+      display:flex;align-items:center;justify-content:center;
+      perspective:700px;overflow:hidden;
     }
-    .rcceleb-prof{
-      font-size:.56rem;letter-spacing:.22em;text-transform:uppercase;
-      color:var(--cream3);margin-bottom:.3rem;text-align:center;
+    .rpcar-track{
+      position:relative;width:100%;height:100%;
     }
-    .rcceleb-sep{
-      height:1px;background:rgba(201,160,61,.11);margin:.25rem 0 .55rem;
+    .rpcar-slide{
+      position:absolute;top:0;
+      left:50%;width:130px;margin-left:-65px;
+      height:100%;
+      display:flex;flex-direction:column;align-items:center;
+      transition:transform .5s cubic-bezier(.25,.46,.45,.94),
+                 opacity .5s ease, filter .5s ease;
+      will-change:transform,opacity;
     }
-    .rcceleb-flbl{
-      font-size:.49rem;letter-spacing:.24em;text-transform:uppercase;
-      color:rgba(201,160,61,.48);margin-bottom:.08rem;
+    .rpcar-imgwrap{
+      position:relative;width:130px;height:200px;
+      border-radius:12px;overflow:hidden;
+      background:rgba(201,160,61,.04);
+      border:1px solid rgba(201,160,61,.1);
+      flex-shrink:0;
     }
-    .rcceleb-fname{
-      font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:600;
-      color:var(--gold);line-height:1.2;
+    .rpcar-center .rpcar-imgwrap{
+      border-color:rgba(201,160,61,.28);
+      box-shadow:0 8px 28px rgba(0,0,0,.55);
     }
-    .rcceleb-fmarca{
-      font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;
-      color:var(--cream3);margin-top:.08rem;display:block;
+    /* gradient al pie de la foto */
+    .rpcar-imgwrap::after{
+      content:'';position:absolute;inset:0;
+      background:linear-gradient(to bottom,transparent 45%,rgba(4,12,7,.92) 100%);
+      pointer-events:none;z-index:1;
     }
-    .rcceleb-others{
-      font-size:.54rem;color:var(--cream3);opacity:.6;
-      margin-top:.45rem;line-height:1.6;
+    .rpcar-img{
+      width:100%;height:100%;
+      object-fit:cover;object-position:top center;
+      display:none;
     }
+    .rpcar-placeholder{
+      width:100%;height:100%;
+      display:flex;align-items:center;justify-content:center;
+      font-size:1.4rem;color:rgba(201,160,61,.12);
+      background:linear-gradient(135deg,rgba(201,160,61,.03) 0%,transparent 60%);
+    }
+    .rpcar-celeb{
+      font-family:'Cormorant Garamond',serif;
+      font-size:.92rem;font-weight:600;
+      color:rgba(220,210,195,.9);
+      margin-top:.55rem;line-height:1.2;
+      transition:opacity .4s;
+    }
+    .rpcar-prof{
+      font-size:.47rem;letter-spacing:.15em;text-transform:uppercase;
+      color:rgba(201,160,61,.45);margin-top:.15rem;
+      transition:opacity .4s;
+    }
+    .rpcar-side .rpcar-celeb,
+    .rpcar-side .rpcar-prof{ opacity:0; }
+    /* botones nav */
+    .rpcar-btn{
+      position:absolute;top:88px;z-index:20;
+      background:rgba(5,14,9,.88);
+      border:1px solid rgba(201,160,61,.22);
+      border-radius:50%;width:26px;height:26px;
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer;color:rgba(201,160,61,.75);
+      font-size:1rem;line-height:1;
+      transition:background .25s,border-color .25s,color .25s;
+    }
+    .rpcar-btn:hover{
+      background:rgba(201,160,61,.15);
+      border-color:rgba(201,160,61,.55);color:var(--gold);
+    }
+    .rpcar-prev{left:0;}
+    .rpcar-next{right:0;}
   </style>
 </head>
 <body>
@@ -166,9 +165,8 @@
 
       <div class="rcard" id="rc">
         <span class="rstar">&#9670; &#9670; &#9670;</span>
-        <div class="rintro">Tu firma olfativa</div>
-        <div class="rperfume-main" id="rPerfumeMain"></div>
-        <div class="rintro" style="margin-top:2rem;font-size:.78rem;letter-spacing:.18em">celebrities con tu aroma</div>
+        <div class="rintro">Tus fragancias perfectas</div>
+        <div class="rintro" style="font-size:.66rem;letter-spacing:.15em;opacity:.55;margin-top:.3rem;margin-bottom:0">con las celebrities que las llevan</div>
         <div class="rcelebs" id="rCelebs"></div>
         <button class="btnRetry" onclick="restartTest()">Repetir test &nbsp; &#9670;</button>
       </div>
@@ -634,7 +632,7 @@ function showPhoto(nombre, imgEl, wrapEl){
 
   function reveal(){
     imgEl.style.display = "block";
-    const ph = wrapEl.querySelector(".rcceleb-placeholder");
+    const ph = wrapEl.querySelector('[class*="placeholder"]');
     if(ph) ph.style.display = "none";
   }
 
@@ -704,83 +702,149 @@ async function fetchWikiPhoto(nombre, imgEl, wrapEl){
   } catch(_){}
 }
 
+/* ── Estado de los carruseles ── */
+const _carState  = {};   // idx → { cur, total }
+const _carTimers = {};   // idx → intervalId
+
+function _carUpdate(idx) {
+  const st = _carState[idx];
+  if (!st) return;
+  const slides = document.querySelectorAll('#rptrack_' + idx + ' .rpcar-slide');
+  slides.forEach((slide, ci) => {
+    const total = st.total;
+    let pos = ((ci - st.cur) % total + total) % total;
+    if (pos > Math.floor(total / 2)) pos -= total;
+    // pos: 0=center, ±1=sides, |pos|>1=oculto
+    const isCenter = pos === 0;
+    const isSide   = Math.abs(pos) === 1;
+    slide.className = 'rpcar-slide' + (isCenter ? ' rpcar-center' : isSide ? ' rpcar-side' : '');
+    slide.style.cssText =
+      'transform:translateX(' + (pos * 52) + '%) scale(' + (isCenter ? 1 : isSide ? 0.74 : 0.55) + ')' +
+      ' rotateY(' + (pos * -9) + 'deg);' +
+      'z-index:' + (isCenter ? 10 : isSide ? 5 : 1) + ';' +
+      'opacity:' + (isCenter ? 1 : isSide ? 0.45 : 0) + ';' +
+      'filter:blur(' + (isCenter ? 0 : isSide ? 3 : 6) + 'px);' +
+      'visibility:' + (Math.abs(pos) > 1 ? 'hidden' : 'visible') + ';';
+  });
+}
+
+function carMove(idx, dir) {
+  const st = _carState[idx];
+  if (!st || st.total <= 1) return;
+  clearInterval(_carTimers[idx]);
+  st.cur = (st.cur + dir + st.total) % st.total;
+  _carUpdate(idx);
+  _carTimers[idx] = setInterval(() => carMove(idx, 1), 4200);
+}
+
 
 // ── Mostrar resultados ──
 function showResult(){
-  // Puntuar todas las celebrities usando únicamente PERFUME_DB
+  // 1) Puntuar celebrities
   const scored = CELEBRITIES
     .filter(c => c.perfumes.length > 0)
     .map(c => ({ c, sc: scoreC(c, tAns) }))
     .sort((a,b) => b.sc - a.sc);
 
-  // Top 3 con score > 0
-  const top3raw = scored.filter(x => x.sc > 0).slice(0, 3);
-  while(top3raw.length < 3){
-    const rnd = CELEBRITIES[Math.floor(Math.random()*CELEBRITIES.length)];
-    if(!top3raw.find(x=>x.c===rnd)) top3raw.push({c:rnd, sc:0});
+  // 2) Construir mapa: perfumeKey → { perfume, marca, celebs[] (máx 3, en orden de score) }
+  const perfMap = {};
+  for (const { c } of scored) {
+    for (const p of c.perfumes) {
+      const key = p.perfume + '\x00' + p.marca;
+      if (!perfMap[key]) perfMap[key] = { perfume: p.perfume, marca: p.marca, celebs: [] };
+      if (perfMap[key].celebs.length < 3) perfMap[key].celebs.push(c);
+    }
   }
 
-  // Calcular % de afinidad (referencia = puntuación del 1er lugar ó 45 mínimo)
-  const refScore = Math.max(top3raw[0].sc, 45);
-  const top3 = top3raw.map((x,i) => ({
-    ...x.c,
-    pct: Math.min(99, Math.max(10, Math.round(x.sc / refScore * (i===0 ? 97 : 95))))
-  }));
-
-  // Perfume principal = el que mejor puntúa para el usuario dentro del top-1
-  const mainPerfume = bestPerfumeFor(top3[0], tAns);
+  // 3) Top 3 perfumes distintos: el primero que aparece en el recorrido de celebrities por score
+  const top3 = [];
+  const seen = new Set();
+  for (const { c } of scored) {
+    if (top3.length >= 3) break;
+    const bp = bestPerfumeFor(c, tAns);
+    const key = bp.perfume + '\x00' + bp.marca;
+    if (!seen.has(key)) {
+      seen.add(key);
+      top3.push(perfMap[key] || { perfume: bp.perfume, marca: bp.marca, celebs: [c] });
+    }
+  }
+  // Rellenar con perfumes adicionales si hay menos de 3 resultados con score
+  for (const { c } of scored) {
+    if (top3.length >= 3) break;
+    for (const p of c.perfumes) {
+      if (top3.length >= 3) break;
+      const key = p.perfume + '\x00' + p.marca;
+      if (!seen.has(key)) {
+        seen.add(key);
+        top3.push(perfMap[key] || { perfume: p.perfume, marca: p.marca, celebs: [c] });
+      }
+    }
+  }
 
   document.getElementById("qc").style.display = "none";
   document.getElementById("pl").textContent = "Tu resultado";
   document.getElementById("pf").style.width = "100%";
 
-  // Encabezado: fragancia recomendada
-  document.getElementById("rPerfumeMain").innerHTML =
-    `<span class="rpname">${mainPerfume.perfume}</span>` +
-    `<span class="rpbrand"><span class="rpdot">&#9670;</span>${mainPerfume.marca}<span class="rpdot">&#9670;</span></span>`;
+  // Limpiar timers de carruseles previos
+  Object.values(_carTimers).forEach(t => clearInterval(t));
 
-  // Construir cards
-  const celebsEl = document.getElementById("rCelebs");
-  const rankLabels = ["Afinidad total","Segunda opci\u00f3n","Tercera opci\u00f3n"];
-  celebsEl.innerHTML = "";
+  const container = document.getElementById("rCelebs");
+  container.innerHTML = "";
 
-  top3.forEach((celeb, idx) => {
-    const bp = bestPerfumeFor(celeb, tAns);
-    const others = celeb.perfumes.filter(p=>p!==bp).slice(0,2).map(p=>p.perfume).join(" \u00b7 ");
-    const pId = "rcp_"+idx;
-    const wId = "rcw_"+idx;
+  const rankLabels = ["Primera recomendaci\u00f3n","Segunda opci\u00f3n","Tercera opci\u00f3n"];
 
+  top3.forEach((item, idx) => {
+    const multiSlide = item.celebs.length > 1;
     const card = document.createElement("div");
-    card.className = "rcceleb";
+    card.className = "rpcard";
+
+    // Slides del carrusel
+    const slidesHTML = item.celebs.map((c, ci) => {
+      const esc = c.nombre.replace(/"/g,'&quot;');
+      return `<div class="rpcar-slide" id="rpslide_${idx}_${ci}">` +
+        `<div class="rpcar-imgwrap" id="rpwrap_${idx}_${ci}">` +
+          `<div class="rpcar-placeholder">&#9670;</div>` +
+          `<img class="rpcar-img" id="rpimg_${idx}_${ci}" alt="${esc}">` +
+        `</div>` +
+        `<div class="rpcar-celeb">${c.nombre}</div>` +
+        `<div class="rpcar-prof">${c.profesion}</div>` +
+      `</div>`;
+    }).join('');
+
     card.innerHTML =
-      `<div class="rcceleb-imgwrap" id="${wId}">` +
-        `<div class="rcceleb-placeholder">&#9670; &#9670; &#9670;</div>` +
-        `<img class="rcceleb-photo" id="${pId}" alt="${celeb.nombre}">` +
-        `<div class="rcceleb-rank">${rankLabels[idx]}</div>` +
-        `<div class="rcceleb-pct">${celeb.pct}%</div>` +
-        `<div class="rcceleb-overlay-name">${celeb.nombre}</div>` +
-      `</div>` +
-      `<div class="rcceleb-body">` +
-        `<div class="rcceleb-prof">${celeb.profesion}</div>` +
-        `<div class="rcceleb-sep"></div>` +
-        `<div class="rcceleb-flbl">fragancia recomendada</div>` +
-        `<div class="rcceleb-fname">${bp.perfume}</div>` +
-        `<span class="rcceleb-fmarca">${bp.marca}</span>` +
-        (others ? `<div class="rcceleb-others">tambi\u00e9n: ${others}</div>` : "") +
+      `<div class="rpcard-rank">${rankLabels[idx]}</div>` +
+      `<div class="rpcard-name">${item.perfume}</div>` +
+      `<div class="rpcard-brand"><span class="rpdot">&#9670;</span>${item.marca}<span class="rpdot">&#9670;</span></div>` +
+      `<div class="rpcarousel">` +
+        `<button class="rpcar-btn rpcar-prev" onclick="carMove(${idx},-1)"` +
+          (multiSlide ? '' : ' style="visibility:hidden"') + `>&#8249;</button>` +
+        `<div class="rpcar-track" id="rptrack_${idx}">${slidesHTML}</div>` +
+        `<button class="rpcar-btn rpcar-next" onclick="carMove(${idx},1)"` +
+          (multiSlide ? '' : ' style="visibility:hidden"') + `>&#8250;</button>` +
       `</div>`;
 
-    celebsEl.appendChild(card);
+    container.appendChild(card);
 
-    // Foto: local primero, Wikipedia como fallback
-    showPhoto(celeb.nombre,
-      document.getElementById(pId),
-      document.getElementById(wId));
+    // Inicializar carrusel
+    _carState[idx] = { cur: 0, total: item.celebs.length };
+    _carUpdate(idx);
+    if (multiSlide) {
+      _carTimers[idx] = setInterval(() => carMove(idx, 1), 4200);
+    }
+
+    // Cargar fotos de celebrities
+    item.celebs.forEach((c, ci) => {
+      showPhoto(c.nombre,
+        document.getElementById('rpimg_' + idx + '_' + ci),
+        document.getElementById('rpwrap_' + idx + '_' + ci));
+    });
   });
 
   document.getElementById("rc").classList.add("show");
 }
 
 function restartTest(){
+  Object.values(_carTimers).forEach(t => clearInterval(t));
   tAns = {q1:null,q2:null,q3:null,q4:null,q5:[],q6:[],q7:[],q8:null,q9:null,q10:[],q11:null};
   tStep = 0;
   document.getElementById("pf").style.width = "9%";
