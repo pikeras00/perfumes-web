@@ -338,7 +338,9 @@ const QS = [
     {i:ico('<path d="M4 5l2 4-2 4-2-4 2-4zm6 0 2 4-2 4-2-4 2-4zm6 0 2 4-2 4-2-4 2-4z"/>'),
      l:"70 &ndash; 150 &euro;",d:"Marcas premium y selectivas",     v:"alto"},
     {i:ico('<path d="M3 16h14V8l-3.5 5-3.5-8-3.5 8L3 8v8z"/>'),
-     l:"M&aacute;s de 150 &euro;",d:"Nicho, artesanal y gran lujo", v:"lujo"}
+     l:"M&aacute;s de 150 &euro;",d:"Nicho, artesanal y gran lujo", v:"lujo"},
+    {i:ico('<circle cx="10" cy="10" r="7"/><path d="M10 7v3l2 2"/>'),
+     l:"Me es indiferente",d:"Cualquier rango de precio",           v:"indiferente"}
   ]},
   {id:"q10", txt:"&iquest;Qu&eacute; quieres transmitir con tu fragancia?", multi:true,
    sub:"Elige hasta tres opciones", max:3, opts:[
@@ -485,10 +487,12 @@ function scoreFromDB(d, ans){
   // Q8 Proyección (+3)
   if(d.proyeccion===DB_PROYECCION[ans.q8]) sc+=3;
 
-  // Q9 Precio (+4 exacto, +2 rango adyacente)
-  const pTarget=DB_PRECIO_MAP[ans.q9];
-  const piDB=DB_PRECIO_ORD.indexOf(d.precio), piT=DB_PRECIO_ORD.indexOf(pTarget);
-  if(piDB!==-1&&piT!==-1){ const diff=Math.abs(piDB-piT); if(diff===0) sc+=4; else if(diff===1) sc+=2; }
+  // Q9 Precio (+4 exacto, +2 rango adyacente; omitir si indiferente)
+  if(ans.q9 !== "indiferente"){
+    const pTarget=DB_PRECIO_MAP[ans.q9];
+    const piDB=DB_PRECIO_ORD.indexOf(d.precio), piT=DB_PRECIO_ORD.indexOf(pTarget);
+    if(piDB!==-1&&piT!==-1){ const diff=Math.abs(piDB-piT); if(diff===0) sc+=4; else if(diff===1) sc+=2; }
+  }
 
   // Q10 Vibe / sensación (+3 por vibe coincidente)
   for(const feel of (ans.q10||[])){
