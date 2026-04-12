@@ -580,6 +580,54 @@ function bestPerfumeFor(c, ans){
   return bp;
 }
 
+// ── Slugs y términos de búsqueda alternativos para Wikipedia ──
+const WIKI_SLUG = {
+  "Marily Manson":      "Marilyn_Manson",
+  "Raw Alejandro":      "Rauw_Alejandro",
+  "Matthew McConughey": "Matthew_McConaughey",
+  "Princesa Diana":     "Diana,_Princess_of_Wales",
+  "Wi Hajoon":          "Wi_Ha-joon",
+  "Jin":                "Jin_(entertainer)",
+  "Karina":             "Karina_(rapper)",
+  "Winter":             "Winter_(singer)",
+  "Yunjin":             "Huh_Yun-jin",
+  "Liz":                "Liz_(singer)",
+  "Minnie":             "Minnie_(singer)",
+  "Kino":               "Kang_Hyunggu",
+  "Marcelo":            "Marcelo_(footballer,_born_1988)",
+  "Kim Youngdae":       "Kim_Young-dae",
+};
+const WIKI_SEARCH = {
+  "Marily Manson":         "Marilyn Manson rock musician",
+  "Raw Alejandro":         "Rauw Alejandro reggaeton singer",
+  "Matthew McConughey":    "Matthew McConaughey actor",
+  "Princesa Diana":        "Princess Diana Wales",
+  "Wi Hajoon":             "Wi Ha-joon Korean actor",
+  "Jin":                   "Jin BTS singer Korean",
+  "Karina":                "Karina aespa singer rapper",
+  "Winter":                "Winter aespa singer",
+  "Yunjin":                "Yunjin LE SSERAFIM singer",
+  "Liz":                   "Liz IVE singer",
+  "Minnie":                "Minnie GIDLE singer",
+  "Kino":                  "Kino Pentagon singer",
+  "Marcelo":               "Marcelo footballer Real Madrid",
+  "Drake":                 "Drake rapper singer Canadian",
+  "Dr. Dre":               "Dr Dre rapper music producer",
+  "Kim Kardashian":        "Kim Kardashian celebrity",
+  "Kim Minkyu":            "Kim Min-kyu Korean actor",
+  "Kim Sungcheol":         "Kim Sung-cheol Korean actor",
+  "Kim Youngdae":          "Kim Young-dae Korean actor",
+  "Alice Campello":        "Alice Campello model Italian",
+  "Paula Echeverria":      "Paula Echevarria Spanish actress",
+  "Carlos Baute":          "Carlos Baute singer Spain",
+  "Leiva":                 "Leiva cantante guitarrista español",
+  "Alba Lago":             "Alba Lago actriz española",
+  "Ana Cristina Portillo": "Ana Cristina Portillo España",
+  "Andrea Garte":          "Andrea Garte",
+  "Patricia Conde":        "Patricia Conde presentadora España",
+  "Rosé":                  "Rosé BLACKPINK singer",
+};
+
 // ── Carga de foto: local primero, Wikipedia como fallback ──
 function showPhoto(nombre, imgEl, wrapEl){
   const localFile = typeof PHOTO_MAP !== "undefined" ? PHOTO_MAP[nombre] : null;
@@ -598,7 +646,10 @@ function showPhoto(nombre, imgEl, wrapEl){
       imgEl.src = "";
       fetchWikiPhoto(nombre, imgEl, wrapEl);
     };
-    imgEl.src = "Carpetas%20famosos/" + localFile.split("/").map(encodeURIComponent).join("/");
+    // Si el valor es una URL directa, usarla tal cual; si es un fichero local, anteponer la carpeta
+    imgEl.src = localFile.startsWith('https://')
+      ? localFile
+      : "Carpetas%20famosos/" + localFile.split("/").map(encodeURIComponent).join("/");
   } else {
     fetchWikiPhoto(nombre, imgEl, wrapEl);
   }
@@ -616,9 +667,9 @@ async function fetchWikiPhoto(nombre, imgEl, wrapEl){
     imgEl.src = src;
   }
 
-  // 1) REST v1 summary — maneja redirects automáticamente, muy fiable
+  // 1) REST v1 summary con slug correcto (maneja redirects automáticamente)
   try{
-    const slug = encodeURIComponent(nombre.replace(/ /g,"_"));
+    const slug = encodeURIComponent((WIKI_SLUG[nombre] || nombre.replace(/ /g,"_")));
     const r = await fetch("https://en.wikipedia.org/api/rest_v1/page/summary/" + slug);
     if(r.ok){
       const d = await r.json();
@@ -627,16 +678,28 @@ async function fetchWikiPhoto(nombre, imgEl, wrapEl){
     }
   } catch(_){}
 
-  // 2) Fallback: búsqueda por nombre (gsrsearch) — funciona aunque el título no coincida
+  // 2) gsrsearch con término específico para evitar ambigüedades
   try{
+    const term = WIKI_SEARCH[nombre] || WIKI_SLUG[nombre]?.replace(/_/g,' ') || nombre;
     const r2 = await fetch(
       "https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch="
-      + encodeURIComponent(nombre) + "&gsrlimit=1&prop=pageimages&format=json&pithumbsize=400&origin=*"
+      + encodeURIComponent(term) + "&gsrlimit=1&prop=pageimages&format=json&pithumbsize=400&origin=*"
     );
     const d2 = await r2.json();
     if(d2.query && d2.query.pages){
       const pg = Object.values(d2.query.pages)[0];
       if(pg && pg.thumbnail){ applyImg(pg.thumbnail.source); return; }
+    }
+  } catch(_){}
+
+  // 3) Wikipedia en español como último recurso
+  try{
+    const slug3 = encodeURIComponent((WIKI_SLUG[nombre] || nombre).replace(/ /g,"_"));
+    const r3 = await fetch("https://es.wikipedia.org/api/rest_v1/page/summary/" + slug3);
+    if(r3.ok){
+      const d3 = await r3.json();
+      const src3 = (d3.thumbnail && d3.thumbnail.source) || (d3.originalimage && d3.originalimage.source);
+      if(src3){ applyImg(src3); return; }
     }
   } catch(_){}
 }

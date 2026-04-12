@@ -130,7 +130,7 @@ const PHOTO_MAP = {
   "Dolly Parton": "Dolly_Parton_at_‘Blue_Smoke_World_Tour’_in_Knoxville.jpg",
   "Dongwoon": "dongwoon.jpg",
   "Doyoung": "nct-doyoung-announced-as-brand-ambassador-for-dolce-gabbana-v0-2c87d5k4npya1.jpg",
-  "Dr. Dre": "Dr._Dre.jpg",
+  "Drake": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Drake_June_2015.jpg/400px-Drake_June_2015.jpg",
   "Dua Lipa": "Dua202.jpg",
   "Dwayne Johnson": "Dwayne_Johnson.jpg",
   "Elizabeth Olsen": "Elizabeth_Olsen_-_Los_Angeles_Comic_Con_2025.jpg",
@@ -195,7 +195,10 @@ const PHOTO_MAP = {
   "Rosie Huntington-Whiteley": "rosie_huntington-whiteley.jpg",
   "Rosie Perez": "rosie_perez.jpg",
   "Rossella Jardini": "rossella-jardini.jpg",
-  "Rosé": "rose.jpg",
+  "Marily Manson": "https://en.wikipedia.org/wiki/Special:FilePath/Marilyn_Manson.jpg?width=400",
+  "Matthew McConughey": "https://en.wikipedia.org/wiki/Special:FilePath/Matthew_McConaughey_2011.jpg?width=400",
+  "Princesa Diana": "https://en.wikipedia.org/wiki/Special:FilePath/Diana,_Princess_of_Wales_1997_(2).jpg?width=400",
+  "Raw Alejandro": "https://en.wikipedia.org/wiki/Special:FilePath/Rauw_Alejandro_2022.jpg?width=400",
   "RuPaul": "rupaul.jpg",
   "Russell Crowe": "russell_crowe.jpg",
   "Ryan Reynolds": "ryan_reynolds.jpg",
@@ -327,7 +330,7 @@ const PHOTO_MAP = {
   "Vanessa Minnillo": "Vanessa_Minillojpg.jpg",
   "Vanessa Paradis": "vanessa_paradis.jpg",
   "Vanessa Seward": "vanessa_seward.jpg",
-  "Vanessa Traina": "vanessa_traina.jpg",
+  "Vanessa Traina": "https://en.wikipedia.org/wiki/Special:FilePath/Vanessa_Traina.jpg?width=400",
   "Venus Williams": "Venus_Williams.jpg",
   "Veronica Castro": "veronica_castro.jpg",
   "Victor Cruz": "Victor_Cruz.jpg",
@@ -340,12 +343,12 @@ const PHOTO_MAP = {
   "Whitney Houston": "Whitney_Houston.jpg",
   "Whitney Port": "Whitney_Port.jpg",
   "Whoopi Goldberg": "Whoopi_Goldberg.jpg",
-  "Wi Hajoon": "wi_hajoon.jpg",
+  "Wi Hajoon": "https://en.wikipedia.org/wiki/Special:FilePath/Wi_Ha-joon.jpg?width=400",
   "Will Smith": "will_smith.jpg",
   "Willa Ford": "willa_ford.jpg",
   "Winnie Harlow": "Winnie_Harlow.jpg",
   "Winona Ryder": "Winona_Ryder.jpg",
-  "Winter": "winter.jpg",
+  "Winter": "https://en.wikipedia.org/wiki/Special:FilePath/Winter_(aespa)_at_the_2022_Asia_Artist_Awards.jpg?width=400",
   "Wonho": "WONHO.jpg",
   "Wonwoo": "wonwoo.jpg",
   "Wonyoung": "wonyoung.jpg",
@@ -360,7 +363,7 @@ const PHOTO_MAP = {
   "Yoseop": "yoseop.jpg",
   "Young Miko": "young_miko.jpg",
   "Yujin": "yujin.jpg",
-  "Yunjin": "yunjin.jpg",
+  "Yunjin": "https://en.wikipedia.org/wiki/Special:FilePath/Yunjin_(LE_SSERAFIM)_at_the_2023_Gaon_Chart_Music_Awards.jpg?width=400",
   "Yuta": "yuta.jpg",
   "Zac Efron": "zac_efron.jpg",
   "Zachary Quinto": "zachary_quinto.jpg",
@@ -420,6 +423,7 @@ function ini(n) { return n.split(" ").slice(0,2).map(w=>w[0]).join("").toUpperCa
 function photoSrc(nombre) {
   const f = PHOTO_MAP[nombre];
   if (!f) return null;
+  if (f.startsWith('https://')) return f;
   return 'Carpetas%20famosos/' + encodeURIComponent(f);
 }
 
@@ -427,6 +431,58 @@ function photoSrc(nombre) {
 const _wikiCache = {};      // nombre → url  (null = sin foto)
 const _wikiQueue = [];      // cards pendientes de consultar
 let   _wikiBatchTimer = null;
+
+// Slug de Wikipedia exacto cuando el nombre en data.js no coincide con el título de Wikipedia
+const WIKI_SLUG = {
+  "Marily Manson":      "Marilyn_Manson",
+  "Raw Alejandro":      "Rauw_Alejandro",
+  "Matthew McConughey": "Matthew_McConaughey",
+  "Princesa Diana":     "Diana,_Princess_of_Wales",
+  "Wi Hajoon":          "Wi_Ha-joon",
+  "Jin":                "Jin_(entertainer)",
+  "Karina":             "Karina_(rapper)",
+  "Winter":             "Winter_(singer)",
+  "Yunjin":             "Huh_Yun-jin",
+  "Liz":                "Liz_(singer)",
+  "Minnie":             "Minnie_(singer)",
+  "Kino":               "Kang_Hyunggu",
+  "Marcelo":            "Marcelo_(footballer,_born_1988)",
+  "Kim Youngdae":       "Kim_Young-dae",
+};
+
+// Término de búsqueda (gsrsearch) para casos ambiguos o con typo
+const WIKI_SEARCH = {
+  "Marily Manson":         "Marilyn Manson rock musician",
+  "Raw Alejandro":         "Rauw Alejandro reggaeton singer",
+  "Matthew McConughey":    "Matthew McConaughey actor",
+  "Princesa Diana":        "Princess Diana Wales",
+  "Wi Hajoon":             "Wi Ha-joon Korean actor",
+  "Jin":                   "Jin BTS singer Korean",
+  "Karina":                "Karina aespa singer rapper",
+  "Winter":                "Winter aespa singer",
+  "Yunjin":                "Yunjin LE SSERAFIM singer",
+  "Liz":                   "Liz IVE singer",
+  "Minnie":                "Minnie GIDLE singer",
+  "Kino":                  "Kino Pentagon singer",
+  "Marcelo":               "Marcelo footballer Real Madrid Brazil",
+  "Drake":                 "Drake rapper singer Canadian",
+  "Dr. Dre":               "Dr Dre rapper music producer",
+  "Kim Kardashian":        "Kim Kardashian celebrity",
+  "Kim Minkyu":            "Kim Min-kyu Korean actor",
+  "Kim Sungcheol":         "Kim Sung-cheol Korean actor",
+  "Kim Youngdae":          "Kim Young-dae Korean actor",
+  "Alice Campello":        "Alice Campello model Italian",
+  "Paula Echeverria":      "Paula Echevarria Spanish actress",
+  "Carlos Baute":          "Carlos Baute singer Spain",
+  "Leiva":                 "Leiva cantante guitarrista español",
+  "Alba Lago":             "Alba Lago actriz española",
+  "Ana Cristina Portillo": "Ana Cristina Portillo España",
+  "Andrea Garte":          "Andrea Garte",
+  "Patricia Conde":        "Patricia Conde presentadora España",
+  "Plex":                  "Plex rapper",
+  "Rosé":                  "Rosé BLACKPINK singer",
+  "Vanessa Traina":        "Vanessa Traina style",
+};
 
 function applyWikiSrc(card, src) {
   if (!src) return;
@@ -451,8 +507,11 @@ async function _flushWikiQueue() {
   if (!_wikiQueue.length) return;
   const batch = _wikiQueue.splice(0, 50);
   const names  = batch.map(c => c.dataset.nombre).filter(Boolean);
-  // Codificar cada título individualmente y unir con | literal (no encodeURIComponent del conjunto)
-  const titles = names.map(n => encodeURIComponent(n.replace(/ /g, '_'))).join('|');
+  // Usar WIKI_SLUG para nombres con typo/ambigüedad; codificar individualmente con | literal
+  const titles = names.map(n => {
+    const slug = WIKI_SLUG[n] || n.replace(/ /g, '_');
+    return encodeURIComponent(slug);
+  }).join('|');
   const noImgCards = [];
   try {
     const r = await fetch(
@@ -462,54 +521,70 @@ async function _flushWikiQueue() {
     );
     const d  = await r.json();
     const pages = Object.values(d.query.pages);
-
-    // Construir mapa: título final normalizado → thumbnail
+    // Construir mapa: título normalizado → thumbnail
     const srcMap = {};
     pages.forEach(pg => {
       const key = (pg.title || '').replace(/_/g, ' ').toLowerCase();
       if (pg.thumbnail) srcMap[key] = pg.thumbnail.source;
     });
-    // Manejar redirects: Wikipedia puede devolver la página destino con título diferente
+    // Manejar redirects
     const redirects = (d.query && d.query.redirects) || [];
     const redirectMap = {};
     redirects.forEach(rd => {
       redirectMap[(rd.from || '').replace(/_/g, ' ').toLowerCase()] =
         (rd.to   || '').replace(/_/g, ' ').toLowerCase();
     });
-
     batch.forEach(card => {
       const n = card.dataset.nombre;
-      const nLow = n.toLowerCase();
-      const redirectedKey = redirectMap[nLow] || nLow;
-      const src = srcMap[nLow] || srcMap[redirectedKey] || null;
+      const lookupKey = (WIKI_SLUG[n] || n).replace(/_/g, ' ').toLowerCase();
+      const redirectedKey = redirectMap[lookupKey] || lookupKey;
+      const src = srcMap[lookupKey] || srcMap[redirectedKey] || null;
       _wikiCache[n] = src;
-      if (src) {
-        applyWikiSrc(card, src);
-      } else {
-        noImgCards.push(card); // segunda pasada con búsqueda
-      }
+      if (src) applyWikiSrc(card, src);
+      else noImgCards.push(card);
     });
   } catch(_) {
     batch.forEach(c => noImgCards.push(c));
   }
 
-  // Segunda pasada: buscar por nombre (gsrsearch) para los que no tienen imagen
+  // Segunda pasada: gsrsearch con término específico para los que no tienen imagen
   for (const card of noImgCards) {
     const n = card.dataset.nombre;
-    if (_wikiCache[n]) continue; // ya encontrado por otra vía
+    if (_wikiCache[n]) continue;
+    const searchTerm = WIKI_SEARCH[n] || WIKI_SLUG[n]?.replace(/_/g,' ') || n;
+    let found = false;
+    // 1) Wikipedia inglés con búsqueda
     try {
       const r2 = await fetch(
         'https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch='
-        + encodeURIComponent(n) + '&gsrlimit=1&prop=pageimages&format=json&pithumbsize=400&origin=*'
+        + encodeURIComponent(searchTerm) + '&gsrlimit=1&prop=pageimages&format=json&pithumbsize=400&origin=*'
       );
       const d2 = await r2.json();
       if (d2.query && d2.query.pages) {
         const pg2 = Object.values(d2.query.pages)[0];
-        const src2 = (pg2 && pg2.thumbnail) ? pg2.thumbnail.source : null;
-        _wikiCache[n] = src2;
-        if (src2) applyWikiSrc(card, src2);
+        if (pg2 && pg2.thumbnail) {
+          _wikiCache[n] = pg2.thumbnail.source;
+          applyWikiSrc(card, pg2.thumbnail.source);
+          found = true;
+        }
       }
     } catch(_) {}
+    // 2) Wikipedia español como último recurso
+    if (!found) {
+      try {
+        const slug = encodeURIComponent((WIKI_SLUG[n] || n).replace(/ /g,'_'));
+        const r3 = await fetch(
+          'https://es.wikipedia.org/api/rest_v1/page/summary/' + slug
+        );
+        if (r3.ok) {
+          const d3 = await r3.json();
+          const src3 = (d3.thumbnail && d3.thumbnail.source) ||
+                       (d3.originalimage && d3.originalimage.source);
+          if (src3) { _wikiCache[n] = src3; applyWikiSrc(card, src3); found = true; }
+        }
+      } catch(_) {}
+    }
+    if (!found) _wikiCache[n] = null;
   }
 }
 
