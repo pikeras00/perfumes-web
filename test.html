@@ -15,121 +15,152 @@
       stroke-width:1.35;stroke-linecap:round;stroke-linejoin:round;
       transition:stroke .2s;}
 
-    /* ── Grid de cards de perfume ── */
+    /* ── Lista de cards de perfume (una por fila) ── */
     .rcelebs{
-      display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem;
-      margin:1.6rem 0 2rem;width:100%;
+      display:flex;flex-direction:column;gap:1.8rem;
+      margin:2rem 0 2.5rem;width:100%;
+      max-width:860px;margin-left:auto;margin-right:auto;
     }
-    @media(max-width:900px){.rcelebs{grid-template-columns:1fr;max-width:420px;margin-left:auto;margin-right:auto;}}
 
-    /* ── Card perfume ── */
+    /* ── Card perfume — layout horizontal ── */
     .rpcard{
-      background:rgba(6,18,11,.7);
+      background:rgba(6,18,11,.72);
       border:1px solid rgba(201,160,61,.16);
-      border-radius:20px;
-      padding:1.6rem 1rem 1.4rem;
-      display:flex;flex-direction:column;align-items:center;
-      text-align:center;
-      box-shadow:0 8px 40px rgba(0,0,0,.5);
+      border-radius:22px;
+      display:grid;
+      grid-template-columns:1fr 420px;
+      overflow:hidden;
+      box-shadow:0 10px 50px rgba(0,0,0,.55);
       transition:border-color .3s,transform .35s,box-shadow .35s;
     }
     .rpcard:hover{
       border-color:rgba(201,160,61,.38);
-      transform:translateY(-5px);
-      box-shadow:0 18px 50px rgba(0,0,0,.55);
+      transform:translateY(-4px);
+      box-shadow:0 20px 60px rgba(0,0,0,.6);
+    }
+    /* Lado izquierdo: info del perfume */
+    .rpcard-info{
+      padding:2.5rem 2.2rem 2.5rem 2.8rem;
+      display:flex;flex-direction:column;justify-content:center;
+      border-right:1px solid rgba(201,160,61,.1);
     }
     .rpcard-rank{
       font-family:'Montserrat',sans-serif;
-      font-size:.48rem;font-weight:700;letter-spacing:.28em;text-transform:uppercase;
-      color:rgba(201,160,61,.55);margin-bottom:.65rem;
+      font-size:.48rem;font-weight:700;letter-spacing:.32em;text-transform:uppercase;
+      color:rgba(201,160,61,.5);margin-bottom:1rem;
     }
     .rpcard-name{
-      font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:600;
-      color:var(--gold);line-height:1.1;margin-bottom:.3rem;
+      font-family:'Cormorant Garamond',serif;font-size:2.6rem;font-weight:600;
+      color:var(--gold);line-height:1.05;margin-bottom:.5rem;
     }
     .rpcard-brand{
-      font-size:.54rem;letter-spacing:.22em;text-transform:uppercase;
-      color:var(--cream3);margin-bottom:1.2rem;
+      font-size:.58rem;letter-spacing:.25em;text-transform:uppercase;
+      color:var(--cream3);opacity:.75;
     }
-    .rpcard-brand .rpdot{color:rgba(201,160,61,.35);margin:0 .45rem;}
+    .rpcard-brand .rpdot{color:rgba(201,160,61,.35);margin:0 .5rem;}
+    .rpcard-divider{
+      width:38px;height:1px;
+      background:linear-gradient(90deg,rgba(201,160,61,.5),transparent);
+      margin:1.4rem 0;
+    }
+    .rpcard-lbl{
+      font-size:.5rem;letter-spacing:.22em;text-transform:uppercase;
+      color:rgba(201,160,61,.45);margin-bottom:.4rem;
+    }
+    .rpcard-celebnames{
+      font-family:'Cormorant Garamond',serif;
+      font-size:1rem;color:rgba(220,210,195,.7);line-height:1.7;
+    }
 
-    /* ── Carrusel de celebrities ── */
+    /* Lado derecho: carrusel */
     .rpcarousel{
-      position:relative;width:100%;height:295px;
+      position:relative;height:380px;
       display:flex;align-items:center;justify-content:center;
-      perspective:700px;overflow:hidden;
+      perspective:900px;overflow:hidden;
+      background:rgba(3,10,6,.4);
     }
     .rpcar-track{
       position:relative;width:100%;height:100%;
     }
+    /* Cada slide centrado horizontalmente */
     .rpcar-slide{
       position:absolute;top:0;
-      left:50%;width:130px;margin-left:-65px;
+      left:50%;width:180px;margin-left:-90px;
       height:100%;
-      display:flex;flex-direction:column;align-items:center;
-      transition:transform .5s cubic-bezier(.25,.46,.45,.94),
-                 opacity .5s ease, filter .5s ease;
+      display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+      padding-top:24px;
+      transition:transform .52s cubic-bezier(.25,.46,.45,.94),
+                 opacity .52s ease, filter .52s ease;
       will-change:transform,opacity;
     }
     .rpcar-imgwrap{
-      position:relative;width:130px;height:200px;
-      border-radius:12px;overflow:hidden;
+      position:relative;width:180px;height:280px;
+      border-radius:14px;overflow:hidden;
       background:rgba(201,160,61,.04);
-      border:1px solid rgba(201,160,61,.1);
+      border:1px solid rgba(201,160,61,.12);
       flex-shrink:0;
     }
     .rpcar-center .rpcar-imgwrap{
-      border-color:rgba(201,160,61,.28);
-      box-shadow:0 8px 28px rgba(0,0,0,.55);
+      border-color:rgba(201,160,61,.32);
+      box-shadow:0 12px 40px rgba(0,0,0,.65);
     }
-    /* gradient al pie de la foto */
     .rpcar-imgwrap::after{
       content:'';position:absolute;inset:0;
-      background:linear-gradient(to bottom,transparent 45%,rgba(4,12,7,.92) 100%);
-      pointer-events:none;z-index:1;
+      background:linear-gradient(to bottom,transparent 50%,rgba(4,12,7,.9) 100%);
+      pointer-events:none;
     }
     .rpcar-img{
+      position:absolute;inset:0;
       width:100%;height:100%;
       object-fit:cover;object-position:top center;
       display:none;
     }
     .rpcar-placeholder{
-      width:100%;height:100%;
+      position:absolute;inset:0;
       display:flex;align-items:center;justify-content:center;
-      font-size:1.4rem;color:rgba(201,160,61,.12);
+      font-size:1.6rem;color:rgba(201,160,61,.1);
       background:linear-gradient(135deg,rgba(201,160,61,.03) 0%,transparent 60%);
     }
     .rpcar-celeb{
       font-family:'Cormorant Garamond',serif;
-      font-size:.92rem;font-weight:600;
-      color:rgba(220,210,195,.9);
-      margin-top:.55rem;line-height:1.2;
+      font-size:1rem;font-weight:600;
+      color:rgba(240,230,210,.95);
+      margin-top:.7rem;text-align:center;line-height:1.2;
       transition:opacity .4s;
     }
     .rpcar-prof{
-      font-size:.47rem;letter-spacing:.15em;text-transform:uppercase;
-      color:rgba(201,160,61,.45);margin-top:.15rem;
+      font-size:.46rem;letter-spacing:.14em;text-transform:uppercase;
+      color:rgba(201,160,61,.5);margin-top:.18rem;
       transition:opacity .4s;
     }
     .rpcar-side .rpcar-celeb,
     .rpcar-side .rpcar-prof{ opacity:0; }
     /* botones nav */
     .rpcar-btn{
-      position:absolute;top:88px;z-index:20;
-      background:rgba(5,14,9,.88);
+      position:absolute;top:50%;transform:translateY(-50%);
+      z-index:20;
+      background:rgba(5,14,9,.85);
       border:1px solid rgba(201,160,61,.22);
-      border-radius:50%;width:26px;height:26px;
+      border-radius:50%;width:30px;height:30px;
       display:flex;align-items:center;justify-content:center;
-      cursor:pointer;color:rgba(201,160,61,.75);
-      font-size:1rem;line-height:1;
+      cursor:pointer;color:rgba(201,160,61,.8);
+      font-size:1.15rem;line-height:1;
       transition:background .25s,border-color .25s,color .25s;
     }
     .rpcar-btn:hover{
-      background:rgba(201,160,61,.15);
-      border-color:rgba(201,160,61,.55);color:var(--gold);
+      background:rgba(201,160,61,.18);
+      border-color:rgba(201,160,61,.6);color:var(--gold);
     }
-    .rpcar-prev{left:0;}
-    .rpcar-next{right:0;}
+    .rpcar-prev{left:6px;}
+    .rpcar-next{right:6px;}
+
+    /* Responsive */
+    @media(max-width:750px){
+      .rpcard{grid-template-columns:1fr;border-radius:18px;}
+      .rpcard-info{padding:2rem 1.6rem 1.5rem;border-right:none;border-bottom:1px solid rgba(201,160,61,.1);}
+      .rpcard-name{font-size:2rem;}
+      .rpcarousel{height:330px;}
+    }
   </style>
 </head>
 <body>
@@ -658,7 +689,7 @@ async function fetchWikiPhoto(nombre, imgEl, wrapEl){
     if(!src) return;
     imgEl.onload = () => {
       imgEl.style.display = "block";
-      const ph = wrapEl.querySelector(".rcceleb-placeholder");
+      const ph = wrapEl.querySelector('[class*="placeholder"]');
       if(ph) ph.style.display = "none";
     };
     imgEl.onerror = null;
@@ -811,10 +842,17 @@ function showResult(){
       `</div>`;
     }).join('');
 
+    const celebNamesStr = item.celebs.map(c => c.nombre).join(' · ');
+
     card.innerHTML =
-      `<div class="rpcard-rank">${rankLabels[idx]}</div>` +
-      `<div class="rpcard-name">${item.perfume}</div>` +
-      `<div class="rpcard-brand"><span class="rpdot">&#9670;</span>${item.marca}<span class="rpdot">&#9670;</span></div>` +
+      `<div class="rpcard-info">` +
+        `<div class="rpcard-rank">${rankLabels[idx]}</div>` +
+        `<div class="rpcard-name">${item.perfume}</div>` +
+        `<div class="rpcard-brand"><span class="rpdot">&#9670;</span>${item.marca}<span class="rpdot">&#9670;</span></div>` +
+        `<div class="rpcard-divider"></div>` +
+        `<div class="rpcard-lbl">celebrities que lo usan</div>` +
+        `<div class="rpcard-celebnames">${celebNamesStr}</div>` +
+      `</div>` +
       `<div class="rpcarousel">` +
         `<button class="rpcar-btn rpcar-prev" onclick="carMove(${idx},-1)"` +
           (multiSlide ? '' : ' style="visibility:hidden"') + `>&#8249;</button>` +
