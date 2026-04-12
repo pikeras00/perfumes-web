@@ -781,13 +781,18 @@ function showResult(){
     .map(c => ({ c, sc: scoreC(c, tAns) }))
     .sort((a,b) => b.sc - a.sc);
 
-  // 2) Construir mapa: perfumeKey → { perfume, marca, celebs[] (máx 3, en orden de score) }
+  // Normaliza la clave para evitar duplicados por diferencias de mayúsculas/espacios
+  function pKey(perfume, marca){
+    return perfume.trim().toLowerCase() + '\x00' + marca.trim().toLowerCase();
+  }
+
+  // 2) Construir mapa: perfumeKey → { perfume, marca, celebs[] }
   const perfMap = {};
   for (const { c } of scored) {
     for (const p of c.perfumes) {
-      const key = p.perfume + '\x00' + p.marca;
+      const key = pKey(p.perfume, p.marca);
       if (!perfMap[key]) perfMap[key] = { perfume: p.perfume, marca: p.marca, celebs: [] };
-      perfMap[key].celebs.push(c);
+      if (!perfMap[key].celebs.includes(c)) perfMap[key].celebs.push(c);
     }
   }
 
@@ -797,7 +802,7 @@ function showResult(){
   for (const { c } of scored) {
     if (top3.length >= 3) break;
     const bp = bestPerfumeFor(c, tAns);
-    const key = bp.perfume + '\x00' + bp.marca;
+    const key = pKey(bp.perfume, bp.marca);
     if (!seen.has(key)) {
       seen.add(key);
       top3.push(perfMap[key] || { perfume: bp.perfume, marca: bp.marca, celebs: [c] });
@@ -808,7 +813,7 @@ function showResult(){
     if (top3.length >= 3) break;
     for (const p of c.perfumes) {
       if (top3.length >= 3) break;
-      const key = p.perfume + '\x00' + p.marca;
+      const key = pKey(p.perfume, p.marca);
       if (!seen.has(key)) {
         seen.add(key);
         top3.push(perfMap[key] || { perfume: p.perfume, marca: p.marca, celebs: [c] });
