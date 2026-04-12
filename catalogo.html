@@ -75,6 +75,7 @@
   <!-- Modal emergente de perfume -->
   <div class="pfmodal-overlay" id="pfModal" role="dialog" aria-modal="true">
     <div class="pfmodal-card" id="pfModalCard">
+      <canvas class="pfmodal-canvas" id="pfModalCanvas" aria-hidden="true"></canvas>
       <button class="pfmodal-close" onclick="pfModalClose()" aria-label="Cerrar">&#10005;</button>
       <div class="pfmodal-img-placeholder" id="pfModalImgWrap">
         <span class="pfmodal-img-diamond">&#9670;</span>
@@ -880,10 +881,68 @@ function pfModalOpen(perfume, marca){
     'https://www.amazon.es/s?k=' + encodeURIComponent((entry ? entry.nombre : perfume) + ' ' + (entry ? entry.marca : marca));
 
   document.getElementById('pfModal').classList.add('open');
+  // Iniciar partículas tras el frame de apertura (el card ya tiene dimensiones)
+  requestAnimationFrame(function(){
+    if(window._pfModalParticlesStart) window._pfModalParticlesStart();
+  });
 }
+
+// ── Partículas doradas flotantes dentro del modal ──────────────────
+(function(){
+  var rafModal = null;
+  var mPts     = [];
+  var mCtx, mW, mH;
+
+  function MParticle(){
+    this.x    = Math.random() * mW;
+    this.y    = Math.random() * mH;
+    this.r    = Math.random() * 1.8 + 0.3;
+    this.vx   = (Math.random() - 0.5) * 0.22;
+    this.vy   = -(Math.random() * 0.25 + 0.05);
+    this.life = Math.floor(Math.random() * 400);
+    this.maxLife = Math.floor(Math.random() * 380 + 200);
+    this.gold = Math.random() > 0.3;
+  }
+
+  function initModalParticles(){
+    var canvas = document.getElementById('pfModalCanvas');
+    var card   = document.getElementById('pfModalCard');
+    if(!canvas || !card) return;
+    mW = canvas.width  = card.offsetWidth;
+    mH = canvas.height = card.offsetHeight;
+    mCtx = canvas.getContext('2d');
+    var count = Math.floor((mW * mH) / 2200);
+    mPts = [];
+    for(var i = 0; i < count; i++) mPts.push(new MParticle());
+    loopModal();
+  }
+
+  function loopModal(){
+    rafModal = requestAnimationFrame(loopModal);
+    mCtx.clearRect(0, 0, mW, mH);
+    for(var i = 0; i < mPts.length; i++){
+      var p = mPts[i];
+      p.x += p.vx; p.y += p.vy; p.life++;
+      if(p.life > p.maxLife) Object.assign(p, new MParticle());
+      var a = Math.sin((p.life / p.maxLife) * Math.PI) * (p.gold ? 0.65 : 0.25);
+      mCtx.beginPath();
+      mCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      mCtx.fillStyle = p.gold
+        ? 'rgba(201,160,61,' + a + ')'
+        : 'rgba(244,216,112,' + (a * 0.55) + ')';
+      mCtx.fill();
+    }
+  }
+
+  window._pfModalParticlesStart = initModalParticles;
+  window._pfModalParticlesStop  = function(){
+    if(rafModal){ cancelAnimationFrame(rafModal); rafModal = null; }
+  };
+})();
 
 function pfModalClose(){
   document.getElementById('pfModal').classList.remove('open');
+  if(window._pfModalParticlesStop) window._pfModalParticlesStop();
 }
 
 // Leer ?familia= de la URL para llegar desde el carousel del index
