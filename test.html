@@ -898,7 +898,7 @@ function showResult(){
       `<div class="rpcard-info">` +
         `<div class="rpcard-rank">${rankLabels[idx]}</div>` +
         `<div class="rpcard-name">${item.perfume}</div>` +
-        `<div class="rpcard-brand"><span class="rpdot">&#9670;</span><button class="rpcard-brand-btn" onclick="pfModalOpen(${JSON.stringify(item.perfume)},${JSON.stringify(item.marca)})">${item.marca}</button><span class="rpdot">&#9670;</span></div>` +
+        `<div class="rpcard-brand"><span class="rpdot">&#9670;</span><button class="rpcard-brand-btn pf-modal-trigger" data-perfume="${item.perfume.replace(/"/g,'&quot;')}" data-marca="${item.marca.replace(/"/g,'&quot;')}">${item.marca}</button><span class="rpdot">&#9670;</span></div>` +
         `<div class="rpcard-divider"></div>` +
         `<div class="rpcard-lbl">celebrities que lo usan</div>` +
         `<div class="rpcard-celebnames">${celebNamesStr}</div>` +
@@ -968,6 +968,15 @@ renderQ();
   // Cerrar con Escape
   document.addEventListener('keydown', function(e){
     if(e.key === 'Escape') pfModalClose();
+  });
+
+  // Delegación: captura clics en .pf-modal-trigger
+  document.addEventListener('click', function(e){
+    const btn = e.target.closest('.pf-modal-trigger');
+    if(btn){
+      e.stopPropagation();
+      pfModalOpen(btn.dataset.perfume, btn.dataset.marca);
+    }
   });
 })();
 

@@ -666,7 +666,7 @@ function cardHTML(c) {
       <div class="ccard-prof">${c.profesion}</div>
       <div class="ccard-name">${c.nombre}</div>
     </div>
-    <div class="ccard-btn" onclick="pfModalOpen(${JSON.stringify(perfName)},${JSON.stringify(perfBrand)});event.stopPropagation()">
+    <div class="ccard-btn pf-modal-trigger" data-perfume="${perfName.replace(/"/g,'&quot;')}" data-marca="${perfBrand.replace(/"/g,'&quot;')}">
       <div class="ccard-btn-inner">
         <div class="ccard-btn-perf">${perfName}</div>
         <div class="ccard-btn-brand">${perfBrand}</div>
@@ -783,6 +783,8 @@ document.getElementById("fbarFam").querySelectorAll(".fbtn").forEach(btn => {
 (function(){
   const overlay = document.getElementById('pfModal');
   const card    = document.getElementById('pfModalCard');
+
+  // Tilt 3D
   card.addEventListener('mousemove', function(e){
     const r = card.getBoundingClientRect();
     const rx = ((e.clientY - r.top)  / r.height - 0.5) * -16;
@@ -794,11 +796,22 @@ document.getElementById("fbarFam").querySelectorAll(".fbtn").forEach(btn => {
     card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1,1,1)';
     card.style.transition = 'transform .4s ease-in-out';
   });
+
+  // Cerrar al clicar el overlay o Escape
   overlay.addEventListener('click', function(e){
     if(e.target === overlay) pfModalClose();
   });
   document.addEventListener('keydown', function(e){
     if(e.key === 'Escape') pfModalClose();
+  });
+
+  // Delegación: captura clics en cualquier .pf-modal-trigger presente o futuro
+  document.addEventListener('click', function(e){
+    const btn = e.target.closest('.pf-modal-trigger');
+    if(btn){
+      e.stopPropagation();
+      pfModalOpen(btn.dataset.perfume, btn.dataset.marca);
+    }
   });
 })();
 
