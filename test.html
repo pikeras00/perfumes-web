@@ -781,9 +781,16 @@ function showResult(){
     .map(c => ({ c, sc: scoreC(c, tAns) }))
     .sort((a,b) => b.sc - a.sc);
 
-  // Normaliza la clave para evitar duplicados por diferencias de mayúsculas/espacios
+  // Normaliza la clave para evitar duplicados por diferencias de mayúsculas/espacios/marca
+  const MARCA_ALIAS = {
+    "christian dior": "dior",
+    "giorgio armani": "armani",
+    "yves saint laurent": "ysl",
+    "saint laurent": "ysl"
+  };
   function pKey(perfume, marca){
-    return perfume.trim().toLowerCase() + '\x00' + marca.trim().toLowerCase();
+    const m = marca.trim().toLowerCase();
+    return perfume.trim().toLowerCase() + '\x00' + (MARCA_ALIAS[m] || m);
   }
 
   // 2) Construir mapa: perfumeKey → { perfume, marca, celebs[] }
