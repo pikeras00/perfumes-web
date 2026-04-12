@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perfumity &mdash; Sobre Nosotros</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    #nosotros { padding: 3rem 2.5rem 5rem; }
+
+    /* ── Menú de anclas ── */
+    .nos-nav {
+      display: flex; justify-content: center; gap: 0;
+      margin-bottom: 3.5rem;
+      border-bottom: 1px solid rgba(201,160,61,.14);
+    }
+    .nos-navbtn {
+      background: none; border: none;
+      color: var(--cream3);
+      font-family: 'Montserrat', sans-serif;
+      font-size: .62rem; font-weight: 600;
+      letter-spacing: .25em; text-transform: uppercase;
+      padding: .9rem 2.4rem; cursor: pointer;
+      position: relative; transition: color .3s;
+    }
+    .nos-navbtn::after {
+      content: ''; position: absolute;
+      bottom: -1px; left: 15%; right: 15%; height: 1px;
+      background: var(--gold);
+      transform: scaleX(0); transform-origin: left;
+      transition: transform .35s ease;
+    }
+    .nos-navbtn:hover { color: var(--gold); }
+    .nos-navbtn.active { color: var(--gold); }
+    .nos-navbtn.active::after,
+    .nos-navbtn:hover::after { transform: scaleX(1); }
+
+    /* ── Grid de tarjetas ── */
+    .nos-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+
+    /* ── Tarjeta base ── */
+    .nos-card {
+      position: relative;
+      height: 520px;
+      overflow: hidden;
+      cursor: pointer;
+      background: #050f0a;
+    }
+
+    /* Imagen de fondo */
+    .nos-card-bg {
+      position: absolute; inset: 0;
+      background-size: cover;
+      background-position: center;
+      filter: grayscale(100%) saturate(0.7) brightness(0.75);
+      transform: scale(1);
+      transition: transform .7s cubic-bezier(.25,.46,.45,.94),
+                  filter .6s ease;
+      will-change: transform, filter;
+    }
+    .nos-card:hover .nos-card-bg {
+      filter: grayscale(0%) saturate(1.1) brightness(0.82);
+      transform: scale(1.08);
+    }
+
+    /* Overlay gradiente */
+    .nos-card-overlay {
+      position: absolute; inset: 0; z-index: 1;
+      background: linear-gradient(
+        to top,
+        rgba(0,0,0,.82) 0%,
+        rgba(0,0,0,.35) 45%,
+        rgba(0,0,0,.1)  100%
+      );
+      transition: background .5s;
+    }
+    .nos-card:hover .nos-card-overlay {
+      background: linear-gradient(
+        to top,
+        rgba(0,0,0,.75) 0%,
+        rgba(0,0,0,.2)  45%,
+        rgba(0,0,0,.04) 100%
+      );
+    }
+
+    /* Flecha top-right */
+    .nos-card-arrow {
+      position: absolute; top: 1.2rem; right: 1.4rem; z-index: 3;
+      width: 28px; height: 28px;
+      color: rgba(255,255,255,.45);
+      transition: transform .55s ease, color .4s;
+    }
+    .nos-card-arrow svg {
+      width: 28px; height: 28px;
+      stroke: currentColor; fill: none;
+      stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+    }
+    .nos-card:hover .nos-card-arrow {
+      transform: rotate(-45deg);
+      color: rgba(255,255,255,.95);
+    }
+
+    /* Contenido inferior */
+    .nos-card-content {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      z-index: 2; padding: 2rem 2rem 2.2rem;
+      color: rgba(220,210,195,.75);
+      transition: color .4s;
+    }
+    .nos-card:hover .nos-card-content { color: #fff; }
+
+    /* Heading con letras animadas */
+    .nos-card-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.6rem; font-weight: 600;
+      line-height: 1; margin-bottom: .65rem;
+      letter-spacing: .01em;
+    }
+    /* Cada letra: contenedor overflow hidden */
+    .nos-letter {
+      display: inline-block;
+      height: 1.12em; overflow: hidden;
+      vertical-align: bottom;
+    }
+    .nos-letter-inner {
+      display: flex; flex-direction: column;
+      transition: transform .5s ease;
+      /* delay se inyecta inline por JS */
+    }
+    .nos-card:hover .nos-letter-inner { transform: translateY(-50%); }
+    .nos-letter-inner span { display: block; height: 1.12em; }
+    /* Espacio entre palabras */
+    .nos-space { display: inline-block; width: .35em; }
+
+    /* Subtítulo/tag */
+    .nos-card-tag {
+      display: block; margin-bottom: .4rem;
+      font-family: 'Montserrat', sans-serif;
+      font-size: .52rem; font-weight: 700;
+      letter-spacing: .28em; text-transform: uppercase;
+      color: rgba(201,160,61,.65);
+      transition: color .4s;
+    }
+    .nos-card:hover .nos-card-tag { color: rgba(201,160,61,.95); }
+
+    /* Descripción */
+    .nos-card-desc {
+      font-size: .8rem; line-height: 1.75;
+      color: rgba(220,210,195,.6);
+      transition: color .4s;
+    }
+    .nos-card:hover .nos-card-desc { color: rgba(255,255,255,.78); }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .nos-grid { grid-template-columns: 1fr; max-width: 520px; }
+      .nos-card { height: 400px; }
+      .nos-card-heading { font-size: 2rem; }
+      #nosotros { padding: 2.5rem 1.2rem 4rem; }
+    }
+    @media (max-width: 480px) {
+      .nos-navbtn { padding: .8rem 1rem; letter-spacing: .16em; }
+      .nos-card { height: 360px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-blob bg-blob-1" aria-hidden="true"></div>
+  <div class="bg-blob bg-blob-2" aria-hidden="true"></div>
+  <div class="bg-blob bg-blob-3" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <nav>
+    <a href="index.html" class="logo">Perfumity</a>
+    <div class="nav-links">
+      <a href="catalogo.html" class="nbtn">Cat&aacute;logo</a>
+      <a href="test.html" class="nbtn">Test</a>
+      <a href="sostenible.html" class="nbtn">Sostenible</a>
+      <a href="nosotros.html" class="nbtn active">Sobre Nosotros</a>
+    </div>
+  </nav>
+
+  <section id="nosotros">
+
+    <div class="shdr" style="padding-top:1.5rem">
+      <div class="stag">La maison</div>
+      <h2 class="stitle">Sobre Nosotros</h2>
+      <div class="sline"></div>
+      <p class="sdesc">Somos apasionados del universo olfativo que rodea a las grandes figuras del planeta. Creemos que un perfume no es solo una fragancia &mdash; es una declaraci&oacute;n de identidad.</p>
+    </div>
+
+    <!-- Menú ancla -->
+    <nav class="nos-nav" aria-label="Secciones">
+      <button class="nos-navbtn active" data-target="mision">Misi&oacute;n</button>
+      <button class="nos-navbtn"        data-target="vision">Visi&oacute;n</button>
+      <button class="nos-navbtn"        data-target="valores">Valores</button>
+    </nav>
+
+    <!-- Cards -->
+    <div class="nos-grid">
+
+      <!-- MISIÓN -->
+      <div class="nos-card" id="mision">
+        <div class="nos-card-bg" style="background-image:url('https://images.pexels.com/photos/965989/pexels-photo-965989.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2')"></div>
+        <div class="nos-card-overlay"></div>
+        <div class="nos-card-arrow">
+          <svg viewBox="0 0 24 24"><line x1="5" y1="19" x2="19" y2="5"/><polyline points="5 5 19 5 19 19"/></svg>
+        </div>
+        <div class="nos-card-content">
+          <span class="nos-card-tag">Misi&oacute;n</span>
+          <h3 class="nos-card-heading" data-text="Descubrir">Descubrir</h3>
+          <p class="nos-card-desc">Conectar a cada persona con las fragancias que definen a las celebrities m&aacute;s influyentes, convirtiendo el descubrimiento olfativo en una experiencia &uacute;nica y personal.</p>
+        </div>
+      </div>
+
+      <!-- VISIÓN -->
+      <div class="nos-card" id="vision">
+        <div class="nos-card-bg" style="background-image:url('https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2')"></div>
+        <div class="nos-card-overlay"></div>
+        <div class="nos-card-arrow">
+          <svg viewBox="0 0 24 24"><line x1="5" y1="19" x2="19" y2="5"/><polyline points="5 5 19 5 19 19"/></svg>
+        </div>
+        <div class="nos-card-content">
+          <span class="nos-card-tag">Visi&oacute;n</span>
+          <h3 class="nos-card-heading" data-text="Liderar">Liderar</h3>
+          <p class="nos-card-desc">Convertirnos en la referencia global del universo olfativo de las celebrities, el mayor archivo digital de fragancias de lujo accesible para cualquier persona del planeta.</p>
+        </div>
+      </div>
+
+      <!-- VALORES -->
+      <div class="nos-card" id="valores">
+        <div class="nos-card-bg" style="background-image:url('https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2')"></div>
+        <div class="nos-card-overlay"></div>
+        <div class="nos-card-arrow">
+          <svg viewBox="0 0 24 24"><line x1="5" y1="19" x2="19" y2="5"/><polyline points="5 5 19 5 19 19"/></svg>
+        </div>
+        <div class="nos-card-content">
+          <span class="nos-card-tag">Valores</span>
+          <h3 class="nos-card-heading" data-text="Inspirar">Inspirar</h3>
+          <p class="nos-card-desc">Autenticidad, pasi&oacute;n, accesibilidad, excelencia y curiosidad. Los cinco pilares que gu&iacute;an cada decisi&oacute;n que tomamos y definen qui&eacute;nes somos.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <footer>
+    <p>&#9670; &nbsp;<strong>Perfumity</strong>&nbsp; &#9670; &nbsp; Datos extra&iacute;dos de fuentes p&uacute;blicas &nbsp;&middot;&nbsp; Todos los derechos de marca pertenecen a sus respectivos due&ntilde;os</p>
+  </footer>
+
+  <script src="effects.js"></script>
+  <script>
+  // ── Animar letras del heading (stagger hacia arriba en hover) ──
+  (function(){
+    document.querySelectorAll('.nos-card-heading').forEach(function(h){
+      var text = h.textContent.trim();
+      var html = '';
+      var letterIdx = 0;
+      for (var i = 0; i < text.length; i++) {
+        var ch = text[i];
+        if (ch === ' ') {
+          html += '<span class="nos-space"></span>';
+        } else {
+          var delay = (letterIdx * 35) + 'ms';
+          html += '<span class="nos-letter">'
+                + '<span class="nos-letter-inner" style="transition-delay:' + delay + '">'
+                + '<span>' + ch + '</span>'
+                + '<span>' + ch + '</span>'
+                + '</span></span>';
+          letterIdx++;
+        }
+      }
+      h.innerHTML = html;
+    });
+  })();
+
+  // ── Menú de anclas activo ──
+  (function(){
+    var btns = document.querySelectorAll('.nos-navbtn');
+    btns.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        btns.forEach(function(b){ b.classList.remove('active'); });
+        btn.classList.add('active');
+        var t = document.getElementById(btn.dataset.target);
+        if (t) t.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    });
+
+    // Resaltar botón según card en viewport
+    var cards = document.querySelectorAll('.nos-card[id]');
+    if ('IntersectionObserver' in window) {
+      var obs = new IntersectionObserver(function(entries){
+        entries.forEach(function(e){
+          if (e.isIntersecting) {
+            var id = e.target.id;
+            btns.forEach(function(b){
+              b.classList.toggle('active', b.dataset.target === id);
+            });
+          }
+        });
+      }, { threshold: 0.55 });
+      cards.forEach(function(c){ obs.observe(c); });
+    }
+  })();
+  </script>
+
+</body>
+</html>

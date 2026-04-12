@@ -20,12 +20,12 @@
   function Pt(init) {
     this.x  = Math.random() * W;
     this.y  = init ? Math.random() * H : H + 4;
-    this.r  = Math.random() * 1.3 + 0.15;
-    this.vx = (Math.random() - 0.5) * 0.1;
-    this.vy = -(Math.random() * 0.2 + 0.04);
+    this.r  = Math.random() * 2.2 + 0.3;
+    this.vx = (Math.random() - 0.5) * 0.18;
+    this.vy = -(Math.random() * 0.28 + 0.06);
     this.life    = init ? Math.floor(Math.random() * 450) : 0;
     this.maxLife = Math.floor(Math.random() * 400 + 200);
-    this.gold    = Math.random() > 0.5;
+    this.gold    = Math.random() > 0.25;
   }
 
   Pt.prototype.tick = function () {
@@ -36,12 +36,12 @@
   };
 
   Pt.prototype.draw = function () {
-    const a = Math.sin((this.life / this.maxLife) * Math.PI) * (this.gold ? 0.55 : 0.22);
+    const a = Math.sin((this.life / this.maxLife) * Math.PI) * (this.gold ? 0.72 : 0.30);
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
     ctx.fillStyle = this.gold
       ? 'rgba(201,160,61,' + a + ')'
-      : 'rgba(244,216,112,' + (a * 0.55) + ')';
+      : 'rgba(244,216,112,' + (a * 0.6) + ')';
     ctx.fill();
   };
 
@@ -53,7 +53,7 @@
   window.addEventListener('resize', resize, { passive: true });
   resize();
 
-  const N = Math.min(Math.floor((W * H) / 6000), 160);
+  const N = Math.min(Math.floor((W * H) / 2800), 320);
   for (let i = 0; i < N; i++) pts.push(new Pt(true));
 
   (function loop() {
@@ -690,10 +690,14 @@
       d.addEventListener('click', function () { set(i); startAuto(); });
     });
 
-    /* Click en card lateral → navegar a esa card */
+    /* Click en card lateral → navegar a esa card; click en card activa → ir al catálogo */
     cards.forEach(function (card, i) {
       card.addEventListener('click', function () {
-        if (!dragged && !card.classList.contains('cat-active')) {
+        if (dragged) return;
+        if (card.classList.contains('cat-active')) {
+          var fam = card.dataset.familia;
+          if (fam) location.href = 'catalogo.html?familia=' + encodeURIComponent(fam);
+        } else {
           set(i); startAuto();
         }
       });

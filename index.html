@@ -21,10 +21,10 @@
   <nav>
     <a href="index.html" class="logo">Perfumity</a>
     <div class="nav-links">
-      <a href="index.html" class="nbtn active">Inicio</a>
       <a href="catalogo.html" class="nbtn">Cat&aacute;logo</a>
       <a href="test.html" class="nbtn">Test</a>
       <a href="sostenible.html" class="nbtn">Sostenible</a>
+      <a href="nosotros.html" class="nbtn">Sobre Nosotros</a>
     </div>
   </nav>
 
@@ -41,8 +41,8 @@
 
     <div class="hero-badge">Fragancias de &eacute;lite</div>
     <h1 class="hero-title" id="hero-title">PERFUMITY</h1>
-    <p class="hero-sub">Descubre las fragancias que eligen las m&aacute;s grandes figuras del entretenimiento, la moda y el deporte. El universo olfativo del lujo, en un solo lugar.</p>
-    <a class="hero-cta" href="catalogo.html">Explorar colecci&oacute;n <span class="hero-cta-arrow">&#8250;</span></a>
+    <p class="hero-sub">Descubre qu&eacute; perfume de celebrity encaja contigo a trav&eacute;s de un breve test dise&ntilde;ado para revelar tu estilo y esencia.</p>
+    <a class="hero-cta" href="test.html">Descubrir mi perfume <span class="hero-cta-arrow">&#8250;</span></a>
     <div class="hero-divider">
       <span class="hero-dline"></span>
       <span class="hero-dorn">&#9670; &nbsp; &#9670; &nbsp; &#9670;</span>
@@ -64,7 +64,7 @@
     <div class="cat-carousel" id="catCarousel" role="region" aria-label="Familias de fragancia">
       <div class="cat-stage" id="catStage">
 
-        <article class="cat-card" data-i="0">
+        <article class="cat-card" data-i="0" data-familia="florales">
           <img class="cat-img" src="ImgenesPerfumesCat/florales.jpg" alt="Florales" loading="lazy">
           <div class="cat-overlay">
             <p class="cat-name">Florales</p>
@@ -72,7 +72,7 @@
           </div>
         </article>
 
-        <article class="cat-card" data-i="1">
+        <article class="cat-card" data-i="1" data-familia="orientales">
           <img class="cat-img" src="ImgenesPerfumesCat/orientales.jpg" alt="Orientales" loading="lazy">
           <div class="cat-overlay">
             <p class="cat-name">Orientales</p>
@@ -80,7 +80,7 @@
           </div>
         </article>
 
-        <article class="cat-card" data-i="2">
+        <article class="cat-card" data-i="2" data-familia="amaderados">
           <img class="cat-img" src="ImgenesPerfumesCat/amaderados.jpg" alt="Amaderados" loading="lazy">
           <div class="cat-overlay">
             <p class="cat-name">Amaderados</p>
@@ -88,7 +88,7 @@
           </div>
         </article>
 
-        <article class="cat-card" data-i="3">
+        <article class="cat-card" data-i="3" data-familia="citricos">
           <img class="cat-img" src="ImgenesPerfumesCat/citricos.jpg" alt="C&iacute;tricos" loading="lazy">
           <div class="cat-overlay">
             <p class="cat-name">C&iacute;tricos</p>
@@ -96,7 +96,7 @@
           </div>
         </article>
 
-        <article class="cat-card" data-i="4">
+        <article class="cat-card" data-i="4" data-familia="acuaticos">
           <img class="cat-img" src="ImgenesPerfumesCat/acuaticos.jpg" alt="Acu&aacute;ticos" loading="lazy">
           <div class="cat-overlay">
             <p class="cat-name">Acu&aacute;ticos</p>
@@ -104,10 +104,10 @@
           </div>
         </article>
 
-        <article class="cat-card" data-i="5">
+        <article class="cat-card" data-i="5" data-familia="fougere">
           <img class="cat-img" src="ImgenesPerfumesCat/fouguere.jpg" alt="Fougère" loading="lazy">
           <div class="cat-overlay">
-            <p class="cat-name">Fougère</p>
+            <p class="cat-name">Foug&egrave;re</p>
             <p class="cat-notes">Lavanda &middot; Musgo &middot; Helecho</p>
           </div>
         </article>
@@ -147,7 +147,7 @@
 
       <div class="fam-track" id="famTrack">
 
-        <article class="fam-card">
+        <a class="fam-card" href="catalogo.html">
           <img src="Carpetas%20famosos/Taylor_Swift.jpg" alt="Taylor Swift" loading="lazy">
           <div class="fam-overlay">
             <h3 class="fam-name">Taylor Swift</h3>
@@ -156,7 +156,7 @@
           </div>
         </article>
 
-        <article class="fam-card">
+        <a class="fam-card" href="catalogo.html">
           <img src="Carpetas%20famosos/Beyonc3F.jpg" alt="Beyoncé" loading="lazy">
           <div class="fam-overlay">
             <h3 class="fam-name">Beyoncé</h3>
@@ -165,7 +165,7 @@
           </div>
         </article>
 
-        <article class="fam-card">
+        <a class="fam-card" href="catalogo.html">
           <img src="Carpetas%20famosos/rihanna.jpg" alt="Rihanna" loading="lazy">
           <div class="fam-overlay">
             <h3 class="fam-name">Rihanna</h3>
@@ -174,7 +174,7 @@
           </div>
         </article>
 
-        <article class="fam-card">
+        <a class="fam-card" href="catalogo.html">
           <img src="Carpetas%20famosos/Selena-Gomez.jpg" alt="Selena Gómez" loading="lazy">
           <div class="fam-overlay">
             <h3 class="fam-name">Selena Gómez</h3>
@@ -183,7 +183,7 @@
           </div>
         </article>
 
-        <article class="fam-card">
+        <a class="fam-card" href="catalogo.html">
           <img src="Carpetas%20famosos/Billie_Eilish_Square_24da6ce7-4f6a-4c8b-8e9f-fab810efc436.jpg" alt="Billie Eilish" loading="lazy">
           <div class="fam-overlay">
             <h3 class="fam-name">Billie Eilish</h3>
@@ -192,7 +192,7 @@
           </div>
         </article>
 
-        <article class="fam-card">
+        <a class="fam-card" href="catalogo.html">
           <img src="Carpetas%20famosos/como-hacer-el-peinado-de-ariana-grande.jpg" alt="Ariana Grande" loading="lazy">
           <div class="fam-overlay">
             <h3 class="fam-name">Ariana Grande</h3>
@@ -201,7 +201,7 @@
           </div>
         </article>
 
-        <article class="fam-card">
+        <a class="fam-card" href="catalogo.html">
           <img src="Carpetas%20famosos/Dua202.jpg" alt="Dua Lipa" loading="lazy">
           <div class="fam-overlay">
             <h3 class="fam-name">Dua Lipa</h3>
@@ -210,7 +210,7 @@
           </div>
         </article>
 
-        <article class="fam-card">
+        <a class="fam-card" href="catalogo.html">
           <img src="Carpetas%20famosos/Shakira.jpg" alt="Shakira" loading="lazy">
           <div class="fam-overlay">
             <h3 class="fam-name">Shakira</h3>
@@ -219,7 +219,7 @@
           </div>
         </article>
 
-        <article class="fam-card">
+        <a class="fam-card" href="catalogo.html">
           <img src="Carpetas%20famosos/Legends-Profile_Cristiano-Ronaldo1523460877263.jpg" alt="Cristiano Ronaldo" loading="lazy">
           <div class="fam-overlay">
             <h3 class="fam-name">Cristiano Ronaldo</h3>
@@ -228,7 +228,7 @@
           </div>
         </article>
 
-        <article class="fam-card">
+        <a class="fam-card" href="catalogo.html">
           <img src="Carpetas%20famosos/harry-styles-2022-barba-1675246702.jpg" alt="Harry Styles" loading="lazy">
           <div class="fam-overlay">
             <h3 class="fam-name">Harry Styles</h3>
@@ -237,7 +237,7 @@
           </div>
         </article>
 
-        <article class="fam-card">
+        <a class="fam-card" href="catalogo.html">
           <img src="Carpetas%20famosos/Gigi_Hadid_for_Rabanne.jpg" alt="Gigi Hadid" loading="lazy">
           <div class="fam-overlay">
             <h3 class="fam-name">Gigi Hadid</h3>
@@ -246,7 +246,7 @@
           </div>
         </article>
 
-        <article class="fam-card">
+        <a class="fam-card" href="catalogo.html">
           <img src="Carpetas%20famosos/angelina-jolie-505313846-1525340290.jpg" alt="Angelina Jolie" loading="lazy">
           <div class="fam-overlay">
             <h3 class="fam-name">Angelina Jolie</h3>
@@ -255,7 +255,7 @@
           </div>
         </article>
 
-        <article class="fam-card">
+        <a class="fam-card" href="catalogo.html">
           <img src="Carpetas%20famosos/scarlett_johansson.jpg" alt="Scarlett Johansson" loading="lazy">
           <div class="fam-overlay">
             <h3 class="fam-name">Scarlett Johansson</h3>
@@ -264,7 +264,7 @@
           </div>
         </article>
 
-        <article class="fam-card">
+        <a class="fam-card" href="catalogo.html">
           <img src="Carpetas%20famosos/Emma_Watson.jpg" alt="Emma Watson" loading="lazy">
           <div class="fam-overlay">
             <h3 class="fam-name">Emma Watson</h3>
@@ -273,7 +273,7 @@
           </div>
         </article>
 
-        <article class="fam-card">
+        <a class="fam-card" href="catalogo.html">
           <img src="Carpetas%20famosos/ryan_reynolds.jpg" alt="Ryan Reynolds" loading="lazy">
           <div class="fam-overlay">
             <h3 class="fam-name">Ryan Reynolds</h3>
@@ -282,7 +282,7 @@
           </div>
         </article>
 
-        <article class="fam-card">
+        <a class="fam-card" href="catalogo.html">
           <img src="Carpetas%20famosos/salma_hayek.jpg" alt="Salma Hayek" loading="lazy">
           <div class="fam-overlay">
             <h3 class="fam-name">Salma Hayek</h3>
@@ -291,7 +291,7 @@
           </div>
         </article>
 
-        <article class="fam-card">
+        <a class="fam-card" href="catalogo.html">
           <img src="Carpetas%20famosos/Sydney_Sweeney.jpg" alt="Sydney Sweeney" loading="lazy">
           <div class="fam-overlay">
             <h3 class="fam-name">Sydney Sweeney</h3>
@@ -300,7 +300,7 @@
           </div>
         </article>
 
-        <article class="fam-card">
+        <a class="fam-card" href="catalogo.html">
           <img src="Carpetas%20famosos/tom_cruise.jpg" alt="Tom Cruise" loading="lazy">
           <div class="fam-overlay">
             <h3 class="fam-name">Tom Cruise</h3>
@@ -309,7 +309,7 @@
           </div>
         </article>
 
-        <article class="fam-card">
+        <a class="fam-card" href="catalogo.html">
           <img src="Carpetas%20famosos/zac_efron.jpg" alt="Zac Efron" loading="lazy">
           <div class="fam-overlay">
             <h3 class="fam-name">Zac Efron</h3>
@@ -318,14 +318,14 @@
           </div>
         </article>
 
-        <article class="fam-card">
+        <a class="fam-card" href="catalogo.html">
           <img src="Carpetas%20famosos/Zoe_Saldaña.jpg" alt="Zoe Saldaña" loading="lazy">
           <div class="fam-overlay">
             <h3 class="fam-name">Zoe Saldaña</h3>
             <span class="fam-role">Actriz</span>
             <div class="fam-tags"><span class="fam-tag">Orientales</span><span class="fam-tag">Florales</span></div>
           </div>
-        </article>
+        </a>
 
       </div><!-- /fam-track -->
     </div><!-- /fam-marquee-wrap -->

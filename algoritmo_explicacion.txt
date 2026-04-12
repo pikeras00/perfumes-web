@@ -1,0 +1,247 @@
+════════════════════════════════════════════════════════════════════
+   CELEBRITY PERFUMES — EXPLICACIÓN DEL ALGORITMO DE RECOMENDACIÓN
+════════════════════════════════════════════════════════════════════
+
+RESUMEN
+───────
+El test hace 11 preguntas al usuario. Con sus respuestas, el algoritmo
+puntúa a cada celebrity de la base de datos y devuelve la que mejor
+encaja con el perfil olfativo del usuario.
+
+
+════════════════════════════════════════════════════════════════════
+ ARQUITECTURA: SISTEMA HÍBRIDO EN DOS CAPAS
+════════════════════════════════════════════════════════════════════
+
+El algoritmo combina dos métodos de puntuación:
+
+  CAPA 1 — Puntuación por base de datos (alta precisión)
+  CAPA 2 — Puntuación por palabras clave (fallback)
+
+La razón de usar dos capas es que la base de datos (base_datos_perfumes.xlsx)
+contiene 229 perfumes con sus características detalladas, pero las celebrities
+referencian 628 perfumes en total. El 76% de esos perfumes no están en la BD,
+así que para ellos se aplica el método de palabras clave como respaldo.
+
+
+════════════════════════════════════════════════════════════════════
+ CAPA 1 — PUNTUACIÓN EXPLÍCITA CON LA BASE DE DATOS
+════════════════════════════════════════════════════════════════════
+
+Para cada perfume de una celebrity que SÍ está en la base de datos,
+se evalúa columna a columna contra las respuestas del usuario.
+
+La búsqueda del perfume en la BD se hace por nombre normalizado:
+  - Se convierte a minúsculas
+  - Se eliminan tildes y acentos
+  - Se limpian espacios extra
+  Ejemplo: "L'Air du Temps" → "l'air du temps"
+
+──────────────────────────────────────────────────────────────────
+ TABLA DE PUNTUACIÓN POR PREGUNTA
+──────────────────────────────────────────────────────────────────
+
+PREGUNTA 1 — Género preferido
+  Respuesta del usuario → Campo "Género (Q1)" de la BD
+  +5  si el género del perfume coincide exactamente (Masculino / Femenino)
+  +2  si el perfume es Unisex (compatible con cualquier preferencia)
+  -2  si el género es el contrario al preferido
+  ±0  si el usuario eligió "Indiferente" (no se evalúa)
+
+PREGUNTA 2 — Estación de uso
+  Respuesta del usuario → Campo "Estación (Q2)" de la BD
+  +4  si la estación coincide exactamente
+  +2  si el perfume es "Todo el año" (comodín válido para cualquier elección)
+  +0  si no coincide
+  Ejemplo: usuario elige "Verano" → puntúan "Verano", "Primavera/Verano" y "Todo el año"
+
+PREGUNTA 3 — Momento del día
+  Respuesta del usuario → Campo "Momento (Q3)" de la BD
+  +3  si el momento coincide ("Día" o "Noche") o el perfume es "Todo el día"
+  +0  si no coincide
+  ±0  si el usuario eligió "Todo el día" (se acepta cualquier perfume)
+
+PREGUNTA 4 — Perfil a proyectar
+  Respuesta del usuario → Campo "Perfil (Q4)" de la BD
+  +4  si el perfil coincide exactamente
+  +0  si no coincide
+  Correspondencia:
+    "Juvenil y vibrante"     → Joven
+    "Moderno"                → Moderno
+    "Maduro y elegante"      → Maduro
+    "Clásico"                → Atemporal
+    "Atemporal y equilibrado"→ Atemporal
+
+PREGUNTA 5 — Ocasiones de uso (selección múltiple)
+  Respuesta del usuario → Campo "Ocasión (Q5)" de la BD
+  +2  por cada ocasión seleccionada que coincida con las del perfume
+  Las ocasiones en la BD pueden ser combinadas, por ejemplo:
+  "Diario, Casual, Oficina" — coincide con "diario" y con "oficina"
+  Correspondencia:
+    oficina  → "Oficina"     |  citas   → "Citas"
+    viaje    → "Viaje"       |  eventos → "Eventos"
+    diario   → "Diario"      |  exterior→ "Deporte"
+
+PREGUNTA 6 — Familias olfativas preferidas (selección múltiple)
+  Respuesta del usuario → Campo "Familia (Q6)" de la BD
+  +5  por cada familia que coincida con la del perfume  ← PESO MÁS ALTO
+  La familia en la BD puede ser compuesta: "Amaderado/Oriental"
+  Si el usuario eligió "amaderadas" u "orientales", ambas suman.
+  Correspondencia:
+    citricos   → "Cítrico"    |  florales   → "Floral"
+    amaderadas → "Amaderado"  |  orientales → "Oriental"
+    fougere    → "Aromático"  |  chipre     → "Chipre"
+    gourmand   → "Gourmand"   |  acuaticas  → "Acuático"
+    frutales   → "Frutal"     |  verdes     → "Verde"
+
+PREGUNTA 7 — Notas a evitar (selección múltiple)
+  Respuesta del usuario → Campo "Notas Críticas - Evitar (Q7)" de la BD
+  -6  por cada nota rechazada que aparezca en las notas del perfume  ← PENALIZACIÓN
+  Si el usuario marcó "Ninguna", no se aplica ninguna penalización.
+  Correspondencia de términos de búsqueda:
+    pachuli  → "Pachul"    |  rosa     → "Rosa"
+    vainilla → "Vainilla"  |  cuero    → "Cuero"
+    oud      → "Oud"       |  almizcle → "Almizcle"
+    incienso → "Incienso"  |  canela   → "Canela"
+    coco     → "Coco"
+
+PREGUNTA 8 — Proyección deseada
+  Respuesta del usuario → Campo "Proyección (Q8)" de la BD
+  +3  si coincide exactamente
+  +0  si no coincide
+  Correspondencia:
+    sutil    → Suave     |  moderada → Moderada  |  potente → Potente
+
+PREGUNTA 9 — Presupuesto aproximado
+  Respuesta del usuario → Campo "Precio (Q9)" de la BD
+  +4  si el rango de precio del perfume coincide exactamente
+  +2  si el perfume está en el rango adyacente (uno por encima o por debajo)
+  +0  si hay dos o más rangos de diferencia
+  Correspondencia:
+    bajo  → <50€        |  medio → 50–100€
+    alto  → 100–200€    |  lujo  → >200€
+
+PREGUNTA 10 — Sensación a transmitir (selección múltiple, máx. 3)
+  Respuesta del usuario → Campo "Vibe (Q10)" de la BD
+  +3  por cada vibe que coincida con el grupo seleccionado
+  Cada opción del test agrupa varios vibes de la BD:
+    misterio    → Misterio, Misterio Oriental, Misterio Oscuro, Hipnosis,
+                  Obsesión, Dramatismo, Lujo Oscuro, Sofisticación Oscura
+    elegancia   → Elegancia, Elegancia Clásica, Elegancia Ecuestre,
+                  Elegancia Inglesa, Sofisticación, Distinción, Ícono,
+                  Nobleza, Atemporalidad, Clasicismo, Majestuosidad
+    poder       → Poder, Poder Femenino, Fiereza, Audacia, Confianza,
+                  Intensidad, Masculinidad, Masculinidad Extrema
+    calma       → Serenidad, Zen, Bienestar, Confort, Pureza, Ligereza,
+                  Naturalidad, Nitidez, Suavidad, Limpieza, Equilibrio
+    libertad    → Libertad, Independencia, Aventura, Frescura, Naturaleza,
+                  Vitalidad, Energía, Mediterráneo, Italianidad
+    creatividad → Arte, Originalidad, Minimalismo, Modernidad, Contraste,
+                  Rebeldía, Transgresión, Humor, Fantasía, Extravagancia
+    deseo       → Deseo, Seducción, Sensualidad, Magnetismo, Provocación,
+                  Romance, Romanticismo, Amor, Animalidad, Glamour
+
+PREGUNTA 11 — Experiencia con perfumes
+  Respuesta del usuario → Campo "Nivel (Q11)" de la BD
+  +3  si el nivel del perfume coincide exactamente con el del usuario
+  +1  si el nivel es adyacente (Nuevo↔Intermedio o Intermedio↔Experto)
+  +0  si hay dos niveles de diferencia (Nuevo↔Experto)
+  Correspondencia:
+    nuevo     → Nuevo        |  descubrir → Intermedio  |  experto → Experto
+
+
+════════════════════════════════════════════════════════════════════
+ CAPA 2 — PUNTUACIÓN POR PALABRAS CLAVE (FALLBACK)
+════════════════════════════════════════════════════════════════════
+
+Para los perfumes que NO están en la base de datos, el algoritmo busca
+palabras clave en el nombre del perfume y la marca de cada celebrity.
+
+Funciona igual que la Capa 1 pero de forma aproximada:
+  - En lugar de leer la columna "Género", busca palabras como
+    "pour homme", "for men", "rose", "fleur", etc.
+  - En lugar de leer la columna "Familia", busca "santal", "cedar",
+    "vanilla", "rose", "aqua", etc.
+  - Las penalizaciones por notas rechazadas también se aplican
+    buscando esas palabras en el nombre/marca.
+
+Este método es menos preciso porque depende de que el nombre del
+perfume contenga información sobre sus características.
+
+
+════════════════════════════════════════════════════════════════════
+ COMBINACIÓN FINAL DE LAS DOS CAPAS
+════════════════════════════════════════════════════════════════════
+
+Una vez calculadas ambas puntuaciones para una celebrity:
+
+  SI la celebrity tiene algún perfume en la BD:
+    Score final = (mejor puntuación BD + promedio BD × 0.2) × 0.8
+                + puntuación keywords × 0.2
+
+  SI ningún perfume de la celebrity está en la BD:
+    Score final = solo puntuación keywords
+
+La razón del 80/20:
+  - La BD tiene datos explícitos y precisos → mayor confianza → 80%
+  - Las palabras clave son aproximadas → menor confianza → 20%
+
+El "mejor puntuación BD + promedio BD × 0.2" sirve para premiar a
+las celebrities cuyo MEJOR perfume encaja muy bien, pero también
+valora ligeramente la consistencia (si VARIOS perfumes suyos encajan,
+el promedio sube y suma algo extra).
+
+
+════════════════════════════════════════════════════════════════════
+ SELECCIÓN DEL RESULTADO FINAL
+════════════════════════════════════════════════════════════════════
+
+1. Se calculan los scores de TODAS las celebrities con perfumes.
+2. Se elige la celebrity con el score más alto.
+3. Dentro de esa celebrity, se elige el perfume más relevante:
+   - Se evalúa cada perfume suyo contra Q6 (familia), Q4 (perfil)
+     y Q3 (momento) para encontrar el que mejor encaja.
+   - Ese perfume es el que se muestra como "Fragancia recomendada".
+4. Los otros perfumes de esa celebrity se muestran en "También usa".
+
+
+════════════════════════════════════════════════════════════════════
+ EJEMPLO PRÁCTICO
+════════════════════════════════════════════════════════════════════
+
+Usuario responde:
+  Q1 Femenino · Q2 Primavera · Q3 Día · Q4 Joven
+  Q5 Diario, Citas · Q6 Florales, Frutales · Q7 Ninguna
+  Q8 Moderada · Q9 Medio (30-70€) · Q10 Alegría, Frescura · Q11 Nuevo
+
+Para un perfume floral-frutal, de día, para uso diario y citas,
+de proyección moderada y precio medio:
+  - Q1 Femenino coincide        → +5
+  - Q2 Primavera coincide       → +4
+  - Q3 Día coincide             → +3
+  - Q4 Joven coincide           → +4
+  - Q5 Diario coincide (+2)
+        Citas coincide  (+2)    → +4
+  - Q6 Florales coincide (+5)
+        Frutales coincide (+5)  → +10
+  - Q7 Sin penalización         →  0
+  - Q8 Moderada coincide        → +3
+  - Q9 Precio adyacente         → +2
+  - Q10 Vibes cercanos          → +3
+  - Q11 Nivel Nuevo coincide    → +3
+                               ─────
+  TOTAL para ese perfume:       +41 puntos
+
+La celebrity cuyo mejor perfume sume más puntos gana.
+
+
+════════════════════════════════════════════════════════════════════
+ ARCHIVOS DEL SISTEMA
+════════════════════════════════════════════════════════════════════
+
+  base_datos_perfumes.xlsx  → Base de datos fuente (229 perfumes, 13 columnas)
+  perfume_db.js             → BD convertida a objeto JS, indexada por nombre
+  data.js                   → Lista de celebrities con sus perfumes
+  test.html                 → Preguntas del test + algoritmo de puntuación
+
+════════════════════════════════════════════════════════════════════

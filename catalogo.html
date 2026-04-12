@@ -21,19 +21,19 @@
   <nav>
     <a href="index.html" class="logo">Perfumity</a>
     <div class="nav-links">
-      <a href="index.html" class="nbtn">Inicio</a>
       <a href="catalogo.html" class="nbtn active">Cat&aacute;logo</a>
       <a href="test.html" class="nbtn">Test</a>
       <a href="sostenible.html" class="nbtn">Sostenible</a>
+      <a href="nosotros.html" class="nbtn">Sobre Nosotros</a>
     </div>
   </nav>
 
   <section id="catalogo">
-    <div class="shdr" style="padding-top:6rem">
-      <div class="stag">M&aacute;s de 560 Celebrities</div>
+    <div class="shdr" style="padding-top:1.5rem">
+      <div class="stag">599 Celebrities</div>
       <h2 class="stitle">Cat&aacute;logo</h2>
       <div class="sline"></div>
-      <p class="sdesc">Hemos reunido m&aacute;s de 560 celebrities &mdash; cantantes, actores, deportistas, modelos y leyendas de todos los tiempos &mdash; junto a las fragancias que definen su sello personal. Desde los cl&aacute;sicos de Hollywood hasta los iconos del K-Pop y el reguet&oacute;n, cada perfil revela el universo olfativo de las figuras que marcan tendencia en el planeta. Filtra por categor&iacute;a o busca directamente tu celebrity favorita.</p>
+      <p class="sdesc">599 celebrities &mdash; cantantes, actores, deportistas, modelos y leyendas de todos los tiempos &mdash; junto a las fragancias que definen su sello personal. Desde los cl&aacute;sicos de Hollywood hasta los iconos del K-Pop y el reguet&oacute;n, cada perfil revela el universo olfativo de las figuras que marcan tendencia en el planeta. Filtra por categor&iacute;a o busca directamente tu celebrity favorita.</p>
     </div>
 
     <div class="fbar" id="fbar">
@@ -46,6 +46,16 @@
       <button class="fbtn" data-f="politico">Pol&iacute;ticos</button>
       <button class="fbtn" data-f="disenador">Dise&ntilde;adores</button>
       <button class="fbtn" data-f="director">Directores</button>
+    </div>
+
+    <div class="fbar fbar-fam" id="fbarFam">
+      <button class="fbtn active" data-fam="all">Todas las familias</button>
+      <button class="fbtn" data-fam="florales">Florales</button>
+      <button class="fbtn" data-fam="orientales">Orientales</button>
+      <button class="fbtn" data-fam="amaderados">Amaderados</button>
+      <button class="fbtn" data-fam="citricos">C&iacute;tricos</button>
+      <button class="fbtn" data-fam="acuaticos">Acu&aacute;ticos</button>
+      <button class="fbtn" data-fam="fougere">Foug&egrave;re</button>
     </div>
 
     <div class="sbox">
@@ -64,9 +74,16 @@
 
   <script src="effects.js"></script>
   <script src="data.js"></script>
+  <script src="perfume_db.js"></script>
   <script>
 const PS = 24;
-let fil = [], cp = 1, cf = "all", cs = "";
+let fil = [], cp = 1, cf = "all", cfam = "all", cs = "";
+
+function normKey(s){
+  s = s.toLowerCase().trim();
+  s = s.normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+  return s.replace(/\s+/g," ");
+}
 
 /* ── Mapa celebrity → foto ── */
 const PHOTO_MAP = {
@@ -406,6 +423,60 @@ function photoSrc(nombre) {
   return 'Carpetas%20famosos/' + encodeURIComponent(f);
 }
 
+/* ── Wikipedia fallback for missing/broken photos ── */
+const _wikiCache = {};
+
+async function wikiImg(card){
+  const nombre = card.dataset.nombre;
+  if(!nombre || card.dataset.wikiDone) return;
+  card.dataset.wikiDone = "1";
+  let src = _wikiCache[nombre];
+  if(!src){
+    try{
+      const encoded = encodeURIComponent(nombre.replace(/ /g,"_"));
+      const r = await fetch("https://en.wikipedia.org/w/api.php?action=query&titles="+encoded+"&prop=pageimages&format=json&pithumbsize=300&origin=*");
+      const d = await r.json();
+      const pg = Object.values(d.query.pages)[0];
+      src = pg.thumbnail ? pg.thumbnail.source : null;
+      if(src) _wikiCache[nombre] = src;
+    } catch(_){ return; }
+  }
+  if(!src) return;
+  let img = card.querySelector('.ccard-photo');
+  if(!img){
+    img = document.createElement('img');
+    img.className = 'ccard-photo';
+    img.alt = nombre;
+    card.prepend(img);
+  }
+  img.onload = () => {
+    img.style.display = 'block';
+    card.classList.remove('no-photo');
+    const btl = card.querySelector('.ccard-bottle');
+    if(btl) btl.remove();
+  };
+  img.onerror = null;
+  img.src = src;
+}
+
+/* ── Lazy-load Wikipedia photos when card enters viewport ── */
+let _wikiObserver = null;
+function initWikiObserver(){
+  if(_wikiObserver){ _wikiObserver.disconnect(); }
+  _wikiObserver = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if(!e.isIntersecting) return;
+      const card = e.target;
+      _wikiObserver.unobserve(card);
+      wikiImg(card);
+    });
+  }, { rootMargin:'300px' });
+  document.querySelectorAll('.ccard.no-photo, .ccard .wiki-lazy').forEach(el => {
+    const card = el.closest('.ccard') || el;
+    _wikiObserver.observe(card);
+  });
+}
+
 function cardHTML(c) {
   const pf  = c.perfumes[0] || null;
   const pal = getBP(pf ? pf.marca : null);
@@ -415,8 +486,13 @@ function cardHTML(c) {
   const perfName  = pf ? pf.perfume : 'Sin datos';
   const perfBrand = pf ? pf.marca   : '';
 
-  return `<div class="ccard${noPhoto}">
-    ${src ? `<img class="ccard-photo" src="${src}" alt="${c.nombre}" loading="lazy" onerror="this.closest('.ccard').classList.add('no-photo');this.remove()">` : ''}
+  const escapedName = c.nombre.replace(/"/g,"&quot;");
+  return `<div class="ccard${noPhoto}" data-nombre="${escapedName}">
+    ${src
+      ? `<img class="ccard-photo" src="${src}" alt="${escapedName}" loading="lazy"
+             onerror="this.onerror=null;wikiImg(this.closest('.ccard'))">`
+      : `<img class="ccard-photo wiki-lazy" src="" data-nombre="${escapedName}" alt="${escapedName}" style="display:none">`
+    }
     <div class="ccard-fallback" style="background:linear-gradient(160deg,${pal.c1} 0%,${pal.c2} 60%,${pal.ac}22 100%)"></div>
     <div class="ccard-shade"></div>
     ${noPhoto ? BOTTLE : ''}
@@ -466,10 +542,26 @@ const PROFS = {
   director:   p => p==="Director de cine" || p==="Director de Cine" || p==="Director" || p==="Directora",
 };
 
+const FAMS = {
+  florales:   f => /floral/i.test(f),
+  orientales: f => /oriental/i.test(f),
+  amaderados: f => /amaderado|mader/i.test(f),
+  citricos:   f => /c[ií]tric/i.test(f),
+  acuaticos:  f => /acu[áa]tic|marino|aqua/i.test(f),
+  fougere:    f => /foug[eè]r/i.test(f),
+};
+
 function applyF() {
   fil = CELEBRITIES.filter(c => {
     const matchF = cf==="all" || (PROFS[cf] && PROFS[cf](c.profesion));
     if (!matchF) return false;
+    if (cfam !== "all") {
+      const matchFam = c.perfumes.some(p => {
+        const entry = typeof PERFUME_DB !== "undefined" && PERFUME_DB[normKey(p.perfume)];
+        return entry && FAMS[cfam] && FAMS[cfam](entry.familia);
+      });
+      if (!matchFam) return false;
+    }
     if (!cs) return true;
     const q = cs.toLowerCase();
     return c.nombre.toLowerCase().includes(q) ||
@@ -483,6 +575,7 @@ function renderP() {
   const sl = fil.slice((cp-1)*PS, cp*PS);
   document.getElementById("cg").innerHTML = sl.map(cardHTML).join("");
   addTilt();
+  initWikiObserver();
 }
 
 function renderPg() {
@@ -504,13 +597,38 @@ function onSrch() { cs = document.getElementById("si").value; renderG(); }
 
 document.getElementById("fbar").querySelectorAll(".fbtn").forEach(btn => {
   btn.addEventListener("click", () => {
-    document.querySelectorAll(".fbtn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll("#fbar .fbtn").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
     cf = btn.dataset.f;
     renderG();
   });
 });
-renderG();
+
+document.getElementById("fbarFam").querySelectorAll(".fbtn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll("#fbarFam .fbtn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    cfam = btn.dataset.fam;
+    renderG();
+  });
+});
+
+// Leer ?familia= de la URL para llegar desde el carousel del index
+(function(){
+  const p = new URLSearchParams(location.search);
+  const fam = (p.get("familia") || "").toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .replace(/\s+/g,"");
+  if (fam && FAMS[fam]) {
+    cfam = fam;
+    document.querySelectorAll("#fbarFam .fbtn").forEach(b => {
+      b.classList.toggle("active", b.dataset.fam === fam);
+    });
+    // Scroll suave a la sección al cargar
+    setTimeout(() => document.getElementById("catalogo").scrollIntoView({behavior:"smooth"}), 200);
+  }
+  renderG();
+})();
   </script>
 
 </body>
