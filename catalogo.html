@@ -72,6 +72,29 @@
     <p>&#9670; &nbsp;<strong>Perfumity</strong>&nbsp; &#9670; &nbsp; Datos extra&iacute;dos de fuentes p&uacute;blicas &nbsp;&middot;&nbsp; Todos los derechos de marca pertenecen a sus respectivos due&ntilde;os</p>
   </footer>
 
+  <!-- Modal emergente de perfume -->
+  <div class="pfmodal-overlay" id="pfModal" role="dialog" aria-modal="true">
+    <div class="pfmodal-card" id="pfModalCard">
+      <button class="pfmodal-close" onclick="pfModalClose()" aria-label="Cerrar">&#10005;</button>
+      <div class="pfmodal-img-placeholder" id="pfModalImgWrap">&#9670;</div>
+      <div class="pfmodal-imggrad"></div>
+      <div class="pfmodal-header">
+        <div class="pfmodal-header-text">
+          <div class="pfmodal-htitle" id="pfModalName"></div>
+          <div class="pfmodal-hbrand" id="pfModalBrand"></div>
+        </div>
+        <div class="pfmodal-hdot">&#9670;</div>
+      </div>
+      <div class="pfmodal-body">
+        <div class="pfmodal-section-lbl">Notas olfativas</div>
+        <div class="pfmodal-notas" id="pfModalNotas"></div>
+        <div class="pfmodal-divider"></div>
+        <div class="pfmodal-section-lbl">Detalles</div>
+        <div class="pfmodal-meta" id="pfModalMeta"></div>
+      </div>
+    </div>
+  </div>
+
   <script src="effects.js"></script>
   <script src="data.js"></script>
   <script src="perfume_db.js"></script>
@@ -643,7 +666,7 @@ function cardHTML(c) {
       <div class="ccard-prof">${c.profesion}</div>
       <div class="ccard-name">${c.nombre}</div>
     </div>
-    <div class="ccard-btn">
+    <div class="ccard-btn" onclick="pfModalOpen(${JSON.stringify(perfName)},${JSON.stringify(perfBrand)});event.stopPropagation()">
       <div class="ccard-btn-inner">
         <div class="ccard-btn-perf">${perfName}</div>
         <div class="ccard-btn-brand">${perfBrand}</div>
@@ -755,6 +778,71 @@ document.getElementById("fbarFam").querySelectorAll(".fbtn").forEach(btn => {
     renderG();
   });
 });
+
+// ── Modal emergente de perfume ──
+(function(){
+  const overlay = document.getElementById('pfModal');
+  const card    = document.getElementById('pfModalCard');
+  card.addEventListener('mousemove', function(e){
+    const r = card.getBoundingClientRect();
+    const rx = ((e.clientY - r.top)  / r.height - 0.5) * -16;
+    const ry = ((e.clientX - r.left) / r.width  - 0.5) *  16;
+    card.style.transform = 'perspective(1000px) rotateX('+rx+'deg) rotateY('+ry+'deg) scale3d(1.04,1.04,1.04)';
+    card.style.transition = 'transform .1s ease-out';
+  });
+  card.addEventListener('mouseleave', function(){
+    card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1,1,1)';
+    card.style.transition = 'transform .4s ease-in-out';
+  });
+  overlay.addEventListener('click', function(e){
+    if(e.target === overlay) pfModalClose();
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape') pfModalClose();
+  });
+})();
+
+function pfModalOpen(perfume, marca){
+  const key = perfume.trim().toLowerCase();
+  const db  = typeof PERFUME_DB !== 'undefined' ? PERFUME_DB : {};
+  const entry = db[key] || null;
+
+  document.getElementById('pfModalName').textContent  = entry ? entry.nombre : perfume;
+  document.getElementById('pfModalBrand').textContent = entry ? entry.marca  : marca;
+
+  const notasEl = document.getElementById('pfModalNotas');
+  notasEl.innerHTML = '';
+  const notasStr = entry ? entry.notas : '';
+  if(notasStr){
+    notasStr.split(',').forEach(function(n){
+      const t = n.trim(); if(!t) return;
+      const chip = document.createElement('span');
+      chip.className = 'pfmodal-nota';
+      chip.textContent = t;
+      notasEl.appendChild(chip);
+    });
+  } else {
+    notasEl.innerHTML = '<span style="color:rgba(255,255,255,.3);font-size:.72rem">No disponible</span>';
+  }
+
+  const metaEl = document.getElementById('pfModalMeta');
+  metaEl.innerHTML = '';
+  if(entry){
+    [{l:'Familia',v:entry.familia},{l:'Género',v:entry.genero},
+     {l:'Estación',v:entry.estacion},{l:'Ocasión',v:entry.ocasion},
+     {l:'Precio',v:entry.precio},{l:'Proyección',v:entry.proyeccion}
+    ].forEach(function(f){
+      if(!f.v) return;
+      metaEl.innerHTML += '<div class="pfmodal-meta-item"><div class="pfmodal-meta-lbl">'+f.l+'</div><div class="pfmodal-meta-val">'+f.v+'</div></div>';
+    });
+  }
+
+  document.getElementById('pfModal').classList.add('open');
+}
+
+function pfModalClose(){
+  document.getElementById('pfModal').classList.remove('open');
+}
 
 // Leer ?familia= de la URL para llegar desde el carousel del index
 (function(){

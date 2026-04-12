@@ -1632,3 +1632,108 @@ footer { border-top: none; padding-top: 0; }
   .nbtn { font-size: .6rem; padding: .3rem .45rem; }
   .fam-card { width: 155px; height: 232px; }
 }
+
+/* ════════════════════════════════════════
+   Modal emergente de perfume (catálogo + test)
+   ════════════════════════════════════════ */
+.pfmodal-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0,0,0,.72);
+  backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity .3s ease;
+}
+.pfmodal-overlay.open { opacity: 1; pointer-events: auto; }
+
+.pfmodal-card {
+  position: relative;
+  width: 320px;
+  border-radius: 28px;
+  overflow: hidden;
+  background: #07130d;
+  border: 1px solid rgba(201,160,61,.22);
+  box-shadow: 0 30px 80px rgba(0,0,0,.75);
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: transform .12s ease-out;
+}
+.pfmodal-img-placeholder {
+  width: 100%; height: 200px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 3rem; color: rgba(201,160,61,.12);
+  background: linear-gradient(135deg, rgba(201,160,61,.04) 0%, rgba(4,12,7,.95) 100%);
+}
+.pfmodal-imggrad {
+  position: absolute; top: 0; left: 0; right: 0; height: 200px;
+  background: linear-gradient(to bottom, transparent 40%, rgba(7,19,13,.95) 100%);
+  pointer-events: none;
+}
+.pfmodal-header {
+  position: absolute; top: 14px; left: 14px; right: 14px;
+  background: rgba(255,255,255,.06);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 16px;
+  padding: 14px 16px;
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
+}
+.pfmodal-htitle {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.35rem; font-weight: 600;
+  color: #fff; line-height: 1.15;
+}
+.pfmodal-hbrand {
+  font-size: .48rem; letter-spacing: .24em; text-transform: uppercase;
+  color: rgba(201,160,61,.8); margin-top: .25rem;
+}
+.pfmodal-hdot {
+  width: 32px; height: 32px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem; color: rgba(201,160,61,.55);
+  background: rgba(201,160,61,.07); border-radius: 50%;
+}
+.pfmodal-body {
+  padding: 1.4rem 1.5rem 1.6rem;
+}
+.pfmodal-section-lbl {
+  font-size: .44rem; letter-spacing: .26em; text-transform: uppercase;
+  color: rgba(201,160,61,.45); margin-bottom: .5rem;
+}
+.pfmodal-notas {
+  display: flex; flex-wrap: wrap; gap: .4rem .5rem; margin-bottom: 1.2rem;
+}
+.pfmodal-nota {
+  font-size: .68rem; letter-spacing: .06em;
+  color: rgba(230,220,200,.85);
+  background: rgba(201,160,61,.07);
+  border: 1px solid rgba(201,160,61,.14);
+  border-radius: 20px;
+  padding: .28rem .75rem;
+}
+.pfmodal-divider {
+  width: 30px; height: 1px;
+  background: linear-gradient(90deg, rgba(201,160,61,.45), transparent);
+  margin: 1rem 0;
+}
+.pfmodal-meta {
+  display: grid; grid-template-columns: 1fr 1fr; gap: .5rem .8rem;
+}
+.pfmodal-meta-lbl {
+  font-size: .42rem; letter-spacing: .2em; text-transform: uppercase;
+  color: rgba(201,160,61,.38);
+}
+.pfmodal-meta-val {
+  font-size: .72rem; color: rgba(220,210,195,.78); margin-top: .12rem;
+}
+.pfmodal-close {
+  position: absolute; top: 10px; right: 12px; z-index: 10;
+  background: rgba(5,14,9,.85);
+  border: 1px solid rgba(201,160,61,.22);
+  border-radius: 50%; width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: rgba(201,160,61,.7);
+  font-size: .9rem; line-height: 1;
+  transition: background .2s, color .2s;
+}
+.pfmodal-close:hover { background: rgba(201,160,61,.18); color: var(--gold); }
