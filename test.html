@@ -161,6 +161,141 @@
       .rpcard-name{font-size:2rem;}
       .rpcarousel{height:330px;}
     }
+
+    /* ── Botón de marca clickable ── */
+    .rpcard-brand-btn{
+      background:none;border:none;padding:0;cursor:pointer;
+      font-size:inherit;letter-spacing:inherit;text-transform:inherit;
+      color:inherit;font-family:inherit;opacity:inherit;
+      transition:color .25s,opacity .25s;
+    }
+    .rpcard-brand-btn:hover{ color:var(--gold);opacity:1; }
+
+    /* ── Modal overlay ── */
+    .pfmodal-overlay{
+      position:fixed;inset:0;z-index:1000;
+      background:rgba(0,0,0,.72);
+      backdrop-filter:blur(6px);
+      display:flex;align-items:center;justify-content:center;
+      opacity:0;pointer-events:none;
+      transition:opacity .3s ease;
+    }
+    .pfmodal-overlay.open{ opacity:1;pointer-events:auto; }
+
+    /* ── Tarjeta emergente ── */
+    .pfmodal-card{
+      position:relative;
+      width:320px;
+      border-radius:28px;
+      overflow:hidden;
+      background:#07130d;
+      border:1px solid rgba(201,160,61,.22);
+      box-shadow:0 30px 80px rgba(0,0,0,.75);
+      transform-style:preserve-3d;
+      will-change:transform;
+      transition:transform .12s ease-out;
+    }
+
+    /* Imagen placeholder (sustituible por imagen real) */
+    .pfmodal-img{
+      width:100%;height:200px;
+      object-fit:cover;object-position:center;
+      display:block;
+      background:linear-gradient(135deg,rgba(201,160,61,.06) 0%,rgba(4,12,7,.9) 100%);
+    }
+    .pfmodal-img-placeholder{
+      width:100%;height:200px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:3rem;color:rgba(201,160,61,.12);
+      background:linear-gradient(135deg,rgba(201,160,61,.04) 0%,rgba(4,12,7,.95) 100%);
+    }
+
+    /* Gradiente sobre imagen */
+    .pfmodal-imggrad{
+      position:absolute;top:0;left:0;right:0;height:200px;
+      background:linear-gradient(to bottom,transparent 40%,rgba(7,19,13,.95) 100%);
+      pointer-events:none;
+    }
+
+    /* Cabecera glassmorphism */
+    .pfmodal-header{
+      position:absolute;top:14px;left:14px;right:14px;
+      background:rgba(255,255,255,.06);
+      backdrop-filter:blur(12px);
+      border:1px solid rgba(255,255,255,.1);
+      border-radius:16px;
+      padding:14px 16px;
+      display:flex;align-items:flex-start;justify-content:space-between;
+      gap:10px;
+    }
+    .pfmodal-header-text{}
+    .pfmodal-htitle{
+      font-family:'Cormorant Garamond',serif;
+      font-size:1.35rem;font-weight:600;
+      color:#fff;line-height:1.15;
+    }
+    .pfmodal-hbrand{
+      font-size:.48rem;letter-spacing:.24em;text-transform:uppercase;
+      color:rgba(201,160,61,.8);margin-top:.25rem;
+    }
+    .pfmodal-hdot{
+      width:32px;height:32px;flex-shrink:0;
+      display:flex;align-items:center;justify-content:center;
+      font-size:1.1rem;color:rgba(201,160,61,.55);
+      background:rgba(201,160,61,.07);border-radius:50%;
+    }
+
+    /* Cuerpo: notas y datos */
+    .pfmodal-body{
+      padding:1.4rem 1.5rem 1.6rem;
+      transform:translateZ(20px);
+    }
+    .pfmodal-section-lbl{
+      font-size:.44rem;letter-spacing:.26em;text-transform:uppercase;
+      color:rgba(201,160,61,.45);margin-bottom:.5rem;
+    }
+    .pfmodal-notas{
+      display:flex;flex-wrap:wrap;gap:.4rem .5rem;
+      margin-bottom:1.2rem;
+    }
+    .pfmodal-nota{
+      font-size:.68rem;letter-spacing:.06em;
+      color:rgba(230,220,200,.85);
+      background:rgba(201,160,61,.07);
+      border:1px solid rgba(201,160,61,.14);
+      border-radius:20px;
+      padding:.28rem .75rem;
+    }
+    .pfmodal-meta{
+      display:grid;grid-template-columns:1fr 1fr;gap:.5rem .8rem;
+    }
+    .pfmodal-meta-item{}
+    .pfmodal-meta-lbl{
+      font-size:.42rem;letter-spacing:.2em;text-transform:uppercase;
+      color:rgba(201,160,61,.38);
+    }
+    .pfmodal-meta-val{
+      font-size:.72rem;color:rgba(220,210,195,.78);
+      margin-top:.12rem;
+    }
+    .pfmodal-divider{
+      width:30px;height:1px;
+      background:linear-gradient(90deg,rgba(201,160,61,.45),transparent);
+      margin:1rem 0;
+    }
+
+    /* Botón cerrar */
+    .pfmodal-close{
+      position:absolute;top:10px;right:12px;z-index:10;
+      background:rgba(5,14,9,.85);
+      border:1px solid rgba(201,160,61,.22);
+      border-radius:50%;width:28px;height:28px;
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer;color:rgba(201,160,61,.7);
+      font-size:.9rem;line-height:1;
+      transition:background .2s,color .2s;
+    }
+    .pfmodal-close:hover{background:rgba(201,160,61,.18);color:var(--gold);}
   </style>
 </head>
 <body>
@@ -207,6 +342,29 @@
   <footer>
     <p>&#9670; &nbsp;<strong>Perfumity</strong>&nbsp; &#9670; &nbsp; Datos extra&iacute;dos de fuentes p&uacute;blicas &nbsp;&middot;&nbsp; Todos los derechos de marca pertenecen a sus respectivos due&ntilde;os</p>
   </footer>
+
+  <!-- Modal emergente de perfume -->
+  <div class="pfmodal-overlay" id="pfModal" role="dialog" aria-modal="true">
+    <div class="pfmodal-card" id="pfModalCard">
+      <button class="pfmodal-close" onclick="pfModalClose()" aria-label="Cerrar">&#10005;</button>
+      <div class="pfmodal-img-placeholder" id="pfModalImgWrap">&#9670;</div>
+      <div class="pfmodal-imggrad"></div>
+      <div class="pfmodal-header">
+        <div class="pfmodal-header-text">
+          <div class="pfmodal-htitle" id="pfModalName"></div>
+          <div class="pfmodal-hbrand" id="pfModalBrand"></div>
+        </div>
+        <div class="pfmodal-hdot">&#9670;</div>
+      </div>
+      <div class="pfmodal-body">
+        <div class="pfmodal-section-lbl">Notas olfativas</div>
+        <div class="pfmodal-notas" id="pfModalNotas"></div>
+        <div class="pfmodal-divider"></div>
+        <div class="pfmodal-section-lbl">Detalles</div>
+        <div class="pfmodal-meta" id="pfModalMeta"></div>
+      </div>
+    </div>
+  </div>
 
   <script src="effects.js"></script>
   <script src="data.js"></script>
@@ -864,7 +1022,7 @@ function showResult(){
       `<div class="rpcard-info">` +
         `<div class="rpcard-rank">${rankLabels[idx]}</div>` +
         `<div class="rpcard-name">${item.perfume}</div>` +
-        `<div class="rpcard-brand"><span class="rpdot">&#9670;</span>${item.marca}<span class="rpdot">&#9670;</span></div>` +
+        `<div class="rpcard-brand"><span class="rpdot">&#9670;</span><button class="rpcard-brand-btn" onclick="pfModalOpen(${JSON.stringify(item.perfume)},${JSON.stringify(item.marca)})">${item.marca}</button><span class="rpdot">&#9670;</span></div>` +
         `<div class="rpcard-divider"></div>` +
         `<div class="rpcard-lbl">celebrities que lo usan</div>` +
         `<div class="rpcard-celebnames">${celebNamesStr}</div>` +
@@ -906,6 +1064,90 @@ function restartTest(){
   renderQ();
 }
 renderQ();
+
+// ── Modal emergente de perfume ──
+(function(){
+  const overlay = document.getElementById('pfModal');
+  const card    = document.getElementById('pfModalCard');
+
+  // Tilt 3D al mover el ratón
+  card.addEventListener('mousemove', function(e){
+    const r = card.getBoundingClientRect();
+    const x = e.clientX - r.left, y = e.clientY - r.top;
+    const rx = (y - r.height/2) / (r.height/2) * -8;
+    const ry = (x - r.width/2)  / (r.width/2)  *  8;
+    card.style.transform = 'perspective(1000px) rotateX('+rx+'deg) rotateY('+ry+'deg) scale3d(1.04,1.04,1.04)';
+    card.style.transition = 'transform .1s ease-out';
+  });
+  card.addEventListener('mouseleave', function(){
+    card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1,1,1)';
+    card.style.transition = 'transform .4s ease-in-out';
+  });
+
+  // Cerrar al hacer clic en el overlay
+  overlay.addEventListener('click', function(e){
+    if(e.target === overlay) pfModalClose();
+  });
+
+  // Cerrar con Escape
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape') pfModalClose();
+  });
+})();
+
+function pfModalOpen(perfume, marca){
+  const key = perfume.trim().toLowerCase();
+  const db  = typeof PERFUME_DB !== 'undefined' ? PERFUME_DB : {};
+  const entry = db[key] || db[key.replace(/\s+/g,' ')] || null;
+
+  document.getElementById('pfModalName').textContent  = entry ? entry.nombre  : perfume;
+  document.getElementById('pfModalBrand').textContent = entry ? entry.marca   : marca;
+
+  // Notas
+  const notasEl = document.getElementById('pfModalNotas');
+  notasEl.innerHTML = '';
+  const notasStr = entry ? entry.notas : '';
+  if(notasStr){
+    notasStr.split(',').forEach(function(n){
+      const t = n.trim();
+      if(!t) return;
+      const chip = document.createElement('span');
+      chip.className = 'pfmodal-nota';
+      chip.textContent = t;
+      notasEl.appendChild(chip);
+    });
+  } else {
+    notasEl.innerHTML = '<span style="color:rgba(255,255,255,.3);font-size:.72rem">No disponible</span>';
+  }
+
+  // Meta datos
+  const metaEl = document.getElementById('pfModalMeta');
+  metaEl.innerHTML = '';
+  if(entry){
+    const fields = [
+      {l:'Familia', v: entry.familia},
+      {l:'Género',  v: entry.genero},
+      {l:'Estación',v: entry.estacion},
+      {l:'Ocasión', v: entry.ocasion},
+      {l:'Precio',  v: entry.precio},
+      {l:'Proyección', v: entry.proyeccion},
+    ];
+    fields.forEach(function(f){
+      if(!f.v) return;
+      metaEl.innerHTML +=
+        '<div class="pfmodal-meta-item">' +
+          '<div class="pfmodal-meta-lbl">'+f.l+'</div>' +
+          '<div class="pfmodal-meta-val">'+f.v+'</div>' +
+        '</div>';
+    });
+  }
+
+  document.getElementById('pfModal').classList.add('open');
+}
+
+function pfModalClose(){
+  document.getElementById('pfModal').classList.remove('open');
+}
   </script>
 
 </body>
