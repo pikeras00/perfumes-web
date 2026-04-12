@@ -418,61 +418,90 @@ const BOTTLE = `<svg class="ccard-bottle" viewBox="0 0 80 155" fill="none" xmlns
 function ini(n) { return n.split(" ").slice(0,2).map(w=>w[0]).join("").toUpperCase(); }
 
 function photoSrc(nombre) {
+  // En servidor HTTP/HTTPS las fotos locales no existen: ir directo a Wikipedia
+  if (location.protocol !== 'file:') return null;
   const f = PHOTO_MAP[nombre];
   if (!f) return null;
   return 'Carpetas%20famosos/' + encodeURIComponent(f);
 }
 
-/* ── Wikipedia fallback for missing/broken photos ── */
-const _wikiCache = {};
+/* ── Wikipedia fotos: caché + batch de hasta 50 títulos por petición ── */
+const _wikiCache = {};      // nombre → url  (null = sin foto)
+const _wikiQueue = [];      // cards pendientes de consultar
+let   _wikiBatchTimer = null;
 
-async function wikiImg(card){
-  const nombre = card.dataset.nombre;
-  if(!nombre || card.dataset.wikiDone) return;
-  card.dataset.wikiDone = "1";
-  let src = _wikiCache[nombre];
-  if(!src){
-    try{
-      const encoded = encodeURIComponent(nombre.replace(/ /g,"_"));
-      const r = await fetch("https://en.wikipedia.org/w/api.php?action=query&titles="+encoded+"&prop=pageimages&format=json&pithumbsize=300&origin=*");
-      const d = await r.json();
-      const pg = Object.values(d.query.pages)[0];
-      src = pg.thumbnail ? pg.thumbnail.source : null;
-      if(src) _wikiCache[nombre] = src;
-    } catch(_){ return; }
-  }
-  if(!src) return;
+function applyWikiSrc(card, src) {
+  if (!src) return;
   let img = card.querySelector('.ccard-photo');
-  if(!img){
+  if (!img) {
     img = document.createElement('img');
     img.className = 'ccard-photo';
-    img.alt = nombre;
+    img.alt = card.dataset.nombre || '';
     card.prepend(img);
   }
   img.onload = () => {
     img.style.display = 'block';
     card.classList.remove('no-photo');
     const btl = card.querySelector('.ccard-bottle');
-    if(btl) btl.remove();
+    if (btl) btl.remove();
   };
   img.onerror = null;
   img.src = src;
 }
 
-/* ── Lazy-load Wikipedia photos when card enters viewport ── */
+async function _flushWikiQueue() {
+  if (!_wikiQueue.length) return;
+  const batch = _wikiQueue.splice(0, 50);
+  const names  = batch.map(c => c.dataset.nombre).filter(Boolean);
+  const titles = names.map(n => n.replace(/ /g, '_')).join('|');
+  try {
+    const r = await fetch(
+      'https://en.wikipedia.org/w/api.php?action=query&titles='
+      + encodeURIComponent(titles)
+      + '&prop=pageimages&format=json&pithumbsize=400&origin=*'
+    );
+    const d  = await r.json();
+    const pages = Object.values(d.query.pages);
+    // Mapear título normalizado → thumbnail
+    const srcMap = {};
+    pages.forEach(pg => {
+      const key = (pg.title || '').replace(/_/g, ' ');
+      srcMap[key] = pg.thumbnail ? pg.thumbnail.source : null;
+    });
+    batch.forEach(card => {
+      const n = card.dataset.nombre;
+      const src = srcMap[n] || null;
+      _wikiCache[n] = src;
+      applyWikiSrc(card, src);
+    });
+  } catch(_) { /* silencioso */ }
+}
+
+function wikiImg(card) {
+  const nombre = card.dataset.nombre;
+  if (!nombre || card.dataset.wikiDone) return;
+  card.dataset.wikiDone = '1';
+  if (_wikiCache[nombre] !== undefined) {
+    applyWikiSrc(card, _wikiCache[nombre]); return;
+  }
+  _wikiQueue.push(card);
+  clearTimeout(_wikiBatchTimer);
+  // Acumula 80 ms para agrupar tarjetas que entran al viewport juntas
+  _wikiBatchTimer = setTimeout(_flushWikiQueue, 80);
+}
+
+/* ── Lazy-load: observa tarjetas que entren en viewport ── */
 let _wikiObserver = null;
 function initWikiObserver(){
-  if(_wikiObserver){ _wikiObserver.disconnect(); }
+  if (_wikiObserver) _wikiObserver.disconnect();
   _wikiObserver = new IntersectionObserver(entries => {
     entries.forEach(e => {
-      if(!e.isIntersecting) return;
-      const card = e.target;
-      _wikiObserver.unobserve(card);
-      wikiImg(card);
+      if (!e.isIntersecting) return;
+      _wikiObserver.unobserve(e.target);
+      wikiImg(e.target);
     });
-  }, { rootMargin:'300px' });
-  document.querySelectorAll('.ccard.no-photo, .ccard .wiki-lazy').forEach(el => {
-    const card = el.closest('.ccard') || el;
+  }, { rootMargin: '400px' });
+  document.querySelectorAll('.ccard').forEach(card => {
     _wikiObserver.observe(card);
   });
 }
