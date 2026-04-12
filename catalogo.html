@@ -418,8 +418,6 @@ const BOTTLE = `<svg class="ccard-bottle" viewBox="0 0 80 155" fill="none" xmlns
 function ini(n) { return n.split(" ").slice(0,2).map(w=>w[0]).join("").toUpperCase(); }
 
 function photoSrc(nombre) {
-  // En servidor HTTP/HTTPS las fotos locales no existen: ir directo a Wikipedia
-  if (location.protocol !== 'file:') return null;
   const f = PHOTO_MAP[nombre];
   if (!f) return null;
   return 'Carpetas%20famosos/' + encodeURIComponent(f);

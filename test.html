@@ -582,9 +582,7 @@ function bestPerfumeFor(c, ans){
 
 // ── Carga de foto: local primero, Wikipedia como fallback ──
 function showPhoto(nombre, imgEl, wrapEl){
-  // En servidor HTTP/HTTPS las fotos locales no existen: ir directo a Wikipedia
-  const localFile = location.protocol === 'file:' &&
-                    typeof PHOTO_MAP !== "undefined" ? PHOTO_MAP[nombre] : null;
+  const localFile = typeof PHOTO_MAP !== "undefined" ? PHOTO_MAP[nombre] : null;
 
   function reveal(){
     imgEl.style.display = "block";
