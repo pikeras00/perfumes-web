@@ -76,7 +76,10 @@
   <div class="pfmodal-overlay" id="pfModal" role="dialog" aria-modal="true">
     <div class="pfmodal-card" id="pfModalCard">
       <button class="pfmodal-close" onclick="pfModalClose()" aria-label="Cerrar">&#10005;</button>
-      <div class="pfmodal-img-placeholder" id="pfModalImgWrap">&#9670;</div>
+      <div class="pfmodal-img-placeholder" id="pfModalImgWrap">
+        <span class="pfmodal-img-diamond">&#9670;</span>
+        <img class="pfmodal-img-photo" id="pfModalPhoto" src="" alt="" aria-hidden="true">
+      </div>
       <div class="pfmodal-imggrad"></div>
       <div class="pfmodal-header">
         <div class="pfmodal-header-text">
@@ -819,6 +822,11 @@ document.getElementById("fbarFam").querySelectorAll(".fbtn").forEach(btn => {
   });
 })();
 
+// ── Mapa de fotos de perfume (sin fondo) ──
+const PERFUME_PHOTOS = {
+  'santal 33': 'Fotos_Perfumes/santal33_nobg.png'
+};
+
 function pfModalOpen(perfume, marca){
   const key = perfume.trim().toLowerCase();
   const db  = typeof PERFUME_DB !== 'undefined' ? PERFUME_DB : {};
@@ -826,6 +834,20 @@ function pfModalOpen(perfume, marca){
 
   document.getElementById('pfModalName').textContent  = entry ? entry.nombre : perfume;
   document.getElementById('pfModalBrand').textContent = entry ? entry.marca  : marca;
+
+  // Foto del frasco
+  const photoEl   = document.getElementById('pfModalPhoto');
+  const diamondEl = document.querySelector('#pfModalImgWrap .pfmodal-img-diamond');
+  const photoSrc  = PERFUME_PHOTOS[key] || null;
+  if(photoSrc){
+    photoEl.src = photoSrc;
+    photoEl.style.display = 'block';
+    diamondEl.style.display = 'none';
+  } else {
+    photoEl.src = '';
+    photoEl.style.display = 'none';
+    diamondEl.style.display = '';
+  }
 
   const notasEl = document.getElementById('pfModalNotas');
   notasEl.innerHTML = '';

@@ -1664,6 +1664,14 @@ footer { border-top: none; padding-top: 0; }
   display: flex; align-items: center; justify-content: center;
   font-size: 3rem; color: rgba(201,160,61,.12);
   background: linear-gradient(135deg, rgba(201,160,61,.04) 0%, rgba(4,12,7,.95) 100%);
+  position: relative; overflow: hidden;
+}
+.pfmodal-img-photo {
+  display: none;
+  position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+  height: 210px; width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 24px rgba(0,0,0,.6));
 }
 .pfmodal-imggrad {
   position: absolute; top: 0; left: 0; right: 0; height: 200px;
