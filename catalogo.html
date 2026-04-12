@@ -855,7 +855,7 @@ function pfModalOpen(perfume, marca){
   }
 
   document.getElementById('pfModalBuy').href =
-    'https://www.sephora.es/search?q=' + encodeURIComponent((entry ? entry.nombre : perfume) + ' ' + (entry ? entry.marca : marca));
+    'https://www.amazon.es/s?k=' + encodeURIComponent((entry ? entry.nombre : perfume) + ' ' + (entry ? entry.marca : marca));
 
   document.getElementById('pfModal').classList.add('open');
 }
