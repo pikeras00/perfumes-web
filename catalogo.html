@@ -451,33 +451,74 @@ async function _flushWikiQueue() {
   if (!_wikiQueue.length) return;
   const batch = _wikiQueue.splice(0, 50);
   const names  = batch.map(c => c.dataset.nombre).filter(Boolean);
-  const titles = names.map(n => n.replace(/ /g, '_')).join('|');
+  // Codificar cada título individualmente y unir con | literal (no encodeURIComponent del conjunto)
+  const titles = names.map(n => encodeURIComponent(n.replace(/ /g, '_'))).join('|');
+  const noImgCards = [];
   try {
     const r = await fetch(
       'https://en.wikipedia.org/w/api.php?action=query&titles='
-      + encodeURIComponent(titles)
-      + '&prop=pageimages&format=json&pithumbsize=400&origin=*'
+      + titles
+      + '&prop=pageimages&format=json&pithumbsize=400&redirects=&origin=*'
     );
     const d  = await r.json();
     const pages = Object.values(d.query.pages);
-    // Mapear título normalizado → thumbnail
+
+    // Construir mapa: título final normalizado → thumbnail
     const srcMap = {};
     pages.forEach(pg => {
-      const key = (pg.title || '').replace(/_/g, ' ');
-      srcMap[key] = pg.thumbnail ? pg.thumbnail.source : null;
+      const key = (pg.title || '').replace(/_/g, ' ').toLowerCase();
+      if (pg.thumbnail) srcMap[key] = pg.thumbnail.source;
     });
+    // Manejar redirects: Wikipedia puede devolver la página destino con título diferente
+    const redirects = (d.query && d.query.redirects) || [];
+    const redirectMap = {};
+    redirects.forEach(rd => {
+      redirectMap[(rd.from || '').replace(/_/g, ' ').toLowerCase()] =
+        (rd.to   || '').replace(/_/g, ' ').toLowerCase();
+    });
+
     batch.forEach(card => {
       const n = card.dataset.nombre;
-      const src = srcMap[n] || null;
+      const nLow = n.toLowerCase();
+      const redirectedKey = redirectMap[nLow] || nLow;
+      const src = srcMap[nLow] || srcMap[redirectedKey] || null;
       _wikiCache[n] = src;
-      applyWikiSrc(card, src);
+      if (src) {
+        applyWikiSrc(card, src);
+      } else {
+        noImgCards.push(card); // segunda pasada con búsqueda
+      }
     });
-  } catch(_) { /* silencioso */ }
+  } catch(_) {
+    batch.forEach(c => noImgCards.push(c));
+  }
+
+  // Segunda pasada: buscar por nombre (gsrsearch) para los que no tienen imagen
+  for (const card of noImgCards) {
+    const n = card.dataset.nombre;
+    if (_wikiCache[n]) continue; // ya encontrado por otra vía
+    try {
+      const r2 = await fetch(
+        'https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch='
+        + encodeURIComponent(n) + '&gsrlimit=1&prop=pageimages&format=json&pithumbsize=400&origin=*'
+      );
+      const d2 = await r2.json();
+      if (d2.query && d2.query.pages) {
+        const pg2 = Object.values(d2.query.pages)[0];
+        const src2 = (pg2 && pg2.thumbnail) ? pg2.thumbnail.source : null;
+        _wikiCache[n] = src2;
+        if (src2) applyWikiSrc(card, src2);
+      }
+    } catch(_) {}
+  }
 }
 
 function wikiImg(card) {
   const nombre = card.dataset.nombre;
   if (!nombre || card.dataset.wikiDone) return;
+  // Si la foto local ya cargó correctamente, no sobreescribir
+  const existingImg = card.querySelector('.ccard-photo');
+  if (existingImg && existingImg.complete && existingImg.naturalWidth > 0) return;
   card.dataset.wikiDone = '1';
   if (_wikiCache[nombre] !== undefined) {
     applyWikiSrc(card, _wikiCache[nombre]); return;

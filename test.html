@@ -605,21 +605,38 @@ function showPhoto(nombre, imgEl, wrapEl){
 }
 
 async function fetchWikiPhoto(nombre, imgEl, wrapEl){
-  const encoded = encodeURIComponent(nombre.replace(/ /g,"_"));
-  const url = "https://en.wikipedia.org/w/api.php?action=query&titles="
-    + encoded + "&prop=pageimages&format=json&pithumbsize=400&origin=*";
+  function applyImg(src){
+    if(!src) return;
+    imgEl.onload = () => {
+      imgEl.style.display = "block";
+      const ph = wrapEl.querySelector(".rcceleb-placeholder");
+      if(ph) ph.style.display = "none";
+    };
+    imgEl.onerror = null;
+    imgEl.src = src;
+  }
+
+  // 1) REST v1 summary — maneja redirects automáticamente, muy fiable
   try{
-    const resp = await fetch(url);
-    const data = await resp.json();
-    const page = Object.values(data.query.pages)[0];
-    if(page.thumbnail && page.thumbnail.source){
-      imgEl.onload = () => {
-        imgEl.style.display = "block";
-        const ph = wrapEl.querySelector(".rcceleb-placeholder");
-        if(ph) ph.style.display = "none";
-      };
-      imgEl.onerror = null;
-      imgEl.src = page.thumbnail.source;
+    const slug = encodeURIComponent(nombre.replace(/ /g,"_"));
+    const r = await fetch("https://en.wikipedia.org/api/rest_v1/page/summary/" + slug);
+    if(r.ok){
+      const d = await r.json();
+      const src = (d.thumbnail && d.thumbnail.source) || (d.originalimage && d.originalimage.source);
+      if(src){ applyImg(src); return; }
+    }
+  } catch(_){}
+
+  // 2) Fallback: búsqueda por nombre (gsrsearch) — funciona aunque el título no coincida
+  try{
+    const r2 = await fetch(
+      "https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch="
+      + encodeURIComponent(nombre) + "&gsrlimit=1&prop=pageimages&format=json&pithumbsize=400&origin=*"
+    );
+    const d2 = await r2.json();
+    if(d2.query && d2.query.pages){
+      const pg = Object.values(d2.query.pages)[0];
+      if(pg && pg.thumbnail){ applyImg(pg.thumbnail.source); return; }
     }
   } catch(_){}
 }
@@ -675,7 +692,7 @@ function showResult(){
     card.innerHTML =
       `<div class="rcceleb-imgwrap" id="${wId}">` +
         `<div class="rcceleb-placeholder">&#9670; &#9670; &#9670;</div>` +
-        `<img class="rcceleb-photo" id="${pId}" alt="${celeb.nombre}" loading="lazy">` +
+        `<img class="rcceleb-photo" id="${pId}" alt="${celeb.nombre}">` +
         `<div class="rcceleb-rank">${rankLabels[idx]}</div>` +
         `<div class="rcceleb-pct">${celeb.pct}%</div>` +
         `<div class="rcceleb-overlay-name">${celeb.nombre}</div>` +
