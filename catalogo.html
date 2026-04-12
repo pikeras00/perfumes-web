@@ -91,6 +91,10 @@
         <div class="pfmodal-divider"></div>
         <div class="pfmodal-section-lbl">Detalles</div>
         <div class="pfmodal-meta" id="pfModalMeta"></div>
+        <a class="pfmodal-buy" id="pfModalBuy" href="#" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          Comprar
+        </a>
       </div>
     </div>
   </div>
@@ -673,10 +677,6 @@ function cardHTML(c) {
       </div>
       <span class="ccard-btn-arrow">&#8250;</span>
     </div>
-    ${pf ? `<a class="ccard-buy" href="https://www.sephora.es/search?q=${encodeURIComponent(perfName+' '+perfBrand)}" target="_blank" rel="noopener" title="Comprar ${perfName}" onclick="event.stopPropagation()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-      Comprar
-    </a>` : ''}
   </div>`;
 }
 
@@ -853,6 +853,9 @@ function pfModalOpen(perfume, marca){
       metaEl.innerHTML += '<div class="pfmodal-meta-item"><div class="pfmodal-meta-lbl">'+f.l+'</div><div class="pfmodal-meta-val">'+f.v+'</div></div>';
     });
   }
+
+  document.getElementById('pfModalBuy').href =
+    'https://www.sephora.es/search?q=' + encodeURIComponent((entry ? entry.nombre : perfume) + ' ' + (entry ? entry.marca : marca));
 
   document.getElementById('pfModal').classList.add('open');
 }
