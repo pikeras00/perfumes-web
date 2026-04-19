@@ -162,6 +162,41 @@
       .rpcarousel{height:330px;}
     }
 
+    /* ── Móvil: correcciones de scroll y nitidez ── */
+    @media(max-width:600px){
+      /* Evitar desbordamiento horizontal en tarjetas de resultado */
+      .rcelebs{gap:1.2rem;margin:1.2rem 0 1.8rem;}
+      .rpcard{border-radius:14px;overflow:hidden;}
+      .rpcard-info{padding:1.5rem 1.2rem 1.2rem;}
+      .rpcard-name{font-size:1.7rem;line-height:1.1;}
+      .rpcard-celebnames{font-size:.88rem;}
+      .rpcarousel{height:290px;}
+
+      /* Eliminar backdrop-filter de la tarjeta — causa blur en móvil */
+      .rcard{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(8,38,20,.97);}
+    }
+
+    @media(max-width:480px){
+      .rpcard-name{font-size:1.45rem;}
+      .rpcard-info{padding:1.2rem 1rem 1rem;}
+      .rpcarousel{height:260px;}
+      .rpcar-imgwrap{height:200px;}
+      .rpcar-slide{padding-top:16px;}
+
+      /* Desactivar 3D en el carrusel: rotateY + perspective = blur en GPU móvil */
+      .rpcarousel{perspective:none;}
+      .rpcar-slide{
+        transition:transform .4s ease, opacity .4s ease;
+      }
+
+      /* Texto del carrusel */
+      .rpcar-celeb{font-size:1.1rem;margin-top:.5rem;}
+      .rpcar-prof{font-size:.4rem;}
+
+      /* Botones nav más compactos */
+      .rpcar-btn{width:24px;height:24px;font-size:.95rem;}
+    }
+
     /* ── Botón de marca clickable ── */
     .rpcard-brand-btn{
       background:none;border:none;padding:0;cursor:pointer;
@@ -474,9 +509,13 @@ const DB_NIVEL_MAP = {nuevo:"Nuevo", descubrir:"Intermedio", experto:"Experto"};
 function scoreFromDB(d, ans){
   let sc=0, penalty=0;
 
-  // Q1 Género (+5 exacto, +2 unisex, -2 incorrecto)
+  // Q1 Género — filtro duro: excluye perfumes de género contrario
   const gt = DB_GENERO[ans.q1];
-  if(gt){ if(d.genero===gt) sc+=5; else if(d.genero==="Unisex") sc+=2; else sc-=2; }
+  if(gt){
+    if(d.genero === gt) sc += 5;
+    else if(d.genero === "Unisex") sc += 2;
+    else return -Infinity; // género incompatible → descartado
+  }
 
   // Q2 Estación (+4 exacto, +2 comodín "Todo el año")
   const estOK = DB_ESTACION[ans.q2]||[];
@@ -782,21 +821,24 @@ const _carTimers = {};   // idx → intervalId
 function _carUpdate(idx) {
   const st = _carState[idx];
   if (!st) return;
+  const isMobile = window.innerWidth <= 480;
   const slides = document.querySelectorAll('#rptrack_' + idx + ' .rpcar-slide');
   slides.forEach((slide, ci) => {
     const total = st.total;
     let pos = ((ci - st.cur) % total + total) % total;
     if (pos > Math.floor(total / 2)) pos -= total;
-    // pos: 0=center, ±1=sides, |pos|>1=oculto
     const isCenter = pos === 0;
     const isSide   = Math.abs(pos) === 1;
     slide.className = 'rpcar-slide' + (isCenter ? ' rpcar-center' : isSide ? ' rpcar-side' : '');
+    // En móvil se omite rotateY y filter:blur para evitar borrosidad por GPU
+    const rotateY = isMobile ? '' : ' rotateY(' + (pos * -9) + 'deg)';
+    const blurVal  = isMobile ? 0 : (isCenter ? 0 : isSide ? 3 : 6);
     slide.style.cssText =
       'transform:translateX(' + (pos * 52) + '%) scale(' + (isCenter ? 1 : isSide ? 0.74 : 0.55) + ')' +
-      ' rotateY(' + (pos * -9) + 'deg);' +
+      rotateY + ';' +
       'z-index:' + (isCenter ? 10 : isSide ? 5 : 1) + ';' +
       'opacity:' + (isCenter ? 1 : isSide ? 0.45 : 0) + ';' +
-      'filter:blur(' + (isCenter ? 0 : isSide ? 3 : 6) + 'px);' +
+      (blurVal > 0 ? 'filter:blur(' + blurVal + 'px);' : '') +
       'visibility:' + (Math.abs(pos) > 1 ? 'hidden' : 'visible') + ';';
   });
 }
