@@ -51,6 +51,15 @@ def compress_image(src: Path, dst: Path, max_kb=MAX_SIZE_KB, max_w=TARGET_W):
 # Celebrities con foto local pero nombre distinto → normalized_celeb_name: stem_del_archivo
 # Las claves son nombres YA normalizados (normalize(celeb_name)) para evitar problemas de encoding
 LOCAL_ALIASES: dict[str, str] = {
+    "d_o":                     "do_kyung_soo",
+    "anne_hathaway":           "anne_hathawaye",
+    "chanel_terrero":          "chanel",
+    "dina_asher_smith":        "dina_asher",
+    "iker_casillas":           "casillas",
+    "neymar":                  "neymar_jr",
+    "vivien_leigh":            "vivien_leigh_scarlet",
+    "winston_churchill":       "churchill",
+    "sylvester_stallone":      "sylvester_stallone_cannes",
     "adam_driver":             "adamdriver",
     "alycia_debnam_carey":     "alyciadebnamcarey",
     "ben_affleck":             "benaffleck",
@@ -132,9 +141,7 @@ def match(celeb_name: str):
         rev = "_".join(reversed(parts))
         if rev in available:
             return available[rev]
-    for k in available:
-        if key in k or k in key:
-            return available[k]
+    # Sin fallback por subcadena para evitar asignaciones incorrectas
     return None
 
 photo_map: dict[str, str] = {}
