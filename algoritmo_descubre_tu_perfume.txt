@@ -1,336 +1,209 @@
-===========================================================================
-  ALGORITMO: DESCUBRE TU PERFUME  —  Documentación técnica completa
-  Archivo: test.html  |  Fecha: 2026-04-12
-===========================================================================
+  ---
+  El Algoritmo de Recomendación de Perfumity: Cómo Funciona el Test
 
-─────────────────────────────────────────────────────────────────────────
-1. VISIÓN GENERAL
-─────────────────────────────────────────────────────────────────────────
-El test "Descubre tu perfume" hace 11 preguntas al usuario sobre género,
-estación, momento, perfil olfativo, ocasiones, familias, notas a evitar,
-proyección, presupuesto, sensación (vibe) y nivel de experiencia.
+  Introducción: Un Motor de Recomendación Personalizado
 
-Con las respuestas, el algoritmo puntúa cada celebrity de la base de datos
-usando EXCLUSIVAMENTE la información estructurada de PERFUME_DB (sin palabras
-clave ni texto libre). Las 3 celebrities con mayor afinidad se presentan
-como tarjetas de resultado con un porcentaje de afinidad, su mejor fragancia
-recomendada y una foto cargada en dos capas (local → Wikipedia).
+  El test de Perfumity no es un cuestionario ordinario. Bajo su interfaz visual elegante se esconde un motor de
+  recomendación multidimensional capaz de evaluar simultáneamente decenas de variables olfativas, contextuales y
+  emocionales para encontrar el perfume —y la celebrity— que mejor encaja con el perfil del usuario. En lugar de
+  limitarse a etiquetas genéricas como "fresco" o "intenso", el algoritmo construye un retrato completo de la identidad
+  olfativa de cada persona a través de once preguntas estratégicamente diseñadas, y lo contrasta contra una base de
+  datos de más de dos mil perfumes vinculados a más de trescientas cincuenta personalidades del mundo del arte, la moda,
+   el deporte y la cultura.
 
-Flujo general:
-  Respuestas usuario
-    → scoreFromDB(perfume, ans)          [puntúa 1 perfume vs respuestas]
-    → scoreC(celebrity, ans)             [agrega scores de todos los perfumes de la celeb]
-    → sort + top 3 + pct de afinidad
-    → bestPerfumeFor(celebrity, ans)     [perfume individual más afín dentro del top-1]
-    → showResult() + showPhoto()
+  El resultado no es solo un perfume recomendado: es la revelación de qué celebrity compartiría tu mismo gusto, tu misma
+   proyección, tu mismo mundo sensorial. Eso convierte al algoritmo en algo más que una herramienta de búsqueda —es un
+  espejo olfativo.
 
+  ---
+  La Arquitectura del Sistema: Tres Capas Interdependientes
 
-─────────────────────────────────────────────────────────────────────────
-2. ARCHIVOS DE DATOS
-─────────────────────────────────────────────────────────────────────────
+  El motor de recomendación se construye sobre tres capas de datos que trabajan en conjunto:
 
-data.js
-  - Exporta CELEBRITIES: array de objetos {nombre, profesion, perfumes[]}
-  - Cada perfume: {perfume, marca}
-  - Generado desde celebrities_perfumes_corregido.xlsx con generar_datos.py
+  Primera capa — El perfil del usuario: Las respuestas del test generan un objeto de respuestas llamado tAns que
+  almacena once variables distintas, algunas de selección única y otras de selección múltiple. Este objeto es la huella
+  digital olfativa del usuario: un mapa preciso de sus preferencias, restricciones y aspiraciones.
 
-perfume_db.js
-  - Exporta PERFUME_DB: objeto clave normalizada → entrada estructurada
-  - Clave: nombre del perfume en minúsculas, sin tildes, sin espacios extra
-    (función normKey: toLowerCase + NFD + strip acentos + colapsar espacios)
-  - Cada entrada contiene los campos:
-      genero, estacion, momento, perfil, ocasion, familia, notas,
-      proyeccion, precio, vibe, nivel
-  - Generado desde base_datos_perfumes_completa.xlsx con generar_datos.py
+  Segunda capa — La base de datos de perfumes: Cada perfume en la base de datos está catalogado con nueve atributos:
+  género, estación, momento del día, perfil de personalidad, ocasiones de uso, familia olfativa, notas individuales,
+  proyección y rango de precio, más un campo de "vibe" que captura el mundo emocional que evoca el perfume y un nivel de
+   experiencia recomendado. Esta granularidad es lo que permite al algoritmo comparar perfiles con precisión quirúrgica.
 
-photo_map.js
-  - Exporta PHOTO_MAP: objeto {nombre_celebrity: "nombre_archivo.jpg"}
-  - Apunta a archivos dentro de la carpeta "Carpetas famosos/"
-  - Generado/corregido con los scripts _photo_map_clean.js y _photo_map_final.js
+  Tercera capa — El universo de celebrities: Cada personalidad lleva asociada una colección de perfumes reales que usa o
+   ha usado. El algoritmo no recomienda directamente un perfume; primero puntúa a las celebrities según la afinidad de
+  su colección con el perfil del usuario, y luego extrae los mejores perfumes de ese ranking.
 
-Carpetas famosos/
-  - Directorio con las fotos locales de celebrities
-  - Nombres de archivo almacenados tal cual en PHOTO_MAP (sin encode en la clave)
+  ---
+  Las Once Preguntas: Cada Una con un Propósito Técnico
 
+  El test formula once preguntas, pero no todas tienen el mismo peso ni el mismo tipo de impacto en el algoritmo.
+  Algunas actúan como filtros absolutos; otras suman puntos graduales; otras penalizan activamente.
 
-─────────────────────────────────────────────────────────────────────────
-3. FASE 1: scoreFromDB — Puntuación de un perfume
-─────────────────────────────────────────────────────────────────────────
-Función: scoreFromDB(d, ans)
-  d   = entrada de PERFUME_DB
-  ans = objeto con las respuestas del usuario {q1..q11}
+  Pregunta 1 — Género olfativo: Esta es la única pregunta que funciona como filtro duro. Si el usuario declara preferir
+  aromas masculinos, el algoritmo descarta automáticamente —con un valor de menos infinito— cualquier perfume catalogado
+   como femenino que no sea unisex. Un perfume unisex recibe dos puntos en lugar de los cinco que obtendría una
+  coincidencia exacta. Si el usuario elige "indiferente", el filtro queda desactivado y todos los perfumes son
+  elegibles. Es el único momento en el algoritmo donde una incompatibilidad resulta en eliminación total, no en
+  penalización parcial.
 
-Devuelve: puntuación numérica (puede ser negativa por penalizaciones)
+  Pregunta 2 — Estación: La estación no exige coincidencia exacta porque los perfumes frecuentemente trascienden una
+  sola temporada. El algoritmo trabaja con rangos: si el usuario indica verano, también se contemplan los perfumes
+  etiquetados como "Primavera/Verano". Un perfume catalogado para "Todo el año" recibe menos puntos que uno específico
+  de la estación elegida —dos puntos frente a cuatro— porque la especificidad es una señal de mayor afinidad. Cuatro
+  puntos es el máximo que esta pregunta puede aportar.
 
-Tabla de pesos:
+  Pregunta 3 — Momento del día: Con un máximo de tres puntos, esta pregunta evalúa si el perfume está diseñado para el
+  mismo contexto temporal que el usuario contempla. Un perfume catalogado como "Todo el día" es elegible para cualquier
+  respuesta, reconociendo que los clásicos versátiles no deben penalizarse por su polivalencia.
 
-  Pregunta  Campo ans  Campo DB          Puntos      Condición
-  ────────  ─────────  ────────          ──────      ─────────
-  Q1  Género     q1   genero      +5   exacto (Masculino/Femenino/Unisex)
-                                  +2   DB = Unisex (y usuario no es unisex)
-                                  -2   género incorrecto
-  Q2  Estación   q2   estacion    +4   exacto (primavera/verano/otoño/invierno)
-                                  +2   DB = "Todo el año"
-  Q3  Momento    q3   momento     +3   exacto (mañana/tarde/noche/…)
-                                  +3   DB = "Todo el día" (match universal)
-  Q4  Perfil     q4   perfil      +4   exacto (dulce/fresco/amaderado/oriental/floral/cítrico)
-  Q5  Ocasión    q5   ocasion     +2   por cada uso coincidente (multi, split por coma en DB)
-                                  +1   si usuario eligió "diario" y DB contiene "Casual"
-                                  +2   si usuario eligió "exterior" y DB contiene "Deporte"
-  Q6  Familia    q6   familia     +5   familia coincide exactamente (split por "/" en DB)
-                                  +3   familia coincide en texto libre (famLow.includes)
-  Q7  Notas evitar q7 notas      -6   por cada nota presente en el campo notas del DB
-                                       (las notas en DB_NOTAS: pachuli, rosa, vainilla, etc.)
-  Q8  Proyección  q8  proyeccion  +3   exacto (sutil/moderada/potente)
-  Q9  Precio      q9  precio      +4   exacto (<50€ / 50–100€ / 100–200€ / >200€)
-                                  +2   rango adyacente (diff = 1 en DB_PRECIO_ORD)
-  Q10 Vibe/feel  q10  vibe        +3   por cada vibe coincidente (lista extensa en DB_VIBE)
-  Q11 Nivel      q11  nivel       +3   exacto (Nuevo/Intermedio/Experto)
-                                  +1   adyacente (diff = 1 en DB_NIVEL_ORD)
+  Pregunta 4 — Perfil de personalidad: Cuatro puntos por coincidencia exacta entre la imagen que el usuario quiere
+  proyectar y el perfil que el perfume transmite. Las opciones van desde "Juvenil y vibrante" hasta "Maduro y elegante",
+   pasando por "Moderno", "Clásico" y "Atemporal y equilibrado". Esta pregunta no admite coincidencias parciales: o el
+  perfil encaja o no suma.
 
-Score final: sc - penalty   (penalty = suma de penalizaciones Q7)
+  Pregunta 5 — Ocasiones de uso: Primera pregunta de selección múltiple. El usuario puede indicar hasta seis contextos
+  de uso —oficina, citas, viajes, eventos especiales, uso diario, exteriores— y cada coincidencia con las ocasiones del
+  perfume suma dos puntos. Hay además un punto de bonificación si el usuario indica "uso diario" y el perfume está
+  catalogado también para uso casual, una distinción sutil pero relevante en la catalogación.
 
-Mappings de constantes de conversión (ans → DB):
-  DB_GENERO      = {hombre:"Masculino", mujer:"Femenino", unisex:"Unisex"}
-  DB_ESTACION    = {primavera:["Primavera","Todo el año"], verano:["Verano","Todo el año"], ...}
-  DB_MOMENTO     = {manana:["Mañana","Todo el día"], tarde:["Tarde","Todo el día"], ...}
-  DB_PERFIL      = {dulce:"Dulce", fresco:"Fresco", amaderado:"Amaderado", oriental:"Oriental",
-                    floral:"Floral", citrico:"Cítrico"}
-  DB_OCASION     = {diario:"Diario", trabajo:"Oficina", citas:"Citas", fiesta:"Fiesta",
-                    exterior:"Exterior", evento:"Evento Especial"}
-  DB_FAMILIA     = {orientales:"Oriental", florales:"Floral", amaderados:"Amaderado",
-                    frescos:"Fresco", citricos:"Cítrico", gourmand:"Gourmand",
-                    acuaticas:"Acuático", frutales:"Frutal", verdes:"Verde"}
-  DB_FAMILIA_ALT = {orientales:["Ámbar"], frescos:["Eau Fraîche"], acuaticas:["Marino"],
-                    frutales:["Afrutado"], verdes:["Herbal"]}
-  DB_NOTAS       = {pachuli:"Pachul", rosa:"Rosa", vainilla:"Vainilla", cuero:"Cuero",
-                    oud:"Oud", almizcle:"Almizcle", incienso:"Incienso", canela:"Canela",
-                    coco:"Coco"}
-  DB_PROYECCION  = {sutil:"Suave", moderada:"Moderada", potente:"Potente"}
-  DB_PRECIO_MAP  = {bajo:"<50€", medio:"50–100€", alto:"100–200€", lujo:">200€"}
-  DB_VIBE        = {misterio:[…], elegancia:[…], poder:[…], calma:[…],
-                    libertad:[…], creatividad:[…], deseo:[…]}  (listas exhaustivas)
-  DB_NIVEL_MAP   = {nuevo:"Nuevo", descubrir:"Intermedio", experto:"Experto"}
+  Pregunta 6 — Familia olfativa: Esta es la pregunta con mayor potencial de impacto en la puntuación total. El usuario
+  puede seleccionar hasta diez familias olfativas —cítricos, florales, amaderadas, orientales, fougère, chipré,
+  gourmand, acuáticas, frutales y verdes— y cada coincidencia suma cinco puntos. Dado que muchos perfumes pertenecen a
+  familias compuestas (por ejemplo, "Verde/Floral" o "Cítrico/Amaderado"), el algoritmo descompone esa etiqueta y evalúa
+   cada componente por separado. También maneja alias alternativos: "fougère" se compara con "Aromático", "acuáticas"
+  con "Marino", etc. Una coincidencia parcial dentro de la familia compuesta suma tres puntos en lugar de cinco.
 
+  Pregunta 7 — Notas a evitar: La única pregunta con penalización activa. Cada nota que el usuario declara querer evitar
+   —pachulí, rosa, vainilla, cuero, oud, almizclado, incienso, canela, coco— descuenta seis puntos si esa nota aparece
+  en la composición del perfume. La penalización es severa a propósito: si un usuario tiene aversión al oud, ningún
+  perfume con oud debería aparecer en sus resultados, sin importar cuánto puntúe en otras dimensiones. La opción
+  "Ninguna" desactiva toda penalización.
 
-─────────────────────────────────────────────────────────────────────────
-4. FASE 2: scoreC — Puntuación de una celebrity (ponderación 80/20)
-─────────────────────────────────────────────────────────────────────────
-Función: scoreC(c, ans)
-  c   = objeto celebrity (con c.perfumes[])
-  ans = respuestas del usuario
+  Pregunta 8 — Proyección: Tres puntos por coincidencia exacta entre la proyección deseada —sutil, moderada o potente— y
+   la proyección real del perfume. Sin puntos parciales.
 
-Lógica:
-  1. Para cada perfume de la celebrity que existe en PERFUME_DB,
-     calcular scoreFromDB → array dbScores[]
-  2. Si dbScores está vacío → devolver 0 (celebrity sin datos en DB)
-  3. maxDB = máximo de dbScores
-  4. avgDB = media de dbScores
-  5. score final = maxDB * 0.8 + avgDB * 0.2
+  Pregunta 9 — Presupuesto: El sistema trabaja con cuatro rangos de precio ordenados: menos de 50€, 50–100€, 100–200€ y
+  más de 200€. Una coincidencia exacta vale cuatro puntos; si el perfume está en un rango adyacente —por ejemplo, el
+  usuario indica 50–100€ y el perfume cuesta 100–200€— recibe dos puntos. Si hay dos rangos de diferencia o más, no suma
+   nada. Si el usuario declara "indiferente al precio", la pregunta completa queda desactivada, permitiendo que perfumes
+   de cualquier rango compitan en igualdad de condiciones.
 
-La ponderación 80/20 premia principalmente el perfume más afín de la
-celebrity (maxDB) pero también tiene en cuenta si toda su colección
-de perfumes es afín al usuario (avgDB), sin castigar celebrities con
-muchos perfumes de los que solo uno coincide bien.
+  Pregunta 10 — Vibe emocional: El campo más poético del algoritmo. El usuario elige hasta tres sentimientos o mundos
+  que quiere transmitir: curiosidad y misterio, elegancia y equilibrio, poder y confianza, calma y serenidad, libertad y
+   frescura, creatividad y originalidad, o deseo y magnetismo. Cada coincidencia suma tres puntos. El desafío aquí es la
+   variedad de etiquetas en la base de datos: "misterio" en la respuesta del usuario puede coincidir con perfumes
+  catalogados con vibes como "Misterio Oriental", "Psicodelia", "Oscuridad" o "Melancolía". El algoritmo maneja más de
+  cien variantes de vibe distribuidas en siete categorías, lo que convierte esta pregunta en una de las más ricas
+  semánticamente.
 
+  Pregunta 11 — Nivel de experiencia: Tres puntos si el nivel del usuario —nuevo en perfumería, explorador, o experto—
+  coincide exactamente con el nivel recomendado del perfume. Un punto si están en niveles adyacentes. Los niveles están
+  ordenados linealmente (Nuevo → Intermedio → Experto), por lo que la distancia entre niveles determina si hay
+  puntuación parcial o nula.
 
-─────────────────────────────────────────────────────────────────────────
-5. FASE 3: bestPerfumeFor — Mejor fragancia individual
-─────────────────────────────────────────────────────────────────────────
-Función: bestPerfumeFor(c, ans)
-  Recorre todos los perfumes de c y devuelve el que obtiene el mayor
-  scoreFromDB contra las respuestas del usuario.
-  Si ningún perfume está en PERFUME_DB, devuelve c.perfumes[0] por defecto.
+  ---
+  El Sistema de Puntuación: Matemática al Servicio del Aroma
 
-Se usa para:
-  - El encabezado de resultado (perfume principal del top-1)
-  - La etiqueta "fragancia recomendada" dentro de cada una de las 3 cards
+  El corazón del algoritmo es la función scoreFromDB, que recibe un perfume de la base de datos y el objeto de
+  respuestas del usuario, y devuelve un número que representa la afinidad entre ambos.
 
+  La puntuación bruta se calcula acumulando los puntos de cada dimensión positiva y restando las penalizaciones. El
+  máximo teórico ronda los 95–100 puntos en circunstancias ideales, aunque en la práctica las puntuaciones más altas
+  suelen estar entre 35 y 65 puntos, dependiendo de cuántas familias olfativas y ocasiones el usuario selecciona.
 
-─────────────────────────────────────────────────────────────────────────
-6. FASE 4: Cálculo del porcentaje de afinidad
-─────────────────────────────────────────────────────────────────────────
-En showResult():
-  1. Filtrar CELEBRITIES con al menos 1 perfume, puntuar con scoreC,
-     ordenar de mayor a menor.
-  2. Tomar top3raw = los 3 primeros con sc > 0. Si hay menos de 3,
-     rellenar con celebrities aleatorias que aún no estén en la lista.
-  3. refScore = Math.max(top3raw[0].sc, 45)
-     (mínimo de 45 evita porcentajes exagerados cuando el score es muy bajo)
-  4. Para cada celebrity en top3:
-       pct = clamp(10, 99, round(sc / refScore * factor))
-       factor = 97 para el puesto 1, 95 para los puestos 2 y 3
-     Esto garantiza que el 1er lugar siempre salga como máximo 99%
-     y haya diferencia visible con los siguientes.
+  La distribución de pesos refleja prioridades deliberadas:
 
+  - Las familias olfativas dominan la puntuación posible, reconociendo que la familia es el predictor más fuerte de si
+  un aroma gustará.
+  - El género actúa como filtro binario, no como gradiente, porque la incompatibilidad de género en perfumería es
+  frecuentemente absoluta para muchos usuarios.
+  - Las notas a evitar tienen un peso de penalización mayor al peso de cualquier coincidencia positiva individual —seis
+  puntos de resta frente a cinco de suma—, reflejando que una nota que el usuario rechaza es un veto, no una preferencia
+   menor.
+  - El precio y la proyección tienen pesos moderados, reconociendo que son importantes pero raramente decisivos si todo
+  lo demás encaja.
 
-─────────────────────────────────────────────────────────────────────────
-7. FASE 5: Presentación de resultados (3 tarjetas de celebrity)
-─────────────────────────────────────────────────────────────────────────
-showResult() construye dinámicamente el DOM:
+  ---
+  De Perfumes a Celebrities: La Lógica del Ranking
 
-  Encabezado (fuera de las cards):
-    - Nombre del perfume principal (bestPerfumeFor del top-1)
-    - Marca del perfume principal
+  El algoritmo no puntúa directamente perfumes: primero puntúa celebrities. Esta decisión arquitectónica es fundamental
+  para el concepto del producto, que busca crear una conexión emocional entre el usuario y una personalidad cultural.
 
-  Cada card (.rcceleb) contiene:
-    Zona foto (.rcceleb-imgwrap, height: 320px):
-      - Placeholder animado (3 diamantes) visible hasta que cargue la foto
-      - <img class="rcceleb-photo"> — foto de la celebrity
-      - .rcceleb-rank   — etiqueta de posición ("Afinidad total" / "Segunda opción" / "Tercera opción")
-      - .rcceleb-pct    — porcentaje de afinidad (ej. "87%")
-      - .rcceleb-overlay-name — nombre de la celebrity superpuesto sobre la foto (font-size: 1.7rem)
+  Para cada celebrity, la función scoreC obtiene el score individual de cada perfume de su colección, calcula el máximo
+  y el promedio, y aplica una fórmula ponderada: 80% del mejor perfume + 20% del promedio de la colección. Esta fórmula
+  equilibra dos objetivos contrapuestos: premia a la celebrity cuyo mejor perfume encaja perfectamente con el usuario,
+  pero también reconoce coherencia de colección. Una celebrity cuyos cinco perfumes son todos mediocres tiene menos
+  ventaja que una cuyo catálogo es mayoritariamente afín, aunque en ambos casos la estrella es el mejor match
+  individual.
 
-    Cuerpo (.rcceleb-body, padding: 1rem 1.4rem 1.6rem):
-      - .rcceleb-prof   — profesión
-      - .rcceleb-sep    — separador visual
-      - .rcceleb-flbl   — etiqueta "fragancia recomendada"
-      - .rcceleb-fname  — nombre del perfume (font-size: 1.3rem)
-      - .rcceleb-fmarca — marca del perfume
-      - .rcceleb-others — otros perfumes de la celebrity (hasta 2, separados por ·)
+  Una vez ordenadas todas las celebrities de mayor a menor score, el algoritmo recorre el ranking e identifica el mejor
+  perfume de cada celebrity mediante bestPerfumeFor. Luego construye una lista de tres perfumes distintos —los tres
+  primeros perfumes únicos que aparecen al recorrer el ranking—. Este proceso garantiza que el Top 3 muestra tres
+  opciones realmente diferentes, sin repetir el mismo perfume aunque varias celebrities lo usen.
 
-  Grid layout: 3 columnas (.rcelebs, gap: 1.6rem)
-               en móvil (<820px): 1 columna, max-width 380px centrado
+  ---
+  El Manejo de la Complejidad: Detalles que Marcan la Diferencia
 
-  Sombra de card: box-shadow: 0 8px 40px rgba(0,0,0,.5)
-  Hover: translateY(-7px) + sombra más intensa + borde dorado
+  Varios detalles técnicos del algoritmo merecen atención especial porque son los que le dan robustez frente a la
+  variabilidad real de los datos:
 
+  Normalización de claves: Todos los nombres de perfumes y marcas se normalizan antes de compararse: minúsculas, sin
+  tildes, sin caracteres especiales. Esto permite que "Santal 33" y "santal 33" sean la misma entrada, y que variaciones
+   tipográficas en los datos no rompan el sistema.
 
-─────────────────────────────────────────────────────────────────────────
-8. FASE 6: Carga de fotos en el test (local → Wikipedia)
-─────────────────────────────────────────────────────────────────────────
+  Familias compuestas: Un perfume catalogado como "Verde/Floral/Cítrico" se descompone automáticamente en tres familias
+  separadas. Si el usuario seleccionó "florales" entre sus preferencias, el perfume recibe cinco puntos aunque su
+  familia principal sea otra. Esto es crucial para perfumes complejos que no pertenecen a una sola familia.
 
-showPhoto(nombre, imgEl, wrapEl)
-  1. Busca en PHOTO_MAP[nombre] el nombre de archivo local.
-  2. Si existe:
-       - Asigna imgEl.onload  = reveal (muestra la imagen, oculta placeholder)
-       - Asigna imgEl.onerror = fallback (limpia src, llama fetchWikiPhoto)
-       - Establece imgEl.src = "Carpetas famosos/" + localFile
-         (sin encodeURIComponent — la ruta se usa tal cual)
-  3. Si no existe en PHOTO_MAP:
-       - Llama directamente a fetchWikiPhoto
+  Ocasiones compuestas: De manera análoga, las ocasiones de uso se almacenan como cadenas separadas por coma ("Diario,
+  Oficina, Viaje") y el algoritmo las descompone para evaluar cada contexto individualmente.
 
-fetchWikiPhoto(nombre, imgEl, wrapEl)  [async]
-  - Construye URL a la Wikipedia API:
-      action=query&titles=NOMBRE&prop=pageimages&pithumbsize=400&origin=*
-    (nombre con espacios reemplazados por "_" y encodeURIComponent)
-  - Si la respuesta contiene page.thumbnail.source:
-      - Asigna imgEl.onload para revelar la imagen
-      - Pone imgEl.onerror = null (sin segundo fallback)
-      - Establece imgEl.src con la URL de Wikipedia
-  - Errores de red/JSON: silenciados con catch(_){}
+  Precio adyacente: La lógica de precio no es binaria sino escalar. El algoritmo conoce el orden de los rangos de precio
+   y calcula la distancia entre el rango del perfume y el del usuario. Esto evita que un perfume de 95€ quede
+  completamente excluido para un usuario con presupuesto hasta 100€ solo por un solapamiento de categoría.
 
-reveal() [función interna de showPhoto]
-  - Pone imgEl.style.display = "block"
-  - Oculta el .rcceleb-placeholder (style.display = "none")
+  Vibes semánticos: Los vibes emocionales son quizás el campo con mayor riqueza semántica en toda la base de datos. Cada
+   uno de los siete grandes sentimientos tiene asociado un listado de decenas de etiquetas: "poder" engloba desde
+  "Virilidad" y "Confianza" hasta "Fiereza" y "Magnetismo". Este sistema de expansión semántica permite que perfumes con
+   descripciones muy distintas queden bajo la misma categoría emocional, capturando matices que una sola etiqueta no
+  podría representar.
 
-Orden de eventos garantizado:
-  1. onerror se registra ANTES de asignar .src
-  2. Si falla local → onerror limpia sus propios handlers antes de delegar
-  3. applyImg() ya no sobreescribe el onerror (bug original corregido)
+  ---
+  Flujo Completo: De la Primera Pregunta al Resultado
 
+  El test arranca mostrando la primera pregunta con una animación de entrada. Para preguntas de selección única, el
+  algoritmo avanza automáticamente tras una pausa de 360 milisegundos después de que el usuario hace su elección —el
+  tiempo justo para confirmar visualmente la selección antes de transicionar—. Para preguntas de selección múltiple, el
+  usuario dispone de un botón de "Continuar" que se activa solo una vez que ha seleccionado al menos una opción.
 
-─────────────────────────────────────────────────────────────────────────
-9. CATÁLOGO: Carga de fotos con IntersectionObserver + Wikipedia
-─────────────────────────────────────────────────────────────────────────
-Archivo: catalogo.html
+  Tras la undécima pregunta, el motor de puntuación se activa simultáneamente sobre todas las celebrities de la base de
+  datos. El proceso es síncrono y ocurre en el mismo hilo de ejecución, lo que es posible gracias a la optimización de
+  la función de scoring: las comparaciones son operaciones de búsqueda en arrays y comparaciones de cadenas, sin
+  llamadas asíncronas ni procesamiento pesado.
 
-photoSrc(nombre)
-  - Consulta PHOTO_MAP[nombre]
-  - Si existe: devuelve 'Carpetas%20famosos/' + encodeURIComponent(f)
-  - Si no:     devuelve null
+  El resultado final muestra tres tarjetas. Cada tarjeta presenta el perfume recomendado, la marca, y un carrusel de
+  celebrities que lo usan —con sus fotos, nombre y profesión—. Si el perfume es compartido por varias personalidades, el
+   carrusel permite navegar entre ellas con una animación tridimensional en escritorio o una transición lateral en
+  móvil. Un botón de detalles abre un modal con la ficha completa del perfume: notas, familia olfativa, proyección,
+  precio estimado y un enlace directo a Amazon para comprarlo.
 
-cardHTML(c)
-  - Si src existe:
-      <img class="ccard-photo" src="…" loading="lazy"
-           onerror="this.onerror=null;wikiImg(this.closest('.ccard'))">
-  - Si src es null:
-      <img class="ccard-photo wiki-lazy" src="" data-nombre="…" style="display:none">
-  - La card siempre lleva data-nombre="…" en el div raíz (.ccard)
-  - La clase .no-photo se aplica solo cuando src es null (estilo de fallback local)
+  ---
+  Reflexión Final: Por Qué Este Diseño Funciona
 
-wikiImg(card)  [async]
-  - Lee card.dataset.nombre (set en data-nombre del div.ccard)
-  - Guard: si card.dataset.wikiDone === "1", sale inmediatamente (no rellamada)
-  - Marca card.dataset.wikiDone = "1"
-  - Consulta caché en memoria _wikiCache[nombre] antes de hacer fetch
-  - Wikipedia API: pithumbsize=300
-  - Si obtiene src:
-      - Busca o crea el elemento <img class="ccard-photo"> en la card
-      - onload: muestra la img, quita clase .no-photo, elimina .ccard-bottle si existe
-      - Asigna img.src = src
+  El algoritmo de Perfumity se distingue de los sistemas de recomendación tradicionales por tres decisiones de diseño
+  que reflejan una comprensión profunda del mundo de la perfumería:
 
-initWikiObserver()
-  - Crea/recrea un IntersectionObserver con rootMargin: '300px'
-    (precarga imágenes 300px antes de entrar en viewport)
-  - Observa todos los .ccard.no-photo y .ccard .wiki-lazy
-  - Al entrar en viewport: unobserve + llamar wikiImg(card)
-  - Se llama al final de renderP() (después de addTilt()) para que
-    cada vez que se renderice una página del catálogo se registren
-    los nuevos observadores
+  Primero, el filtro duro de género combinado con puntuación gradual en todo lo demás. En lugar de tratar todas las
+  dimensiones igual, reconoce que hay incompatibilidades absolutas y hay preferencias con matices. No todo es escalar.
 
-_wikiCache
-  - Objeto en memoria {nombre: url} para no repetir fetch a Wikipedia
-    dentro de la misma sesión de página
+  Segundo, la penalización asimétrica de notas. Una nota que el usuario quiere evitar pesa más que cualquier
+  coincidencia positiva individual. Esto refleja la realidad sensorial: el asco ante una nota específica destruye la
+  experiencia de un perfume por muy bien que encaje en todas las demás dimensiones.
 
+  Tercero, la mediación a través de celebrities. En lugar de recomendar directamente desde la base de datos de perfumes,
+   el algoritmo usa a las celebrities como intermediarias. Esto no es solo un efecto narrativo —es una forma inteligente
+   de aprovechar datos contextuales sobre colecciones completas, favoreciendo perfumes que forman parte de un universo
+  olfativo coherente con el usuario, no solo perfumes que cumplen criterios técnicos aislados.
 
-─────────────────────────────────────────────────────────────────────────
-10. RESUMEN DE PESOS
-─────────────────────────────────────────────────────────────────────────
-
-  Pregunta   Peso máx  Tipo
-  ─────────  ────────  ──────────────────────────────────────────
-  Q1 Género     +5     exacto | +2 unisex | -2 incorrecto
-  Q2 Estación   +4     exacto | +2 todo el año
-  Q3 Momento    +3     exacto | +3 "Todo el día" (comodín)
-  Q4 Perfil     +4     exacto
-  Q5 Ocasión    variable  +2 por coincidencia (multi-select)
-  Q6 Familia    variable  +5 por coincidencia exacta (multi-select)
-  Q7 Notas      -6/nota penalización por nota no deseada presente
-  Q8 Proyección +3     exacto
-  Q9 Precio     +4     exacto | +2 adyacente
-  Q10 Vibe      +3/feel multi-select, match contra lista extensa
-  Q11 Nivel     +3     exacto | +1 adyacente
-
-  Score celebrity = maxDB * 0.8 + avgDB * 0.2
-
-
-─────────────────────────────────────────────────────────────────────────
-11. ESTRUCTURA DE ARCHIVOS
-─────────────────────────────────────────────────────────────────────────
-
-  Perfumesweb/
-  ├── index.html                          Página principal / landing
-  ├── test.html                           Test interactivo (este algoritmo)
-  ├── catalogo.html                       Catálogo de celebrities
-  ├── sostenible.html                     Página adicional
-  ├── styles.css                          Estilos globales
-  ├── effects.js                          Efectos visuales (partículas, hero)
-  ├── data.js                             CELEBRITIES[]
-  ├── perfume_db.js                       PERFUME_DB{}
-  ├── photo_map.js                        PHOTO_MAP{}
-  ├── Carpetas famosos/                   Fotos locales de celebrities
-  ├── base_datos_perfumes_completa.xlsx   Fuente de PERFUME_DB
-  ├── celebrities_perfumes_corregido.xlsx Fuente de CELEBRITIES
-  ├── generar_datos.py                    Regenera data.js y perfume_db.js
-  └── _photo_map_final.js                 Genera/actualiza photo_map.js
-
-
-─────────────────────────────────────────────────────────────────────────
-12. REGENERACIÓN DE DATOS
-─────────────────────────────────────────────────────────────────────────
-
-Para regenerar data.js y perfume_db.js desde los Excel:
-  python generar_datos.py
-
-Para regenerar photo_map.js (mapeo de fotos locales):
-  node _photo_map_final.js
-  # (copia el resultado a photo_map.js)
-
-Para verificar qué celebrities no tienen foto local:
-  Abrir catalogo.html o test.html en el navegador y observar las cards
-  que disparan fetchWikiPhoto (Network tab → filtrar wikipedia.org/w/api.php)
-
-===========================================================================
-  FIN DEL DOCUMENTO
-===========================================================================
+  El resultado es un sistema que, con once preguntas bien formuladas y una base de datos meticulosamente construida, es
+  capaz de generar recomendaciones que se sienten personales, precisas y —lo más importante— con una historia detrás
