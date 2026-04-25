@@ -213,17 +213,7 @@ const WIKI_SEARCH = {
   "Kim Minkyu":            "Kim Min-kyu Korean actor",
   "Kim Sungcheol":         "Kim Sung-cheol Korean actor",
   "Kim Youngdae":          "Kim Young-dae Korean actor",
-  "Alice Campello":        "Alice Campello model Italian",
-  "Paula Echeverria":      "Paula Echevarria Spanish actress",
-  "Carlos Baute":          "Carlos Baute singer Spain",
-  "Leiva":                 "Leiva cantante guitarrista español",
-  "Alba Lago":             "Alba Lago actriz española",
-  "Ana Cristina Portillo": "Ana Cristina Portillo España",
-  "Andrea Garte":          "Andrea Garte",
-  "Patricia Conde":        "Patricia Conde presentadora España",
-  "Plex":                  "Plex rapper",
   "Rosé":                  "Rosé BLACKPINK singer",
-  "Vanessa Traina":        "Vanessa Traina style",
 };
 
 function applyWikiSrc(card, src) {
@@ -361,7 +351,12 @@ function initWikiObserver(){
     });
   }, { rootMargin: '400px' });
   document.querySelectorAll('.ccard').forEach(card => {
-    _wikiObserver.observe(card);
+    // Solo observar tarjetas sin foto local (sin entrada en PHOTO_MAP o con URL de Wikipedia)
+    const nombre = card.dataset.nombre;
+    const mapped = typeof PHOTO_MAP !== 'undefined' && PHOTO_MAP[nombre];
+    if (!mapped || mapped.startsWith('https://')) {
+      _wikiObserver.observe(card);
+    }
   });
 }
 
