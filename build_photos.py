@@ -15,7 +15,7 @@ SRC_FOLDERS = [
     BASE / "Carpeta Fotos Famosos v2" / "CARPETA FAMOSOS (J-Q)",
     BASE / "Carpeta Fotos Famosos v2" / "CARPETA FAMOSOS (R-Z)v2",
 ]
-DST = BASE / "Carpetas famosos"
+DST = BASE / "fotos_celebridades"
 
 MAX_KB = 250
 MAX_W  = 600

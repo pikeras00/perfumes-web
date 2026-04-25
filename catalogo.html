@@ -165,7 +165,7 @@ function ini(n) { return n.split(" ").slice(0,2).map(w=>w[0]).join("").toUpperCa
 function photoSrc(nombre) {
   const f = PHOTO_MAP[nombre];
   if (!f) return null;
-  return 'Carpetas%20famosos/' + encodeURIComponent(f);
+  return 'fotos_celebridades/' + encodeURIComponent(f);
 }
 
 function cardHTML(c) {

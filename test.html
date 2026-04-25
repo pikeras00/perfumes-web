@@ -759,7 +759,7 @@ function showPhoto(nombre, imgEl, wrapEl){
     // Si el valor es una URL directa, usarla tal cual; si es un fichero local, anteponer la carpeta
     imgEl.src = localFile.startsWith('https://')
       ? localFile
-      : "Carpetas%20famosos/" + localFile.split("/").map(encodeURIComponent).join("/");
+      : "fotos_celebridades/" + localFile.split("/").map(encodeURIComponent).join("/");
   } else {
     fetchWikiPhoto(nombre, imgEl, wrapEl);
   }
