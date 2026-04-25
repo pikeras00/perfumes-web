@@ -140,9 +140,6 @@ for celeb in celebs:
     stem = ALIASES.get(key) or (key if key in v2_files else None)
     if stem and stem in v2_files:
         photo_map[celeb] = stem + ".jpg"
-    elif celeb in WIKI:
-        slug = WIKI[celeb]
-        photo_map[celeb] = f"https://en.wikipedia.org/wiki/Special:FilePath/{slug}.jpg?width=400"
     else:
         missing.append(celeb)
 
@@ -150,11 +147,9 @@ print(f"[4] Mapeados local: {sum(1 for v in photo_map.values() if not v.startswi
 print(f"    Wikipedia: {sum(1 for v in photo_map.values() if v.startswith('http'))}")
 print(f"    Sin foto:  {len(missing)}")
 
-# Fallback Wikipedia genérico para los sin foto
+# Sin foto local → simplemente no se incluyen en el mapa
 for celeb in missing:
-    slug = celeb.replace(" ", "_")
-    photo_map[celeb] = f"https://en.wikipedia.org/wiki/Special:FilePath/{slug}.jpg?width=400"
-    print(f"    Wikipedia genérico: {celeb}")
+    print(f"    Sin foto local: {celeb}")
 
 # ── 5. Escribir photo_map.js ─────────────────────────────────────────────────
 out = "const PHOTO_MAP = " + json.dumps(photo_map, ensure_ascii=False) + ";"

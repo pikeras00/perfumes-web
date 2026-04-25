@@ -165,199 +165,7 @@ function ini(n) { return n.split(" ").slice(0,2).map(w=>w[0]).join("").toUpperCa
 function photoSrc(nombre) {
   const f = PHOTO_MAP[nombre];
   if (!f) return null;
-  if (f.startsWith('https://')) return f;
   return 'Carpetas%20famosos/' + encodeURIComponent(f);
-}
-
-/* ── Wikipedia fotos: caché + batch de hasta 50 títulos por petición ── */
-const _wikiCache = {};      // nombre → url  (null = sin foto)
-const _wikiQueue = [];      // cards pendientes de consultar
-let   _wikiBatchTimer = null;
-
-// Slug de Wikipedia exacto cuando el nombre en data.js no coincide con el título de Wikipedia
-const WIKI_SLUG = {
-  "Marily Manson":      "Marilyn_Manson",
-  "Raw Alejandro":      "Rauw_Alejandro",
-  "Matthew McConughey": "Matthew_McConaughey",
-  "Princesa Diana":     "Diana,_Princess_of_Wales",
-  "Wi Hajoon":          "Wi_Ha-joon",
-  "Jin":                "Jin_(entertainer)",
-  "Karina":             "Karina_(rapper)",
-  "Winter":             "Winter_(singer)",
-  "Yunjin":             "Huh_Yun-jin",
-  "Liz":                "Liz_(singer)",
-  "Minnie":             "Minnie_(singer)",
-  "Kino":               "Kang_Hyunggu",
-  "Marcelo":            "Marcelo_(footballer,_born_1988)",
-  "Kim Youngdae":       "Kim_Young-dae",
-};
-
-// Término de búsqueda (gsrsearch) para casos ambiguos o con typo
-const WIKI_SEARCH = {
-  "Marily Manson":         "Marilyn Manson rock musician",
-  "Raw Alejandro":         "Rauw Alejandro reggaeton singer",
-  "Matthew McConughey":    "Matthew McConaughey actor",
-  "Princesa Diana":        "Princess Diana Wales",
-  "Wi Hajoon":             "Wi Ha-joon Korean actor",
-  "Jin":                   "Jin BTS singer Korean",
-  "Karina":                "Karina aespa singer rapper",
-  "Winter":                "Winter aespa singer",
-  "Yunjin":                "Yunjin LE SSERAFIM singer",
-  "Liz":                   "Liz IVE singer",
-  "Minnie":                "Minnie GIDLE singer",
-  "Kino":                  "Kino Pentagon singer",
-  "Marcelo":               "Marcelo footballer Real Madrid Brazil",
-  "Drake":                 "Drake rapper singer Canadian",
-  "Dr. Dre":               "Dr Dre rapper music producer",
-  "Kim Kardashian":        "Kim Kardashian celebrity",
-  "Kim Minkyu":            "Kim Min-kyu Korean actor",
-  "Kim Sungcheol":         "Kim Sung-cheol Korean actor",
-  "Kim Youngdae":          "Kim Young-dae Korean actor",
-  "Rosé":                  "Rosé BLACKPINK singer",
-};
-
-function applyWikiSrc(card, src) {
-  if (!src) return;
-  let img = card.querySelector('.ccard-photo');
-  if (!img) {
-    img = document.createElement('img');
-    img.className = 'ccard-photo';
-    img.alt = card.dataset.nombre || '';
-    card.prepend(img);
-  }
-  img.onload = () => {
-    img.style.display = 'block';
-    card.classList.remove('no-photo');
-    const btl = card.querySelector('.ccard-bottle');
-    if (btl) btl.remove();
-  };
-  img.onerror = null;
-  img.src = src;
-}
-
-async function _flushWikiQueue() {
-  if (!_wikiQueue.length) return;
-  const batch = _wikiQueue.splice(0, 50);
-  const names  = batch.map(c => c.dataset.nombre).filter(Boolean);
-  // Usar WIKI_SLUG para nombres con typo/ambigüedad; codificar individualmente con | literal
-  const titles = names.map(n => {
-    const slug = WIKI_SLUG[n] || n.replace(/ /g, '_');
-    return encodeURIComponent(slug);
-  }).join('|');
-  const noImgCards = [];
-  try {
-    const r = await fetch(
-      'https://en.wikipedia.org/w/api.php?action=query&titles='
-      + titles
-      + '&prop=pageimages&format=json&pithumbsize=400&redirects=&origin=*'
-    );
-    const d  = await r.json();
-    const pages = Object.values(d.query.pages);
-    // Construir mapa: título normalizado → thumbnail
-    const srcMap = {};
-    pages.forEach(pg => {
-      const key = (pg.title || '').replace(/_/g, ' ').toLowerCase();
-      if (pg.thumbnail) srcMap[key] = pg.thumbnail.source;
-    });
-    // Manejar redirects
-    const redirects = (d.query && d.query.redirects) || [];
-    const redirectMap = {};
-    redirects.forEach(rd => {
-      redirectMap[(rd.from || '').replace(/_/g, ' ').toLowerCase()] =
-        (rd.to   || '').replace(/_/g, ' ').toLowerCase();
-    });
-    batch.forEach(card => {
-      const n = card.dataset.nombre;
-      const lookupKey = (WIKI_SLUG[n] || n).replace(/_/g, ' ').toLowerCase();
-      const redirectedKey = redirectMap[lookupKey] || lookupKey;
-      const src = srcMap[lookupKey] || srcMap[redirectedKey] || null;
-      _wikiCache[n] = src;
-      if (src) applyWikiSrc(card, src);
-      else noImgCards.push(card);
-    });
-  } catch(_) {
-    batch.forEach(c => noImgCards.push(c));
-  }
-
-  // Segunda pasada: gsrsearch con término específico para los que no tienen imagen
-  for (const card of noImgCards) {
-    const n = card.dataset.nombre;
-    if (_wikiCache[n]) continue;
-    const searchTerm = WIKI_SEARCH[n] || WIKI_SLUG[n]?.replace(/_/g,' ') || n;
-    let found = false;
-    // 1) Wikipedia inglés con búsqueda
-    try {
-      const r2 = await fetch(
-        'https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch='
-        + encodeURIComponent(searchTerm) + '&gsrlimit=1&prop=pageimages&format=json&pithumbsize=400&origin=*'
-      );
-      const d2 = await r2.json();
-      if (d2.query && d2.query.pages) {
-        const pg2 = Object.values(d2.query.pages)[0];
-        if (pg2 && pg2.thumbnail) {
-          _wikiCache[n] = pg2.thumbnail.source;
-          applyWikiSrc(card, pg2.thumbnail.source);
-          found = true;
-        }
-      }
-    } catch(_) {}
-    // 2) Wikipedia español como último recurso
-    if (!found) {
-      try {
-        const slug = encodeURIComponent((WIKI_SLUG[n] || n).replace(/ /g,'_'));
-        const r3 = await fetch(
-          'https://es.wikipedia.org/api/rest_v1/page/summary/' + slug
-        );
-        if (r3.ok) {
-          const d3 = await r3.json();
-          const src3 = (d3.thumbnail && d3.thumbnail.source) ||
-                       (d3.originalimage && d3.originalimage.source);
-          if (src3) { _wikiCache[n] = src3; applyWikiSrc(card, src3); found = true; }
-        }
-      } catch(_) {}
-    }
-    if (!found) _wikiCache[n] = null;
-  }
-}
-
-function wikiImg(card) {
-  const nombre = card.dataset.nombre;
-  if (!nombre || card.dataset.wikiDone) return;
-  // Si hay foto local en PHOTO_MAP, no consultar Wikipedia nunca
-  const mapped = typeof PHOTO_MAP !== 'undefined' && PHOTO_MAP[nombre];
-  if (mapped && !mapped.startsWith('https://')) return;
-  // Si la foto local ya cargó correctamente, no sobreescribir
-  const existingImg = card.querySelector('.ccard-photo');
-  if (existingImg && existingImg.complete && existingImg.naturalWidth > 0) return;
-  card.dataset.wikiDone = '1';
-  if (_wikiCache[nombre] !== undefined) {
-    applyWikiSrc(card, _wikiCache[nombre]); return;
-  }
-  _wikiQueue.push(card);
-  clearTimeout(_wikiBatchTimer);
-  // Acumula 80 ms para agrupar tarjetas que entran al viewport juntas
-  _wikiBatchTimer = setTimeout(_flushWikiQueue, 80);
-}
-
-/* ── Lazy-load: observa tarjetas que entren en viewport ── */
-let _wikiObserver = null;
-function initWikiObserver(){
-  if (_wikiObserver) _wikiObserver.disconnect();
-  _wikiObserver = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if (!e.isIntersecting) return;
-      _wikiObserver.unobserve(e.target);
-      wikiImg(e.target);
-    });
-  }, { rootMargin: '400px' });
-  document.querySelectorAll('.ccard').forEach(card => {
-    // Solo observar tarjetas sin foto local (sin entrada en PHOTO_MAP o con URL de Wikipedia)
-    const nombre = card.dataset.nombre;
-    const mapped = typeof PHOTO_MAP !== 'undefined' && PHOTO_MAP[nombre];
-    if (!mapped || mapped.startsWith('https://')) {
-      _wikiObserver.observe(card);
-    }
-  });
 }
 
 function cardHTML(c) {
@@ -372,9 +180,8 @@ function cardHTML(c) {
   const escapedName = c.nombre.replace(/"/g,"&quot;");
   return `<div class="ccard${noPhoto}" data-nombre="${escapedName}">
     ${src
-      ? `<img class="ccard-photo" src="${src}" alt="${escapedName}" loading="lazy"
-             onerror="this.onerror=null;wikiImg(this.closest('.ccard'))">`
-      : `<img class="ccard-photo wiki-lazy" src="" data-nombre="${escapedName}" alt="${escapedName}" style="display:none">`
+      ? `<img class="ccard-photo" src="${src}" alt="${escapedName}" loading="lazy">`
+      : ''
     }
     <div class="ccard-fallback" style="background:linear-gradient(160deg,${pal.c1} 0%,${pal.c2} 60%,${pal.ac}22 100%)"></div>
     <div class="ccard-shade"></div>
@@ -458,7 +265,6 @@ function renderP() {
   const sl = fil.slice((cp-1)*PS, cp*PS);
   document.getElementById("cg").innerHTML = sl.map(cardHTML).join("");
   addTilt();
-  initWikiObserver();
 }
 
 function renderPg() {
