@@ -333,6 +333,9 @@ async function _flushWikiQueue() {
 function wikiImg(card) {
   const nombre = card.dataset.nombre;
   if (!nombre || card.dataset.wikiDone) return;
+  // Si hay foto local en PHOTO_MAP, no consultar Wikipedia nunca
+  const mapped = typeof PHOTO_MAP !== 'undefined' && PHOTO_MAP[nombre];
+  if (mapped && !mapped.startsWith('https://')) return;
   // Si la foto local ya cargó correctamente, no sobreescribir
   const existingImg = card.querySelector('.ccard-photo');
   if (existingImg && existingImg.complete && existingImg.naturalWidth > 0) return;
