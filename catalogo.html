@@ -107,14 +107,11 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/Flip.min.js"></script>
   <script src="effects.js?v=4"></script>
   <script src="data.js?v=4"></script>
   <script src="perfume_db.js?v=4"></script>
   <script src="photo_map.js?v=4"></script>
   <script>
-gsap.registerPlugin(Flip);
-
 const PS = 24;
 let fil = [], cp = 1, cf = "all", cfam = "all", cs = "";
 
@@ -272,37 +269,25 @@ function renderP() {
   const sl   = fil.slice((cp-1)*PS, cp*PS);
   const grid = document.getElementById("cg");
 
+  function swapIn() {
+    grid.innerHTML = sl.map(cardHTML).join("");
+    addTilt();
+    gsap.fromTo(grid.querySelectorAll(".ccard"),
+      { opacity: 0, scale: 0.93, y: 18 },
+      { opacity: 1, scale: 1,    y: 0,  duration: 0.38, ease: "power2.out", stagger: 0.035 }
+    );
+  }
+
   const oldCards = Array.from(grid.querySelectorAll(".ccard"));
-  const state    = oldCards.length ? Flip.getState(oldCards) : null;
-
-  grid.innerHTML = sl.map(cardHTML).join("");
-  addTilt();
-
-  const newCards = Array.from(grid.querySelectorAll(".ccard"));
-
-  if (state) {
-    Flip.from(state, {
-      targets: newCards,
-      duration: 0.55,
-      scale: true,
-      ease: "power1.inOut",
-      stagger: 0.04,
-      absolute: true,
-      onEnter: function(els) {
-        gsap.fromTo(els,
-          { opacity: 0, scale: 0.85, y: 18 },
-          { opacity: 1, scale: 1,    y: 0,  duration: 0.5, ease: "power2.out", stagger: 0.04 }
-        );
-      },
-      onLeave: function(els) {
-        gsap.to(els, { opacity: 0, scale: 0.85, duration: 0.28 });
-      }
+  if (oldCards.length) {
+    gsap.killTweensOf(oldCards);
+    gsap.to(oldCards, {
+      opacity: 0, scale: 0.93, y: -8,
+      duration: 0.15, ease: "power1.in",
+      onComplete: swapIn
     });
   } else {
-    gsap.fromTo(newCards,
-      { opacity: 0, y: 24, scale: 0.95 },
-      { opacity: 1, y: 0,  scale: 1,   duration: 0.45, ease: "power2.out", stagger: 0.04 }
-    );
+    swapIn();
   }
 }
 
