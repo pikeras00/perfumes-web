@@ -291,6 +291,27 @@ function ico(d){
   return '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round">'+d+'</svg>';
 }
 
+// ── Partículas doradas flotantes por botón ─────────────────────────────────
+function genParticles() {
+  var h = '';
+  for (var i = 0; i < 4; i++) {
+    var x   = (10 + Math.random() * 80).toFixed(1);
+    var bot = (5  + Math.random() * 30).toFixed(1);
+    var sz  = (1.5 + Math.random() * 2.2).toFixed(1);
+    var dur = (3   + Math.random() * 4).toFixed(1);
+    var del = (-(Math.random() * parseFloat(dur))).toFixed(1);
+    h += '<span class="obtn-particle" aria-hidden="true" style="'
+      + 'left:' + x   + '%;'
+      + 'bottom:' + bot + '%;'
+      + 'width:' + sz  + 'px;'
+      + 'height:' + sz + 'px;'
+      + 'animation-duration:' + dur + 's;'
+      + 'animation-delay:' + del + 's'
+      + '"></span>';
+  }
+  return h;
+}
+
 const QS = [
   {id:"q1", txt:"&iquest;Qu&eacute; tipo de aroma prefieres?", multi:false, opts:[
     {i:ico('<circle cx="7.5" cy="12.5" r="5.5"/><path d="M11.5 8L18 1.5m0 0h-5m5 0v5"/>'),
@@ -622,6 +643,7 @@ function renderQ(){
   q.opts.forEach(o => {
     const isSel = Array.isArray(curVal) ? curVal.includes(o.v) : curVal===o.v;
     html += "<button class='obtn" + (isSel?" sel":"") + "' data-v='" + o.v + "' onclick='pick(\"" + q.id + "\",\"" + o.v + "\"," + (q.multi?1:0) + "," + (q.max||0) + ",this)'>";
+    html += genParticles();
     html += "<span class='oi'>" + o.i + "</span>";
     html += "<span class='ol'>" + o.l + "</span>";
     if(o.d) html += "<span class='od'>" + o.d + "</span>";
@@ -634,6 +656,24 @@ function renderQ(){
     html += "<button class='btnNext' id='btnNext'" + dis + " onclick='nextQ()'>Continuar &nbsp;&#8250;</button></div>";
   }
   document.getElementById("qc").innerHTML = html;
+
+  // ── Rellenar fila incompleta con divs fantasma ─────────────────────────
+  const grid = document.querySelector("#qc .ogrid");
+  if (grid) {
+    const minW  = q.wide ? 168 : 210;
+    const gap   = 10;
+    const cols  = Math.max(1, Math.floor((grid.offsetWidth + gap) / (minW + gap)));
+    const rem   = q.opts.length % cols;
+    if (rem !== 0) {
+      const need = cols - rem;
+      for (let i = 0; i < need; i++) {
+        const ghost = document.createElement("div");
+        ghost.className = "obtn-ghost";
+        ghost.setAttribute("aria-hidden", "true");
+        grid.appendChild(ghost);
+      }
+    }
+  }
 }
 
 function pick(qid, val, isMulti, maxSel, btn){

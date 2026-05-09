@@ -833,6 +833,30 @@ section { padding: 5rem 2.5rem; }
   transform: translateY(-1px);
 }
 
+/* ── Test: partículas flotantes doradas ── */
+@keyframes obtn-float {
+  0%   { transform: translateY(0)     scale(1);  opacity: 0; }
+  18%  { opacity: .55; }
+  80%  { opacity: .2; }
+  100% { transform: translateY(-52px) scale(.3); opacity: 0; }
+}
+.obtn-particle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(201,168,76,.7);
+  pointer-events: none;
+  animation: obtn-float linear infinite;
+  will-change: transform, opacity;
+}
+/* Fantasma para rellenar filas impares */
+.obtn-ghost {
+  visibility: hidden;
+  pointer-events: none;
+  border: none !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+
 /* ── Sustainable page ── */
 #sostenible { background: transparent; }
 .sintro {
