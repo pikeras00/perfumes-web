@@ -621,11 +621,15 @@ section { padding: 5rem 2.5rem; }
   letter-spacing: .08em;
 }
 .ogrid {
-  display: grid;
+  display: flex;
+  flex-wrap: wrap;
   gap: .6rem;
-  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  justify-content: center;
 }
-.ogrid.wide { grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); }
+.ogrid > .obtn       { flex: 0 1 calc(33.333% - .4rem); min-width: 160px; }
+.ogrid.pair > .obtn  { flex: 0 1 calc(50% - .3rem);     min-width: 140px; }
+.ogrid.quad > .obtn  { flex: 0 1 calc(25% - .45rem);    min-width: 150px; }
+.ogrid.wide > .obtn  { flex: 0 1 calc(20% - .48rem);    min-width: 130px; }
 
 /* ── Option button ── */
 .obtn {
@@ -849,13 +853,7 @@ section { padding: 5rem 2.5rem; }
   will-change: transform, opacity;
 }
 /* Fantasma para rellenar filas impares */
-.obtn-ghost {
-  visibility: hidden;
-  pointer-events: none;
-  border: none !important;
-  background: none !important;
-  box-shadow: none !important;
-}
+
 
 /* ── Sustainable page ── */
 #sostenible { background: transparent; }
@@ -992,7 +990,9 @@ footer strong { color: var(--gold); }
   .cgrid { grid-template-columns: repeat(3, 1fr); gap: 1rem; }
   .qcard { padding: 2.2rem 1.8rem 2rem; }
   .qtxt  { font-size: 1.7rem; }
-  .ogrid, .ogrid.wide { grid-template-columns: 1fr 1fr; }
+  .ogrid > .obtn, .ogrid.pair > .obtn, .ogrid.quad > .obtn, .ogrid.wide > .obtn {
+    flex: 0 1 calc(50% - .3rem); min-width: 120px;
+  }
 }
 /* Nav en 2 filas para móviles estrechos */
 @media (max-width: 520px) {

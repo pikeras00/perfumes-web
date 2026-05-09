@@ -633,7 +633,11 @@ function renderQ(){
   document.getElementById("rc").classList.remove("show");
 
   const curVal = tAns[q.id];
-  const gridCls = "ogrid" + (q.wide ? " wide" : "");
+  const n = q.opts.length;
+  let gridCls = "ogrid";
+  if (q.wide)       gridCls += " wide";
+  else if (n <= 4)  gridCls += " pair";
+  else if (n >= 7)  gridCls += " quad";
   const maxNote = q.max ? "M&aacute;ximo " + q.max : "Selecci&oacute;n m&uacute;ltiple";
 
   let html = "<div class='qnum'>Pregunta " + (tStep+1) + "</div>";
@@ -657,23 +661,6 @@ function renderQ(){
   }
   document.getElementById("qc").innerHTML = html;
 
-  // ── Rellenar fila incompleta con divs fantasma ─────────────────────────
-  const grid = document.querySelector("#qc .ogrid");
-  if (grid) {
-    const minW  = q.wide ? 168 : 210;
-    const gap   = 10;
-    const cols  = Math.max(1, Math.floor((grid.offsetWidth + gap) / (minW + gap)));
-    const rem   = q.opts.length % cols;
-    if (rem !== 0) {
-      const need = cols - rem;
-      for (let i = 0; i < need; i++) {
-        const ghost = document.createElement("div");
-        ghost.className = "obtn-ghost";
-        ghost.setAttribute("aria-hidden", "true");
-        grid.appendChild(ghost);
-      }
-    }
-  }
 }
 
 function pick(qid, val, isMulti, maxSel, btn){
