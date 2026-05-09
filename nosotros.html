@@ -160,12 +160,69 @@
     }
     .nos-card:hover .nos-card-desc { color: rgba(255,255,255,.78); }
 
+    /* ── Sección equipo ── */
+    .nos-equipo {
+      max-width: 1120px;
+      margin: 4rem auto 0;
+    }
+    .nos-team-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-top: 2.5rem;
+    }
+    .nos-member {
+      border: 1px solid rgba(201,160,61,.18);
+      padding: 2rem 1.8rem 2.2rem;
+      position: relative;
+      background: rgba(5,15,10,.55);
+    }
+    .nos-member::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 3px; height: 100%;
+      background: linear-gradient(to bottom, var(--gold), transparent);
+    }
+    .nos-member-tag {
+      display: block;
+      font-family: 'Montserrat', sans-serif;
+      font-size: .5rem; font-weight: 700;
+      letter-spacing: .28em; text-transform: uppercase;
+      color: rgba(201,160,61,.7);
+      margin-bottom: .6rem;
+    }
+    .nos-member-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem; font-weight: 600;
+      color: var(--cream1, #f5f0e8);
+      margin: 0 0 1rem;
+      letter-spacing: .02em;
+    }
+    .nos-member-text {
+      font-size: .8rem;
+      line-height: 1.85;
+      color: var(--cream3);
+    }
+    .nos-intro-block {
+      max-width: 720px;
+      margin: 0 auto 0;
+      text-align: center;
+    }
+    .nos-intro-block p {
+      font-size: .88rem;
+      line-height: 1.9;
+      color: var(--cream3);
+      letter-spacing: .03em;
+    }
+
     /* Responsive */
     @media (max-width: 900px) {
       .nos-grid { grid-template-columns: 1fr; max-width: 520px; }
       .nos-card { height: 400px; }
       .nos-card-heading { font-size: 2rem; }
       #nosotros { padding: 2.5rem 1.2rem 4rem; }
+      .nos-team-grid { grid-template-columns: 1fr; max-width: 520px; margin-left: auto; margin-right: auto; }
     }
     @media (max-width: 480px) {
       .nos-navbtn { padding: .8rem 1rem; letter-spacing: .16em; }
@@ -204,6 +261,7 @@
       <button class="nos-navbtn active" data-target="mision">Misi&oacute;n</button>
       <button class="nos-navbtn"        data-target="vision">Visi&oacute;n</button>
       <button class="nos-navbtn"        data-target="valores">Valores</button>
+      <button class="nos-navbtn"        data-target="equipo">Equipo</button>
     </nav>
 
     <!-- Cards -->
@@ -219,7 +277,7 @@
         <div class="nos-card-content">
           <span class="nos-card-tag">Misi&oacute;n</span>
           <h3 class="nos-card-heading" data-text="Descubrir">Descubrir</h3>
-          <p class="nos-card-desc">Conectar a cada persona con las fragancias que definen a las celebrities m&aacute;s influyentes, convirtiendo el descubrimiento olfativo en una experiencia &uacute;nica y personal.</p>
+          <p class="nos-card-desc">Facilitar la b&uacute;squeda del perfume ideal en el entorno digital, resolviendo uno de los principales problemas del sector: la dificultad de elegir una fragancia sin poder olerla previamente. A trav&eacute;s de un test interactivo, conectamos las preferencias del usuario con fragancias reales asociadas a celebrities, ofreciendo una recomendaci&oacute;n personalizada, clara y &uacute;til.</p>
         </div>
       </div>
 
@@ -233,7 +291,7 @@
         <div class="nos-card-content">
           <span class="nos-card-tag">Visi&oacute;n</span>
           <h3 class="nos-card-heading" data-text="Liderar">Liderar</h3>
-          <p class="nos-card-desc">Convertirnos en la referencia global del universo olfativo de las celebrities, el mayor archivo digital de fragancias de lujo accesible para cualquier persona del planeta.</p>
+          <p class="nos-card-desc">Convertirnos en el mayor buscador y recomendador de perfumes a nivel internacional, liderando la orientaci&oacute;n personalizada dentro del sector de la perfumer&iacute;a digital. Diferenciarnos de plataformas como Fragrantica o Sephora ofreciendo recomendaciones basadas en el perfil del usuario: r&aacute;pidas, fiables y gratuitas.</p>
         </div>
       </div>
 
@@ -247,11 +305,51 @@
         <div class="nos-card-content">
           <span class="nos-card-tag">Valores</span>
           <h3 class="nos-card-heading" data-text="Inspirar">Inspirar</h3>
-          <p class="nos-card-desc">Autenticidad, pasi&oacute;n, accesibilidad, excelencia y curiosidad. Los cinco pilares que gu&iacute;an cada decisi&oacute;n que tomamos y definen qui&eacute;nes somos.</p>
+          <p class="nos-card-desc">Orientaci&oacute;n al usuario &mdash; dise&ntilde;amos para ayudar a decidir, no para saturar. Innovaci&oacute;n pr&aacute;ctica &mdash; tecnolog&iacute;a &uacute;til y eficiente. Accesibilidad &mdash; cualquier persona puede encontrar su perfume ideal. Claridad &mdash; datos complejos en decisiones simples. Conexi&oacute;n emocional &mdash; celebrities como elemento diferenciador. Fiabilidad &mdash; recomendaciones basadas en datos estructurados.</p>
         </div>
       </div>
 
     </div>
+
+    <!-- EQUIPO -->
+    <div class="nos-equipo" id="equipo">
+      <div class="shdr" style="padding-top:3.5rem; margin-bottom:0;">
+        <div class="stag">El equipo</div>
+        <h2 class="stitle">Qui&eacute;nes somos</h2>
+        <div class="sline"></div>
+      </div>
+      <div class="nos-intro-block" style="margin-top:1.2rem;">
+        <p>Somos estudiantes de Sistemas Microinform&aacute;ticos y Redes, apasionados por la tecnolog&iacute;a y el mundo de las fragancias. Perfumity nace de una experiencia personal: la dificultad de elegir un perfume online sin referencias claras. A partir de esa necesidad nos planteamos una pregunta clave: &iquest;y si existiera una herramienta que te recomendara un perfume seg&uacute;n tu personalidad?</p>
+      </div>
+      <div class="nos-team-grid">
+
+        <!-- Carmen -->
+        <div class="nos-member">
+          <span class="nos-member-tag">Integrante</span>
+          <h3 class="nos-member-name">Carmen</h3>
+          <p class="nos-member-text">Me interesa especialmente el desarrollo de p&aacute;ginas web porque considero que es un espacio donde se puede dar rienda suelta a la creatividad. Me gusta la idea de poder crear algo propio desde cero y tener la libertad de experimentar con ideas originales, adapt&aacute;ndolas a diferentes formas de comunicar y conectar con los usuarios.</p>
+          <p class="nos-member-text" style="margin-top:.9rem;">La idea de acercar al usuario a sensaciones o referencias relacionadas con personas a las que admiro me resulta especialmente interesante, ya que aporta un componente m&aacute;s humano y emocional al dise&ntilde;o. Me considero una persona reflexiva e imaginativa, y creo que estas cualidades influyen directamente en mi manera de trabajar.</p>
+        </div>
+
+        <!-- Sara -->
+        <div class="nos-member">
+          <span class="nos-member-tag">Integrante</span>
+          <h3 class="nos-member-name">Sara</h3>
+          <p class="nos-member-text">Me interesan especialmente las bases de datos y todo lo relacionado con la b&uacute;squeda, selecci&oacute;n y an&aacute;lisis de informaci&oacute;n relevante. Disfruto investigando en profundidad sobre temas que me resultan interesantes, ya que me permite comprender mejor cada aspecto y organizar la informaci&oacute;n de forma clara y &uacute;til.</p>
+          <p class="nos-member-text" style="margin-top:.9rem;">Me llama mucho la atenci&oacute;n la dimensi&oacute;n m&aacute;s psicol&oacute;gica del comportamiento humano: c&oacute;mo las personas reaccionan ante diferentes est&iacute;mulos y c&oacute;mo estos influyen en la forma en que percibimos el entorno. Las fragancias van m&aacute;s all&aacute; de un simple producto &mdash; est&aacute;n ligadas a la personalidad y a la imagen que proyectamos al mundo.</p>
+        </div>
+
+        <!-- Fernando -->
+        <div class="nos-member">
+          <span class="nos-member-tag">Integrante</span>
+          <h3 class="nos-member-name">Fernando</h3>
+          <p class="nos-member-text">Soy una persona muy conectada con la naturaleza y con el deporte al aire libre, actividades que forman parte importante de mi d&iacute;a a d&iacute;a y que me ayudan a mantener una mentalidad activa y equilibrada. Al mismo tiempo, me interesa mantenerme actualizado sobre las nuevas tendencias y las tecnolog&iacute;as emergentes.</p>
+          <p class="nos-member-text" style="margin-top:.9rem;">Tras varios a&ntilde;os alejado del entorno acad&eacute;mico, decid&iacute; retomar mis estudios en inform&aacute;tica con una visi&oacute;n m&aacute;s clara y motivada. Para este proyecto he tenido la oportunidad de unir dos de mis grandes pasiones: el mundo de los perfumes y la tecnolog&iacute;a, dando forma a una idea con la que me siento plenamente identificado.</p>
+        </div>
+
+      </div>
+    </div>
+
   </section>
 
   <footer>
@@ -297,7 +395,7 @@
     });
 
     // Resaltar botón según card en viewport
-    var cards = document.querySelectorAll('.nos-card[id]');
+    var cards = document.querySelectorAll('.nos-card[id], .nos-equipo[id]');
     if ('IntersectionObserver' in window) {
       var obs = new IntersectionObserver(function(entries){
         entries.forEach(function(e){
