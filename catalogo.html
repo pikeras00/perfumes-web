@@ -106,11 +106,15 @@
     </div>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/Flip.min.js"></script>
   <script src="effects.js?v=4"></script>
   <script src="data.js?v=4"></script>
   <script src="perfume_db.js?v=4"></script>
   <script src="photo_map.js?v=4"></script>
   <script>
+gsap.registerPlugin(Flip);
+
 const PS = 24;
 let fil = [], cp = 1, cf = "all", cfam = "all", cs = "";
 
@@ -181,7 +185,7 @@ function cardHTML(c) {
   const perfBrand = pf ? pf.marca   : '';
 
   const escapedName = c.nombre.replace(/"/g,"&quot;");
-  return `<div class="ccard${noPhoto}" data-nombre="${escapedName}">
+  return `<div class="ccard${noPhoto}" data-nombre="${escapedName}" data-flip-id="${escapedName}">
     ${src
       ? `<img class="ccard-photo" src="${src}" alt="${escapedName}" loading="lazy">`
       : ''
@@ -265,9 +269,41 @@ function applyF() {
 function renderG() { applyF(); cp=1; renderP(); renderPg(); document.getElementById("cn").textContent = fil.length; }
 
 function renderP() {
-  const sl = fil.slice((cp-1)*PS, cp*PS);
-  document.getElementById("cg").innerHTML = sl.map(cardHTML).join("");
+  const sl   = fil.slice((cp-1)*PS, cp*PS);
+  const grid = document.getElementById("cg");
+
+  const oldCards = Array.from(grid.querySelectorAll(".ccard"));
+  const state    = oldCards.length ? Flip.getState(oldCards) : null;
+
+  grid.innerHTML = sl.map(cardHTML).join("");
   addTilt();
+
+  const newCards = Array.from(grid.querySelectorAll(".ccard"));
+
+  if (state) {
+    Flip.from(state, {
+      targets: newCards,
+      duration: 0.55,
+      scale: true,
+      ease: "power1.inOut",
+      stagger: 0.04,
+      absolute: true,
+      onEnter: function(els) {
+        gsap.fromTo(els,
+          { opacity: 0, scale: 0.85, y: 18 },
+          { opacity: 1, scale: 1,    y: 0,  duration: 0.5, ease: "power2.out", stagger: 0.04 }
+        );
+      },
+      onLeave: function(els) {
+        gsap.to(els, { opacity: 0, scale: 0.85, duration: 0.28 });
+      }
+    });
+  } else {
+    gsap.fromTo(newCards,
+      { opacity: 0, y: 24, scale: 0.95 },
+      { opacity: 1, y: 0,  scale: 1,   duration: 0.45, ease: "power2.out", stagger: 0.04 }
+    );
+  }
 }
 
 function renderPg() {
