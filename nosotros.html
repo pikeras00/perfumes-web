@@ -216,6 +216,88 @@
       letter-spacing: .03em;
     }
 
+    /* ── Modal expandido ── */
+    .nos-modal-backdrop {
+      position: fixed; inset: 0; z-index: 1000;
+      background: rgba(0,0,0,.82);
+      backdrop-filter: blur(6px);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity .35s ease;
+    }
+    .nos-modal-backdrop.open {
+      opacity: 1; pointer-events: all;
+    }
+    .nos-modal {
+      position: relative;
+      max-width: 680px; width: 90%;
+      max-height: 85vh;
+      background: linear-gradient(160deg, #0a1a10 0%, #050f0a 100%);
+      border: 1px solid rgba(201,160,61,.22);
+      padding: 3rem 3.2rem 3.2rem;
+      overflow-y: auto;
+      transform: translateY(28px) scale(.97);
+      transition: transform .38s cubic-bezier(.25,.46,.45,.94);
+      scrollbar-width: thin;
+      scrollbar-color: rgba(201,160,61,.3) transparent;
+    }
+    .nos-modal-backdrop.open .nos-modal {
+      transform: translateY(0) scale(1);
+    }
+    .nos-modal::before {
+      content: '';
+      position: absolute; top: 0; left: 0;
+      width: 3px; height: 60%;
+      background: linear-gradient(to bottom, var(--gold), transparent);
+    }
+    .nos-modal-close {
+      position: absolute; top: 1.2rem; right: 1.4rem;
+      background: none; border: none; cursor: pointer;
+      color: rgba(255,255,255,.4);
+      font-size: 1.4rem; line-height: 1;
+      transition: color .25s, transform .25s;
+      padding: .3rem .5rem;
+    }
+    .nos-modal-close:hover { color: var(--gold); transform: rotate(90deg); }
+    .nos-modal-tag {
+      display: block;
+      font-family: 'Montserrat', sans-serif;
+      font-size: .52rem; font-weight: 700;
+      letter-spacing: .28em; text-transform: uppercase;
+      color: rgba(201,160,61,.8);
+      margin-bottom: .7rem;
+    }
+    .nos-modal-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.8rem; font-weight: 600;
+      color: var(--cream1, #f5f0e8);
+      margin: 0 0 1.6rem;
+      line-height: 1;
+    }
+    .nos-modal-body p {
+      font-size: .85rem; line-height: 1.9;
+      color: rgba(220,210,195,.78);
+      margin-bottom: 1.1rem;
+    }
+    .nos-modal-body p:last-child { margin-bottom: 0; }
+    .nos-modal-body strong {
+      color: rgba(201,160,61,.9);
+      font-weight: 600;
+    }
+    /* Indicador de clic en la tarjeta */
+    .nos-card { cursor: pointer; }
+    .nos-card-hint {
+      position: absolute; bottom: 2.2rem; right: 2rem;
+      z-index: 3;
+      font-family: 'Montserrat', sans-serif;
+      font-size: .48rem; font-weight: 600;
+      letter-spacing: .2em; text-transform: uppercase;
+      color: rgba(201,160,61,.55);
+      opacity: 0;
+      transition: opacity .4s .1s;
+    }
+    .nos-card:hover .nos-card-hint { opacity: 1; }
+
     /* Responsive */
     @media (max-width: 900px) {
       .nos-grid { grid-template-columns: 1fr; max-width: 520px; }
@@ -279,6 +361,7 @@
           <h3 class="nos-card-heading" data-text="Descubrir">Descubrir</h3>
           <p class="nos-card-desc">Facilitar la b&uacute;squeda del perfume ideal en el entorno digital, resolviendo uno de los principales problemas del sector: la dificultad de elegir una fragancia sin poder olerla previamente. A trav&eacute;s de un test interactivo, conectamos las preferencias del usuario con fragancias reales asociadas a celebrities, ofreciendo una recomendaci&oacute;n personalizada, clara y &uacute;til.</p>
         </div>
+        <span class="nos-card-hint">Leer m&aacute;s</span>
       </div>
 
       <!-- VISIÓN -->
@@ -293,6 +376,7 @@
           <h3 class="nos-card-heading" data-text="Liderar">Liderar</h3>
           <p class="nos-card-desc">Convertirnos en el mayor buscador y recomendador de perfumes a nivel internacional, liderando la orientaci&oacute;n personalizada dentro del sector de la perfumer&iacute;a digital. Diferenciarnos de plataformas como Fragrantica o Sephora ofreciendo recomendaciones basadas en el perfil del usuario: r&aacute;pidas, fiables y gratuitas.</p>
         </div>
+        <span class="nos-card-hint">Leer m&aacute;s</span>
       </div>
 
       <!-- VALORES -->
@@ -307,8 +391,19 @@
           <h3 class="nos-card-heading" data-text="Inspirar">Inspirar</h3>
           <p class="nos-card-desc">Orientaci&oacute;n al usuario &mdash; dise&ntilde;amos para ayudar a decidir, no para saturar. Innovaci&oacute;n pr&aacute;ctica &mdash; tecnolog&iacute;a &uacute;til y eficiente. Accesibilidad &mdash; cualquier persona puede encontrar su perfume ideal. Claridad &mdash; datos complejos en decisiones simples. Conexi&oacute;n emocional &mdash; celebrities como elemento diferenciador. Fiabilidad &mdash; recomendaciones basadas en datos estructurados.</p>
         </div>
+        <span class="nos-card-hint">Leer m&aacute;s</span>
       </div>
 
+    </div>
+
+    <!-- Modal texto completo -->
+    <div class="nos-modal-backdrop" id="nosModal" role="dialog" aria-modal="true" aria-labelledby="nosModalTitle">
+      <div class="nos-modal">
+        <button class="nos-modal-close" id="nosModalClose" aria-label="Cerrar">&times;</button>
+        <span class="nos-modal-tag" id="nosModalTag"></span>
+        <h3 class="nos-modal-title" id="nosModalTitle"></h3>
+        <div class="nos-modal-body" id="nosModalBody"></div>
+      </div>
     </div>
 
     <!-- EQUIPO -->
@@ -379,6 +474,78 @@
         }
       }
       h.innerHTML = html;
+    });
+  })();
+
+  // ── Contenido completo de cada sección (extraído del documento) ──
+  var nosContent = {
+    mision: {
+      tag: 'Misión',
+      title: 'Descubrir',
+      paragraphs: [
+        'En Perfumity, nuestra misión es facilitar la búsqueda del perfume ideal en el entorno digital, resolviendo uno de los principales problemas del sector: la dificultad de elegir una fragancia sin poder olerla previamente.',
+        'Para ello, desarrollamos una plataforma que actúa como buscador y recomendador inteligente de perfumes, basada en un test interactivo que analiza el perfil olfativo del usuario. A través de este sistema, conectamos sus preferencias con fragancias reales asociadas a celebrities, ofreciendo una recomendación personalizada, clara y útil.',
+        'Nuestro objetivo es transformar un proceso complejo y lleno de incertidumbre en una experiencia sencilla, guiada y basada en datos.'
+      ]
+    },
+    vision: {
+      tag: 'Visión',
+      title: 'Liderar',
+      paragraphs: [
+        'En Perfumity, aspiramos a convertirnos en el mayor buscador y recomendador de perfumes a nivel internacional, liderando la orientación personalizada dentro del sector de la perfumería digital.',
+        'Buscamos diferenciarnos de plataformas como Fragrantica o Sephora no solo ofreciendo información, sino proporcionando recomendaciones personalizadas basadas en el perfil del usuario.',
+        'A largo plazo, queremos consolidarnos como una herramienta de referencia para descubrir fragancias de forma rápida, fiable y gratuita, creando conexiones entre usuarios, perfumes y referentes culturales.'
+      ]
+    },
+    valores: {
+      tag: 'Valores',
+      title: 'Inspirar',
+      paragraphs: [
+        'En Perfumity, nuestros valores parten de una idea central: la pasión por las fragancias como forma de identidad personal, aplicada desde un enfoque tecnológico y accesible.',
+        '<strong>Orientación al usuario:</strong> Diseñamos para ayudar a decidir, no para saturar con información técnica.',
+        '<strong>Innovación práctica:</strong> Aplicamos tecnología útil y eficiente, como nuestro algoritmo de recomendación.',
+        '<strong>Accesibilidad:</strong> Queremos que cualquier persona pueda encontrar su perfume ideal, sin necesidad de conocimientos previos.',
+        '<strong>Claridad:</strong> Convertimos datos complejos en decisiones simples.',
+        '<strong>Conexión emocional:</strong> Integramos el vínculo con celebrities como elemento diferenciador en la experiencia.',
+        '<strong>Fiabilidad:</strong> Ofrecemos recomendaciones basadas en datos estructurados y coherentes.'
+      ]
+    }
+  };
+
+  // ── Modal ──
+  (function(){
+    var backdrop = document.getElementById('nosModal');
+    var closeBtn = document.getElementById('nosModalClose');
+    var tagEl    = document.getElementById('nosModalTag');
+    var titleEl  = document.getElementById('nosModalTitle');
+    var bodyEl   = document.getElementById('nosModalBody');
+
+    function openModal(key) {
+      var data = nosContent[key];
+      if (!data) return;
+      tagEl.textContent  = data.tag;
+      titleEl.textContent = data.title;
+      bodyEl.innerHTML   = data.paragraphs.map(function(p){ return '<p>' + p + '</p>'; }).join('');
+      backdrop.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      backdrop.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    ['mision','vision','valores'].forEach(function(key){
+      var card = document.getElementById(key);
+      if (card) card.addEventListener('click', function(){ openModal(key); });
+    });
+
+    closeBtn.addEventListener('click', closeModal);
+    backdrop.addEventListener('click', function(e){
+      if (e.target === backdrop) closeModal();
+    });
+    document.addEventListener('keydown', function(e){
+      if (e.key === 'Escape') closeModal();
     });
   })();
 
