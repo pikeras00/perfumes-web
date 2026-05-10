@@ -529,6 +529,7 @@
   };
 
   // ── Modal ──
+  var openModal;
   (function(){
     var backdrop = document.getElementById('nosModal');
     var closeBtn = document.getElementById('nosModalClose');
@@ -536,7 +537,7 @@
     var titleEl  = document.getElementById('nosModalTitle');
     var bodyEl   = document.getElementById('nosModalBody');
 
-    function openModal(key) {
+    openModal = function(key) {
       var data = nosContent[key];
       if (!data) return;
       tagEl.textContent  = data.tag;
@@ -572,8 +573,13 @@
       btn.addEventListener('click', function(){
         btns.forEach(function(b){ b.classList.remove('active'); });
         btn.classList.add('active');
-        var t = document.getElementById(btn.dataset.target);
-        if (t) t.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        var target = btn.dataset.target;
+        if (target === 'mision' || target === 'vision' || target === 'valores') {
+          openModal(target);
+        } else {
+          var t = document.getElementById(target);
+          if (t) t.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
       });
     });
 
