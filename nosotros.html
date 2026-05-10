@@ -108,6 +108,22 @@
       transform: rotate(-45deg);
       color: rgba(255,255,255,.95);
     }
+    .nos-card-arrow::after {
+      content: 'Leer más';
+      position: absolute;
+      top: calc(100% + 7px); right: 0;
+      font-family: 'Montserrat', sans-serif;
+      font-size: .47rem; font-weight: 600;
+      letter-spacing: .18em; text-transform: uppercase;
+      color: rgba(201,160,61,.95);
+      white-space: nowrap;
+      background: rgba(5,15,10,.88);
+      border: 1px solid rgba(201,160,61,.22);
+      padding: .28rem .55rem;
+      opacity: 0; pointer-events: none;
+      transition: opacity .25s ease;
+    }
+    .nos-card-arrow:hover::after { opacity: 1; }
 
     /* Contenido inferior */
     .nos-card-content {
