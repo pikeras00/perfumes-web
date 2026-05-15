@@ -259,7 +259,10 @@
   <div class="pfmodal-overlay" id="pfModal" role="dialog" aria-modal="true">
     <div class="pfmodal-card" id="pfModalCard">
       <button class="pfmodal-close" onclick="pfModalClose()" aria-label="Cerrar">&#10005;</button>
-      <div class="pfmodal-img-placeholder" id="pfModalImgWrap">&#9670;</div>
+      <div class="pfmodal-img-placeholder" id="pfModalImgWrap">
+        <span class="pfmodal-img-diamond">&#9670;</span>
+        <img class="pfmodal-img-photo" id="pfModalPhoto" src="" alt="" aria-hidden="true">
+      </div>
       <div class="pfmodal-imggrad"></div>
       <div class="pfmodal-header">
         <div class="pfmodal-header-text">
@@ -286,6 +289,7 @@
   <script src="data.js?v=4"></script>
   <script src="perfume_db.js?v=4"></script>
   <script src="photo_map.js?v=4"></script>
+  <script src="perfume_photo_map.js?v=1"></script>
   <script>
 // ── Icono SVG monocromo ────────────────────────────────────────────────────
 function ico(d){
@@ -1061,6 +1065,21 @@ function pfModalOpen(perfume, marca){
 
   document.getElementById('pfModalName').textContent  = entry ? entry.nombre  : perfume;
   document.getElementById('pfModalBrand').textContent = entry ? entry.marca   : marca;
+
+  // Foto del frasco
+  const photoEl   = document.getElementById('pfModalPhoto');
+  const diamondEl = document.querySelector('#pfModalImgWrap .pfmodal-img-diamond');
+  const rawPath   = typeof PERFUME_PHOTOS !== 'undefined' ? (PERFUME_PHOTOS[key] || null) : null;
+  if(rawPath){
+    const slash = rawPath.lastIndexOf('/');
+    photoEl.src = rawPath.slice(0, slash + 1) + encodeURIComponent(rawPath.slice(slash + 1));
+    photoEl.style.display = 'block';
+    diamondEl.style.display = 'none';
+  } else {
+    photoEl.src = '';
+    photoEl.style.display = 'none';
+    diamondEl.style.display = '';
+  }
 
   // Notas
   const notasEl = document.getElementById('pfModalNotas');
