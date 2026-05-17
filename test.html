@@ -893,16 +893,24 @@ function showResult(){
     .map(c => ({ c, sc: scoreC(c, tAns) }))
     .sort((a,b) => b.sc - a.sc);
 
-  // Normaliza la clave para evitar duplicados por diferencias de mayúsculas/espacios/marca
+  // Normaliza la clave para evitar duplicados por diferencias de mayúsculas/espacios/tildes/marca
   const MARCA_ALIAS = {
     "christian dior": "dior",
     "giorgio armani": "armani",
     "yves saint laurent": "ysl",
     "saint laurent": "ysl"
   };
+  function _normKey(s) {
+    return s.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  }
   function pKey(perfume, marca){
-    const m = marca.trim().toLowerCase();
-    return perfume.trim().toLowerCase() + '\x00' + (MARCA_ALIAS[m] || m);
+    const m = _normKey(marca);
+    return _normKey(perfume) + '\x00' + (MARCA_ALIAS[m] || m);
+  }
+  // Devuelve el nombre "más rico" (con más tildes/caracteres propios)
+  function _preferName(a, b) {
+    const score = s => [...s].filter(c => c > '\x7f').length;
+    return score(b) > score(a) ? b : a;
   }
 
   // 2) Construir mapa: perfumeKey → { perfume, marca, celebs[] }
@@ -910,7 +918,12 @@ function showResult(){
   for (const { c } of scored) {
     for (const p of c.perfumes) {
       const key = pKey(p.perfume, p.marca);
-      if (!perfMap[key]) perfMap[key] = { perfume: p.perfume, marca: p.marca, celebs: [] };
+      if (!perfMap[key]) {
+        perfMap[key] = { perfume: p.perfume, marca: p.marca, celebs: [] };
+      } else {
+        perfMap[key].perfume = _preferName(perfMap[key].perfume, p.perfume);
+        perfMap[key].marca   = _preferName(perfMap[key].marca,   p.marca);
+      }
       if (!perfMap[key].celebs.includes(c)) perfMap[key].celebs.push(c);
     }
   }
